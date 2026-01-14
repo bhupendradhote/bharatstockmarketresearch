@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Blog</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <!-- NEWS & BLOG HERO SECTION -->
+    <section class="w-full flex justify-center px-4 md:px-8 lg:px-16 mt-20">
+        <div class="max-w-[1600px] w-full bg-[#F5F7FB] rounded-[30px] flex flex-col items-center text-center px-4 md:px-10 py-20 md:py-28 lg:py-32"
+            style="min-height: 400px;">
+
+            <!-- Badge -->
+            <span data-animate
+                class="fade-up delay-100 inline-block bg-blue-600 text-white px-6 py-2 rounded-full text-sm md:text-base mb-6">
+                News & Blog
+            </span>
+
+            <!-- Heading -->
+            <h2 data-animate
+                class="fade-up delay-200 text-[22px] md:text-[30px] lg:text-[36px] font-semibold text-[#0A0E23] max-w-3xl leading-snug">
+                Your knowledge hub for smarter decisions
+            </h2>
+
+            <!-- Subtext -->
+            <p data-animate class="fade-up delay-300 text-gray-600 text-sm md:text-base max-w-xl mt-4">
+                Get quick updates on market movements, company news, and
+                educational articles to help you stay aware of what’s happening in the market.
+            </p>
+
+        </div>
+    </section>
+
+    <!-- LATEST NEWS SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-20 flex justify-center">
+        <div class="max-w-[1600px] w-full">
+
+            <!-- Top Row -->
+            <div class="flex justify-between items-center mb-6">
+                <span data-animate
+                    class="fade-up delay-100 inline-block bg-blue-600 text-white px-6 py-2 rounded-full text-sm md:text-base">
+                    Latest News
+                </span>
+
+                <a href="/latestMarket.html" data-animate
+                    class="fade-up delay-200 text-sm md:text-base font-medium text-[#0A0E23] underline hover:text-blue-600 transition">
+                    View More News
+                </a>
+            </div>
+
+            <!-- Heading -->
+            <h2 data-animate
+                class="fade-up delay-200 text-[22px] md:text-[28px] lg:text-[32px] font-semibold text-[#0A0E23] mb-10">
+                Latest Market Updates
+            </h2>
+
+            <!-- NEWS ITEM 1 -->
+            <div class="grid md:grid-cols-2 gap-10 items-start mb-16">
+
+                <!-- Left Image -->
+                <div data-animate class="fade-up delay-300 rounded-2xl overflow-hidden">
+                    <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg" alt="Market News"
+                        class="w-full h-full object-cover" />
+                </div>
+
+                <!-- Right Text -->
+                <div class="flex flex-col justify-center">
+                    <h3 data-animate
+                        class="fade-up delay-300 text-[20px] md:text-[24px] font-semibold text-[#0A0E23] leading-snug mb-2">
+                        Market opens higher as global cues remain positive
+                    </h3>
+
+                    <p data-animate class="fade-up delay-400 text-gray-600 text-sm md:text-base mb-4">
+                        Buying interest seen in banking and IT stocks during early trade
+                    </p>
+
+                    <a href="#" data-animate
+                        class="fade-up delay-500 text-blue-600 text-sm md:text-base underline font-medium hover:text-blue-700">
+                        Read more
+                    </a>
+                </div>
+            </div>
+
+            <!-- NEWS ITEM 2 -->
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+
+                <!-- Left TEXT -->
+                <div class="flex flex-col justify-center order-2 md:order-1">
+                    <h3 data-animate
+                        class="fade-up delay-300 text-[20px] md:text-[24px] font-semibold text-[#0A0E23] leading-snug mb-2">
+                        Rupee holds steady against US Dollar amid mixed market signals
+                    </h3>
+
+                    <p data-animate class="fade-up delay-400 text-gray-600 text-sm md:text-base mb-4">
+                        Currency traders monitor crude oil prices and FII activity closely
+                    </p>
+
+                    <a href="#" data-animate
+                        class="fade-up delay-500 text-blue-600 text-sm md:text-base underline font-medium hover:text-blue-700">
+                        Read more
+                    </a>
+                </div>
+
+                <!-- Right Image -->
+                <div data-animate class="fade-up delay-300 rounded-2xl overflow-hidden order-1 md:order-2">
+                    <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg"
+                        alt="Currency Market" class="w-full h-full object-cover" />
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+
+    <!-- BLOGS SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-24 flex justify-center py-10">
+        <div class="max-w-[1600px] w-full">
+
+            <!-- Top Row: Badge & View More -->
+            <div class="flex justify-between items-center mb-6">
+                <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-100 inline-block bg-blue-600 text-white px-6 py-2 rounded-full text-sm md:text-base">
+                    Blogs
+                </span>
+
+                <a href="/moreBlogs.html" x-data="{ visible: false }" x-intersect.half="visible = true"
+                    :class="{ 'animated': visible }"
+                    class="fade-up delay-200 text-sm md:text-base font-medium text-[#0A0E23] underline hover:text-blue-600 transition">
+                    View More Blogs
+                </a>
+            </div>
+
+            <!-- Heading -->
+            <h2 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-200 text-[22px] md:text-[28px] lg:text-[32px] font-semibold text-[#0A0E23] mb-10">
+                Learn More About the Market
+            </h2>
+
+            <!-- BLOG GRID -->
+            <div class="grid md:grid-cols-3 gap-10">
+
+                <!-- BLOG CARD 1 -->
+                <a href="/blogDetails.html" x-data="{ visible: false }" x-intersect.half="visible = true"
+                    :class="{ 'animated': visible }" class="fade-up delay-200 flex flex-col">
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="rounded-2xl overflow-hidden fade-up delay-300">
+                        <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg"
+                            alt="Blog Image" class="w-full h-[220px] object-cover" />
+                    </div>
+
+                    <h3 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-400 mt-4 text-[16px] md:text-[18px] font-semibold text-[#0A0E23] leading-snug">
+                        5 Key Metrics Every Investor Should Know Before Picking a Stock
+                    </h3>
+
+                    <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-500 text-gray-600 text-sm mt-1">
+                        September 22, 2025
+                    </p>
+                </a>
+                <a href="/blogDetails.html" x-data="{ visible: false }" x-intersect.half="visible = true"
+                    :class="{ 'animated': visible }" class="fade-up delay-200 flex flex-col">
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="rounded-2xl overflow-hidden fade-up delay-300">
+                        <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg"
+                            alt="Blog Image" class="w-full h-[220px] object-cover" />
+                    </div>
+
+                    <h3 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-400 mt-4 text-[16px] md:text-[18px] font-semibold text-[#0A0E23] leading-snug">
+                        5 Key Metrics Every Investor Should Know Before Picking a Stock
+                    </h3>
+
+                    <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-500 text-gray-600 text-sm mt-1">
+                        September 22, 2025
+                    </p>
+                </a>
+                <a href="/blogDetails.html" x-data="{ visible: false }" x-intersect.half="visible = true"
+                    :class="{ 'animated': visible }" class="fade-up delay-200 flex flex-col">
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="rounded-2xl overflow-hidden fade-up delay-300">
+                        <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg"
+                            alt="Blog Image" class="w-full h-[220px] object-cover" />
+                    </div>
+
+                    <h3 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-400 mt-4 text-[16px] md:text-[18px] font-semibold text-[#0A0E23] leading-snug">
+                        5 Key Metrics Every Investor Should Know Before Picking a Stock
+                    </h3>
+
+                    <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-500 text-gray-600 text-sm mt-1">
+                        September 22, 2025
+                    </p>
+                </a>
+
+                <!-- BLOG CARD 2 -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200 flex flex-col">
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="rounded-2xl overflow-hidden fade-up delay-300">
+                        <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg"
+                            alt="Blog Image" class="w-full h-[220px] object-cover" />
+                    </div>
+
+                    <h3 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-400 mt-4 text-[16px] md:text-[18px] font-semibold text-[#0A0E23] leading-snug">
+                        Why Market Research Matters More Than Luck in Investing
+                    </h3>
+
+                    <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-500 text-gray-600 text-sm mt-1">
+                        September 22, 2025
+                    </p>
+                </div>
+
+                <!-- BLOG CARD 3 -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200 flex flex-col">
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="rounded-2xl overflow-hidden fade-up delay-300">
+                        <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg"
+                            alt="Blog Image" class="w-full h-[220px] object-cover" />
+                    </div>
+
+                    <h3 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-400 mt-4 text-[16px] md:text-[18px] font-semibold text-[#0A0E23] leading-snug">
+                        Beginner's Guide: How to Read a Company's Financial Health
+                    </h3>
+
+                    <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-500 text-gray-600 text-sm mt-1">
+                        September 22, 2025
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <script src="/script.js"></script>
+
+</body>
+
+</html>
+

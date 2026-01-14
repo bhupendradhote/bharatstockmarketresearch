@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharat Stock - Modern Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #283593;
+            --accent-color: #3949ab;
+            --dark-color: #0d1338;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --border-color: #e0e0e0;
+            --card-bg: #ffffff;
+            --sidebar-bg: #f5f7ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .logo-icon i {
+            color: white;
+            font-size: 24px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: var(--gray-color);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(26, 35, 126, 0.1);
+            color: var(--primary-color);
+        }
+
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .sidebar-nav i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .top-bar h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: var(--gray-color);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: var(--gray-color);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stat-change.positive {
+            color: #28a745;
+        }
+
+        .stat-change.negative {
+            color: #dc3545;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--gray-color);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .testimonial-card {
+            background-color: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .testimonial-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .testimonial-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 12px;
+        }
+
+        .author-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .author-info h5 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .author-info p {
+            font-size: 12px;
+            color: var(--gray-color);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .contact-info {
+            margin-top: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .contact-item i {
+            width: 36px;
+            height: 36px;
+            background-color: rgba(26, 35, 126, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--primary-color);
+        }
+
+        .contact-details h5 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .contact-details p {
+            font-size: 13px;
+            color: var(--gray-color);
+        }
+
+        /* Bar Accounts Section */
+        .bar-accounts {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .bar-accounts-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .account-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .account-item {
+            padding: 15px;
+            background-color: #f8f9ff;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .account-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .account-balance {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .menu-toggle {
+                display: block;
+                font-size: 24px;
+                color: var(--dark-color);
+                cursor: pointer;
+                margin-right: 20px;
+            }
+            
+            .top-bar {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Chart Styles */
+        .chart-placeholder {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9ff;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .chart-lines {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80%;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 20px;
+        }
+
+        .chart-line {
+            flex: 1;
+            background-color: var(--accent-color);
+            margin: 0 3px;
+            border-radius: 3px 3px 0 0;
+            opacity: 0.7;
+        }
+
+        .chart-line:nth-child(odd) {
+            background-color: var(--primary-color);
+            height: 70%;
+        }
+
+        .chart-line:nth-child(even) {
+            height: 85%;
+        }
+
+        .chart-line:nth-child(3n) {
+            height: 60%;
+        }
+
+        .chart-line:nth-child(4n) {
+            height: 90%;
+        }
+
+        .chart-line:nth-child(5n) {
+            height: 50%;
+        }
+
+        /* Animation for chart */
+        @keyframes grow {
+            0% { height: 0; }
+            100% { height: var(--target-height); }
+        }
+
+        .chart-line {
+            animation: grow 1.5s ease-out forwards;
+            height: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Bharat Stock</h1>
+                    <p>Wis terrssilner you isat</p>
+                </div>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-chart-bar"></i> Market Analysis</a></li>
+                <li><a href="#"><i class="fas fa-wallet"></i> Portfolio</a></li>
+                <li><a href="#"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
+                <li><a href="#"><i class="fas fa-newspaper"></i> News & Insights</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="#"><i class="fas fa-question-circle"></i> Support</a></li>
+            </ul>
+            
+            <div class="contact-section">
+                <h3 class="section-title">Contact</h3>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div class="contact-details">
+                            <h5>Phone</h5>
+                            <p>+91 98765 43210</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div class="contact-details">
+                            <h5>Email</h5>
+                            <p>support@bharatstock.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="contact-details">
+                            <h5>Address</h5>
+                            <p>Mumbai, Maharashtra</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div style="display: flex; align-items: center;">
+                    <div class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                    <h2>Bharat Stock Dashboard</h2>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                    </div>
+                    <div class="user-info">
+                        <h4>John Doe</h4>
+                        <p>Premium Investor</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Portfolio Value</div>
+                        <div class="stat-value">₹32,14,703.50</div>
+                        <div class="stat-change positive">+2.45% today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Today's Gain</div>
+                        <div class="stat-value">₹70,850.00</div>
+                        <div class="stat-change positive">+1.25%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Active Investments</div>
+                        <div class="stat-value">42</div>
+                        <div class="stat-change negative">-2 this week</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Bar Accounts -->
+            <section class="bar-accounts">
+                <h3 class="bar-accounts-title">BAR ACCOUNTS</h3>
+                <div class="account-list">
+                    <div class="account-item">
+                        <div class="account-name">Primary Account</div>
+                        <div class="account-balance">₹9,50,000</div>
+                    </div>
+                    <div class="account-item">
+                        <div class="account-name">Trading Account</div>
+                        <div class="account-balance">₹15,20,000</div>
+                    </div>
+                    <div class="account-item">
+                        <div class="account-name">Savings Account</div>
+                        <div class="account-balance">₹7,44,703</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <!-- Chart Section -->
+                    <section class="chart-section">
+                        <div class="section-header">
+                            <div>
+                                <h3 class="section-title">Bharat Stock Performance</h3>
+                                <p class="section-subtitle">Last 30 days performance chart</p>
+                            </div>
+                            <div>
+                                <select class="form-select" style="width: auto; display: inline-block;">
+                                    <option>Last 30 days</option>
+                                    <option>Last 90 days</option>
+                                    <option>Last 1 year</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <div class="chart-lines">
+                                    <div class="chart-line" style="--target-height: 70%;"></div>
+                                    <div class="chart-line" style="--target-height: 85%;"></div>
+                                    <div class="chart-line" style="--target-height: 60%;"></div>
+                                    <div class="chart-line" style="--target-height: 90%;"></div>
+                                    <div class="chart-line" style="--target-height: 50%;"></div>
+                                    <div class="chart-line" style="--target-height: 75%;"></div>
+                                    <div class="chart-line" style="--target-height: 80%;"></div>
+                                    <div class="chart-line" style="--target-height: 65%;"></div>
+                                    <div class="chart-line" style="--target-height: 95%;"></div>
+                                    <div class="chart-line" style="--target-height: 70%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section-header" style="margin-top: 30px;">
+                            <div>
+                                <h4 class="section-title">Bharat Stock - Lade Contunis</h4>
+                                <p class="section-subtitle">Nttps: ipasm dolor sit eur alt and ouropro, asobniesites trop rio talubiti tibi ramput. Rit crop st.4.083 corp. to 1900 83.</p>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Another Bar Accounts Section -->
+                    <section class="bar-accounts" style="margin-top: 30px;">
+                        <h3 class="bar-accounts-title">BAR 1 ACCOUNTS</h3>
+                        <div class="account-list">
+                            <div class="account-item">
+                                <div class="account-name">Investment Account</div>
+                                <div class="account-balance">₹12,50,000</div>
+                            </div>
+                            <div class="account-item">
+                                <div class="account-name">Trading Fund</div>
+                                <div class="account-balance">₹8,20,000</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="right-column">
+                    <!-- Testimonials Section -->
+                    <section class="testimonials-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Testimonials</h3>
+                        </div>
+                        
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">The en tatum dolor sit amtod aunostory int the rnnud, etr atnes eredimgnu tuegetoot the weent and fendhtote.</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <h5>8.38 Mer Tittle</h5>
+                                    <p>Violet besaat a tneding coenner 2.008 lbs.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">The rem deit roottautumnad th onerunting elit eine ttallim you md dr itergeet aout berind dagitis ynuttanaits.</p>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <h5>Cart Oumis</h5>
+                                    <p>Customer r alili raouops</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="testimonial-card">
+                            <div class="section-header">
+                                <h4 class="section-title">Bharat Stock - Baltouis</h4>
+                            </div>
+                            <p class="testimonial-text">Thars ipsan dolor sit emmand un cespre itio semet. Rit crop: k dt.aet crop. on 1918 83.</p>
+                        </div>
+                    </section>
+                    
+                    <!-- Another Testimonials Section -->
+                    <section class="testimonials-section" style="margin-top: 30px;">
+                        <div class="section-header">
+                            <h3 class="section-title">Testimonial</h3>
+                        </div>
+                        
+                        <div class="testimonial-card">
+                            <div class="testimonial-author">
+                                <div class="author-avatar">
+                                    <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Customer">
+                                </div>
+                                <div class="author-info">
+                                    <h5>Cart Norrer Sepesotal</h5>
+                                    <p>Customer r alul inca alvore</p>
+                                </div>
+                            </div>
+                            <p class="testimonial-text" style="margin-top: 15px;">The rem dolom dolor sit envin amerning hugni tremelim, und tmodrimp, noweeats tingikat the yoosterit entusit.</p>
+                        </div>
+                        
+                        <div class="testimonial-card">
+                            <div class="section-header">
+                                <h4 class="section-title">Firinter Vinsimcald by</h4>
+                            </div>
+                            <div class="testimonial-author">
+                                <div class="author-info">
+                                    <h5>Vord Coontairy</h5>
+                                    <p>Perroj laagret i v ore</p>
+                                </div>
+                            </div>
+                            <p class="testimonial-text" style="margin-top: 15px;">The endem dolom solo sit anum orurtieriferytrof inonuomed ont the texpuntong etroot tend trayoste coraalesatin.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="footer">
+                <p>Inttps: I palm yopp yom etthastirpret toentries</p>
+                <p>&copy; 2023 Bharat Stock. All rights reserved.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+        }
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+        
+        // Animate chart bars on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartLines = document.querySelectorAll('.chart-line');
+            
+            // Set random heights for chart bars
+            chartLines.forEach(line => {
+                const randomHeight = Math.floor(Math.random() * 60) + 40;
+                line.style.setProperty('--target-height', `${randomHeight}%`);
+            });
+            
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+        
+        // Update stats every 5 seconds (simulate live data)
+        function updateStats() {
+            const statValues = document.querySelectorAll('.stat-value');
+            
+            // Add small random fluctuations to simulate live data
+            statValues.forEach(stat => {
+                if (stat.textContent.includes('₹')) {
+                    const currentValue = parseFloat(stat.textContent.replace(/[^0-9.]/g, ''));
+                    const change = (Math.random() * 0.02 - 0.01) * currentValue; // +/- 1%
+                    const newValue = currentValue + change;
+                    stat.textContent = `₹${newValue.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`;
+                }
+            });
+            
+            // Update change indicators
+            const changes = document.querySelectorAll('.stat-change');
+            changes.forEach(change => {
+                const isPositive = Math.random() > 0.5;
+                const percent = (Math.random() * 0.5 + 0.1).toFixed(2);
+                
+                if (isPositive) {
+                    change.textContent = `+${percent}% today`;
+                    change.className = 'stat-change positive';
+                } else {
+                    change.textContent = `-${percent}% today`;
+                    change.className = 'stat-change negative';
+                }
+            });
+        }
+        
+        // Update stats every 5 seconds
+        setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>

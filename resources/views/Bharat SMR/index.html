@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ 
+        mobileMenuOpen: false,
+        animatedSections: [],
+        floating: true
+      }" x-init="
+        // Initialize floating animation
+        setInterval(() => { floating = !floating }, 3000);
+      ">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BSMR</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js Core -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="/style.css">
+
+
+</head>
+
+<body class="bg-white" :class="{ 'menu-open': mobileMenuOpen }">
+
+
+    <header class="w-full  fixed top-0 z-40 flex justify-center items-center">
+
+        <div class="max-w-[1600px] w-full py-4 md:py-6 px-4 md:px-8 lg:px-16 flex items-center justify-between relative lg:bg-white/30 lg:backdrop-blur lg:rounded-full md:bg-white md:rounded-full bg-white sm:bg-white "
+            x-data="{ headerVisible: false }" x-init="setTimeout(() => headerVisible = true, 300)"
+            :class="{ 'animated': headerVisible }" class="fade-up">
+
+            <!-- Logo and Mobile Menu Button (Left side) -->
+            <div class="flex items-center gap-4">
+                <!-- Mobile Menu Button -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-2xl" x-show="!mobileMenuOpen"></i>
+                    <i class="fas fa-times text-2xl" x-show="mobileMenuOpen" x-cloak></i>
+                </button>
+
+                <!-- Logo -->
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 bg-blue-600 rounded-full"></div>
+                    <span class="font-bold text-xl text-gray-900">BSMR</span>
+                </div>
+            </div>
+
+            <!-- Desktop Menu (Hidden on mobile) -->
+            <nav class="hidden lg:flex gap-8 xl:gap-10 text-[16px] font-medium text-gray-700">
+                <a href="#"
+                    class="text-black relative after:absolute after:left-0 after:bottom-[-6px] after:w-full after:h-[3px] after:bg-blue-600 after:rounded-full after:content-['']">
+                    Home
+                </a>
+                <a href="/about.html" class="hover:text-black transition duration-300">About</a>
+                <a href="/service.html" class="hover:text-black transition duration-300">Service</a>
+                <a href="/newsBlogs.html" class="hover:text-black transition duration-300">News & Blog</a>
+                <a href="/contact.html" class="hover:text-black transition duration-300">Contact</a>
+            </nav>
+
+            <!-- Desktop Sign in Button -->
+            <a href="login.html"
+                class="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition duration-300 hidden lg:block">
+                Sign in
+        </a>
+
+            <!-- Mobile Menu Overlay -->
+            <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false"
+                class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" x-cloak
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            </div>
+
+            <!-- Mobile Menu Panel - NOW ON LEFT SIDE -->
+            <div x-show="mobileMenuOpen" x-cloak
+                class="mobile-menu fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-50 lg:hidden p-6"
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full"
+                x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
+
+                <!-- Mobile Menu Header -->
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-600 rounded-full"></div>
+                        <span class="font-bold text-xl text-gray-900">BSMR</span>
+                    </div>
+                    <button @click="mobileMenuOpen = false" class="text-gray-500 hover:text-gray-800">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Items -->
+                <nav class="flex flex-col space-y-6">
+                    <a href="#"
+                        class="text-black text-lg font-semibold pb-2 border-b border-gray-100 flex items-center">
+                        <i class="fas fa-home mr-3 text-blue-600 w-6"></i>
+                        Home
+                    </a>
+                    <a href="#" class="text-gray-700 text-lg font-medium hover:text-black transition flex items-center">
+                        <i class="fas fa-info-circle mr-3 text-blue-500 w-6"></i>
+                        About
+                    </a>
+                    <a href="#" class="text-gray-700 text-lg font-medium hover:text-black transition flex items-center">
+                        <i class="fas fa-cogs mr-3 text-blue-500 w-6"></i>
+                        Service
+                    </a>
+                    <a href="/newsBlogs.html"
+                        class="text-gray-700 text-lg font-medium hover:text-black transition flex items-center">
+                        <i class="fas fa-newspaper mr-3 text-blue-500 w-6"></i>
+                        News & Blog
+                    </a>
+                    <a href="#" class="text-gray-700 text-lg font-medium hover:text-black transition flex items-center">
+                        <i class="fas fa-envelope mr-3 text-blue-500 w-6"></i>
+                        Contact
+                    </a>
+                </nav>
+
+                <!-- Mobile Sign in Button -->
+                <a href="/login.html" class="mt-10 pt-6 border-t border-gray-200">
+                    <button
+                        class="w-full bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition duration-300">
+                        Sign in
+                    </button>
+                </a>
+
+                <!-- Mobile Contact Info -->
+                <div class="mt-8 text-sm text-gray-500">
+                    <p class="mb-2"><i class="fas fa-phone mr-2"></i> +91 123 456 7890</p>
+                    <p><i class="fas fa-envelope mr-2"></i> support@bsmr.com</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+
+    <!-- HERO SECTION -->
+    <section class="w-full px-2 md:px-6 md:py-8 flex justify-center mt-20" id="hero">
+        <div x-data="{ 
+            sectionVisible: false,
+            childrenAnimated: []
+        }" x-intersect.full="sectionVisible = true" :class="{ 'animated': sectionVisible }"
+            class="animate-section flex max-w-[1600px] py-10 px-4 w-full md:px-10 lg:px-16 rounded-[30px] bg-[#F5F7FB] flex-col lg:flex-row lg:items-center gap-10">
+
+            <!-- LEFT SIDE (70%) -->
+            <div class="lg:w-[70%] w-full">
+                <!-- Badge -->
+                <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up inline-block bg-blue-600 text-white px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-medium">
+                    Bharat Stock Market Research
+                </span>
+
+                <!-- Heading -->
+                <h1 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-100 text-3xl md:text-5xl lg:text-6xl text-[#0A0E23] leading-tight my-6">
+                    Smart Stock Research
+                </h1>
+                <h1 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200 text-3xl md:text-5xl lg:text-6xl text-[#0A0E23] leading-tight">
+                    Reliable Market Guidance
+                </h1>
+
+                <!-- Paragraph -->
+                <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-300 text-gray-600 mt-4 md:mt-6 max-w-md text-base md:text-lg">
+                    Get expert-backed stock recommendations and market insights -
+                    designed for retail investors in India.
+                </p>
+
+                <!-- Buttons -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-400 flex flex-col sm:flex-row gap-3 md:gap-4 mt-6 md:mt-8">
+                    <a href="#"
+                        class="bg-blue-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition text-center text-base md:text-lg">
+                        Join Now
+                    </a>
+                    <a href="#"
+                        class="bg-white border border-gray-300 px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition text-center text-base md:text-lg">
+                        View Plans
+                    </a>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE (30%) -->
+            <div class="lg:w-[30%] w-full flex justify-center lg:justify-end mt-8 lg:mt-0">
+                <img x-data="{ 
+                    visible: false,
+                    isFloating: false 
+                }" x-intersect.half="visible = true" :class="{ 
+                    'animated': visible,
+                    'floating': isFloating 
+                }" x-init="
+                    // Start floating animation after image is animated in
+                    setTimeout(() => {
+                        setInterval(() => {
+                            isFloating = !isFloating;
+                        }, 3000);
+                    }, 500);
+                " src="/images/download.png" alt="phones"
+                    class="zoom-in delay-500 w-[280px] sm:w-[320px] md:w-[400px] lg:w-[480px] xl:w-[520px] drop-shadow-2xl" />
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS SECTION -->
+    <section class="w-full flex justify-center mt-20 px-4 md:px-8 lg:px-16" id="stats">
+        <div class="max-w-[1600px] w-full grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-16 text-center">
+            <!-- Stat 1 -->
+            <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up stat-1">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#0A0E23]">10+</h2>
+                <p class="text-gray-600 text-sm md:text-base mt-2">
+                    Years of combined research<br>experience
+                </p>
+            </div>
+
+            <!-- Stat 2 -->
+            <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-100 stat-2">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#0A0E23]">8+</h2>
+                <p class="text-gray-600 text-sm md:text-base mt-2">
+                    Market segments covered
+                </p>
+            </div>
+
+            <!-- Stat 3 -->
+            <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-200 stat-3">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#0A0E23]">1000+</h2>
+                <p class="text-gray-600 text-sm md:text-base mt-2">
+                    Actionable insights<br>delivered
+                </p>
+            </div>
+
+            <!-- Stat 4 -->
+            <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-300 stat-4">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#0A0E23]">4.8/5</h2>
+                <p class="text-gray-600 text-sm md:text-base mt-2">
+                    User experience satisfaction
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY CHOOSE US SECTION -->
+    <section class="w-full px-2 md:px-6 md:py-8 flex justify-center" id="why-choose">
+        <div class="max-w-[1600px] w-full bg-[#F5F7FB] rounded-[30px] p-3 md:p-10 lg:p-14"
+            x-data="{ sectionVisible: false }" x-intersect.half="sectionVisible = true"
+            :class="{ 'animate-section animated': sectionVisible }">
+
+            <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium mb-6">
+                Why choose us
+            </span>
+
+            <div class="grid lg:grid-cols-2 gap-10 w-full items-start">
+                <!-- Heading -->
+                <h2 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-100 text-2xl md:text-3xl lg:text-4xl font-bold text-[#0A0E23] leading-snug">
+                    Providing research-based stock<br>
+                    insights for responsible investing.
+                </h2>
+
+                <!-- RIGHT SIDE TEXT -->
+                <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200 text-gray-700 text-sm md:text-base leading-relaxed">
+                    We deliver well-researched stock recommendations and timely alerts,
+                    so you can take action with better information and reduced uncertainty.
+                </p>
+            </div>
+
+            <!-- IMAGE BOX -->
+            <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="zoom-in delay-300 mt-10 rounded-xl overflow-hidden h-[300px] md:h-[420px] lg:h-[490px]">
+                <img src="https://cdn.pixabay.com/photo/2012/12/10/04/06/fractal-69180_1280.jpg"
+                    alt="Why choose us image" class="w-full h-full object-cover object-center" />
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-24 flex justify-center" id="how-it-works">
+        <div class="max-w-[1600px] w-full">
+
+            <!-- Badge -->
+            <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium mb-4">
+                How it Works
+            </span>
+
+            <!-- Title -->
+            <h2 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-100 text-2xl md:text-3xl lg:text-4xl font-semibold text-[#0A0E23] mb-12">
+                Here's how our service works
+            </h2>
+
+            <!-- ROW 1 -->
+            <div class="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-24" x-data="{ visible: false }"
+                x-intersect.half="visible = true" :class="{ 'animate-section animated': visible }">
+
+                <!-- Left Image -->
+                <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                    class="fade-up rounded-2xl w-full h-[220px] md:h-[300px] overflow-hidden">
+
+                    <img src="https://cdn.pixabay.com/photo/2023/05/01/18/06/windmill-7963566_1280.jpg"
+                        class="w-full h-full object-cover object-center rounded-2xl" />
+                </div>
+
+                <!-- Right Text -->
+                <div>
+                    <h3 x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-100 text-xl md:text-2xl font-semibold text-[#0A0E23] mb-2">
+                        Create Your Account
+                    </h3>
+
+                    <p x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-200 text-gray-600 max-w-sm">
+                        Register with your mobile number and email to get started.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ROW 2 -->
+            <div class="grid md:grid-cols-2 gap-10 md:gap-16 items-center" x-data="{ visible: false }"
+                x-intersect.half="visible = true" :class="{ 'animate-section animated': visible }">
+
+                <!-- Left Text -->
+                <div class="order-2 md:order-1">
+                    <h3 x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up text-xl md:text-2xl font-semibold text-[#0A0E23] mb-2">
+                        Complete KYC Verification
+                    </h3>
+
+                    <p x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-100 text-gray-600 max-w-sm">
+                        Verify PAN, Aadhaar, and eSign the agreement for compliance and security.
+                    </p>
+                </div>
+
+                <!-- Right Image -->
+                <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                    class="fade-up order-1 md:order-2 rounded-2xl w-full h-[220px] md:h-[300px] overflow-hidden">
+
+                    <img src="https://cdn.pixabay.com/photo/2023/05/01/18/06/windmill-7963566_1280.jpg"
+                        class="w-full h-full object-cover object-center rounded-2xl" />
+                </div>
+            </div>
+
+            <!-- ROW 3 -->
+            <div class="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-24" x-data="{ visible: false }"
+                x-intersect.half="visible = true" :class="{ 'animate-section animated': visible }">
+
+                <!-- Left Image -->
+                <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                    class="fade-up rounded-2xl w-full h-[220px] md:h-[300px] overflow-hidden">
+
+                    <img src="https://cdn.pixabay.com/photo/2023/05/01/18/06/windmill-7963566_1280.jpg"
+                        class="w-full h-full object-cover object-center rounded-2xl" />
+                </div>
+
+                <!-- Right Text -->
+                <div>
+                    <h3 x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-100 text-xl md:text-2xl font-semibold text-[#0A0E23] mb-2">
+                        Create Your Account
+                    </h3>
+
+                    <p x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-200 text-gray-600 max-w-sm">
+                        Register with your mobile number and email to get started.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ROW 4 -->
+            <div class="grid md:grid-cols-2 gap-10 md:gap-16 items-center" x-data="{ visible: false }"
+                x-intersect.half="visible = true" :class="{ 'animate-section animated': visible }">
+
+                <!-- Left Text -->
+                <div class="order-2 md:order-1">
+                    <h3 x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up text-xl md:text-2xl font-semibold text-[#0A0E23] mb-2">
+                        Complete KYC Verification
+                    </h3>
+
+                    <p x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-100 text-gray-600 max-w-sm">
+                        Verify PAN, Aadhaar, and eSign the agreement for compliance and security.
+                    </p>
+                </div>
+
+                <!-- Right Image -->
+                <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                    class="fade-up order-1 md:order-2 rounded-2xl w-full h-[220px] md:h-[300px] overflow-hidden">
+
+                    <img src="https://cdn.pixabay.com/photo/2023/05/01/18/06/windmill-7963566_1280.jpg"
+                        class="w-full h-full object-cover object-center rounded-2xl" />
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="w-full flex justify-center mt-24 px-4 md:px-8 lg:px-16">
+        <div class="max-w-[1600px] w-full text-center" x-data="{ visible: false }" x-intersect.half="visible = true"
+            :class="{ 'animate-section animated': visible }">
+
+            <!-- Text -->
+            <h2 x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                class="fade-up text-xl md:text-2xl lg:text-3xl text-[#0A0E23] font-medium leading-relaxed mb-8">
+                From registration to real-time recommendations<br class="hidden md:block">
+                smoothly and securely.
+            </h2>
+
+            <!-- Buttons -->
+            <div class="flex justify-center gap-4 mt-4">
+
+                <!-- Join Now Button -->
+                <a href="#" x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }" class="fade-up delay-100 bg-blue-600 text-white px-6 md:px-8 py-3 rounded-full font-semibold
+                      hover:bg-blue-700 transition text-sm md:text-base">
+                    Join Now
+                </a>
+
+                <!-- Download App Button -->
+                <a href="#" x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }" class="fade-up delay-200 bg-white border border-gray-300 px-6 md:px-8 py-3 rounded-full font-semibold 
+                      hover:bg-gray-100 transition text-sm md:text-base">
+                    Download App
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- OUR PLANS SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-24 flex justify-center" id="plans">
+        <div class="max-w-[1600px] w-full bg-[#F5F7FB] rounded-[30px] p-6 md:p-12 lg:p-16" x-data="{ visible: false }"
+            x-intersect.half="visible = true" :class="{ 'animate-section animated': visible }">
+
+            <!-- Badge -->
+            <span x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                class="fade-up inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium mb-4">
+                Our Plans
+            </span>
+
+            <!-- Title -->
+            <h2 x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                class="fade-up delay-100 text-2xl md:text-3xl lg:text-4xl font-semibold text-[#0A0E23] mb-12">
+                Plans designed for every type of investor
+            </h2>
+
+            <!-- PLANS GRID -->
+            <div class="grid md:grid-cols-3 gap-8">
+
+                <!-- BASIC PLAN -->
+                <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                    class="fade-up bg-white rounded-3xl p-8 shadow-sm">
+
+                    <h3 class="text-xl font-semibold mb-4">Basic / Intraday</h3>
+
+                    <p class="text-xl font-bold">₹5000 (inclusive of GST)</p>
+                    <p class="text-gray-600 text-sm mb-6">Monthly Subscription based</p>
+
+                    <!-- Duration Buttons -->
+                    <div class="flex gap-3 mb-6">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">3 Months</button>
+                        <button class="border px-4 py-2 rounded-full text-sm">6 Months</button>
+                        <button class="border px-4 py-2 rounded-full text-sm">1 Year</button>
+                    </div>
+
+                    <!-- Features -->
+                    <h4 class="font-semibold mb-3">Features</h4>
+                    <ul class="space-y-2 text-gray-700 text-sm">
+                        <li class="flex justify-between">Intraday Recommendations <span>✔</span></li>
+                        <li class="flex justify-between">Short-Term/Medium-Term <span>✖</span></li>
+                        <li class="flex justify-between">Options & Futures <span>✖</span></li>
+                        <li class="flex justify-between">Commodity Tips <span>✖</span></li>
+                        <li class="flex justify-between">Customer Support Priority <span>Standard</span></li>
+                    </ul>
+                </div>
+
+                <!-- STANDARD PLAN (HIGHLIGHTED) -->
+                <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                    class="fade-up bg-white rounded-3xl p-8 shadow-sm border-2 border-blue-500">
+
+                    <h3 class="text-xl font-semibold mb-4">Standard</h3>
+
+                    <p class="text-xl font-bold">₹15000 (inclusive of GST)</p>
+                    <p class="text-gray-600 text-sm mb-6">Monthly Subscription based</p>
+
+                    <!-- Duration Buttons -->
+                    <div class="flex gap-3 mb-6">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">3 Months</button>
+                        <button class="border px-4 py-2 rounded-full text-sm">6 Months</button>
+                        <button class="border px-4 py-2 rounded-full text-sm">1 Year</button>
+                    </div>
+
+                    <!-- Features -->
+                    <h4 class="font-semibold mb-3">Features</h4>
+                    <ul class="space-y-2 text-gray-700 text-sm">
+                        <li class="flex justify-between">Intraday Recommendations <span>✔</span></li>
+                        <li class="flex justify-between">Short-Term/Medium-Term <span>✔</span></li>
+                        <li class="flex justify-between">Options & Futures <span>✔</span></li>
+                        <li class="flex justify-between">Commodity Tips <span>Optional</span></li>
+                        <li class="flex justify-between">Customer Support Priority <span>Priority</span></li>
+                    </ul>
+                </div>
+
+                <!-- PREMIUM PLAN -->
+                <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                    class="fade-up bg-white rounded-3xl p-8 shadow-sm">
+
+                    <h3 class="text-xl font-semibold mb-4">Premium</h3>
+
+                    <p class="text-xl font-bold">₹25000 (inclusive of GST)</p>
+                    <p class="text-gray-600 text-sm mb-6">Monthly Subscription based</p>
+
+                    <!-- Duration Buttons -->
+                    <div class="flex gap-3 mb-6">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm">3 Months</button>
+                        <button class="border px-4 py-2 rounded-full text-sm">6 Months</button>
+                        <button class="border px-4 py-2 rounded-full text-sm">1 Year</button>
+                    </div>
+
+                    <!-- Features -->
+                    <h4 class="font-semibold mb-3">Features</h4>
+                    <ul class="space-y-2 text-gray-700 text-sm">
+                        <li class="flex justify-between">Intraday Recommendations <span>✔</span></li>
+                        <li class="flex justify-between">Short-Term/Medium-Term <span>✔</span></li>
+                        <li class="flex justify-between">Options & Futures <span>✔</span></li>
+                        <li class="flex justify-between">Commodity Tips <span>✔</span></li>
+                        <li class="flex justify-between">Customer Support Priority <span>Premium</span></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+
+
+    <section class="w-full flex justify-center mt-20 px-4 md:px-8 lg:px-16" id="features">
+        <div class="max-w-[1600px] w-full">
+
+            <!-- Badge -->
+            <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium">
+                Key Features of the Platform
+            </span>
+
+            <!-- Heading -->
+            <h2 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-100 text-2xl md:text-3xl lg:text-4xl font-bold text-[#0A0E23] mt-6">
+                Everything you need in one platform
+            </h2>
+
+            <!-- Animated Feature Grid -->
+            <div class="grid lg:grid-cols-[75%_25%] md:grid-cols-[75%_25%] gap-6 mt-10">
+
+                <!-- LARGE LEFT BOX (75%) -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="zoom-in delay-200 h-[320px] md:h-[420px] lg:h-[600px] rounded-2xl overflow-hidden border border-gray-200">
+
+                    <img src="https://cdn.pixabay.com/photo/2022/08/19/12/46/landscape-7396852_1280.jpg"
+                        class="w-full h-full object-cover object-center" />
+                </div>
+
+                <!-- RIGHT SIDE (25%) -->
+                <div class="flex flex-col gap-6">
+
+                    <!-- Top Small Box -->
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="zoom-in delay-300 h-[150px] md:h-[200px] lg:h-[290px] rounded-2xl overflow-hidden border border-gray-200">
+
+                        <img src="https://cdn.pixabay.com/photo/2022/08/19/12/46/landscape-7396852_1280.jpg"
+                            class="w-full h-full object-cover object-center" />
+                    </div>
+
+                    <!-- Bottom Small Box -->
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="zoom-in delay-400 h-[150px] md:h-[200px] lg:h-[290px] rounded-2xl overflow-hidden border border-gray-200">
+
+                        <img src="https://cdn.pixabay.com/photo/2022/08/19/12/46/landscape-7396852_1280.jpg"
+                            class="w-full h-full object-cover object-center" />
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- TESTIMONIALS SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-24 flex justify-center">
+        <div class="max-w-[1600px] w-full" x-data="{
+        current: 0,
+        testimonials: [
+            {
+                quote: 'The dashboard is easy to use and shows only what matters. A helpful platform for retail traders.',
+                name: 'Sanjay, Delhi',
+                image: 'https://i.pravatar.cc/50?img=5'
+            },
+            {
+                quote: 'I finally understand market movements better. The alerts keep me updated when something important changes.',
+                name: 'Akhil, Bengaluru',
+                image: 'https://i.pravatar.cc/50?img=11'
+            },
+            {
+                quote: 'The recommendations are clear and timely. It makes decision-making simpler during market hours.',
+                name: 'Rutuja, Pune',
+                image: 'https://i.pravatar.cc/50?img=32'
+            },
+            {
+                quote: 'Great platform for beginners and experienced traders alike. The insights are valuable.',
+                name: 'Priya, Mumbai',
+                image: 'https://i.pravatar.cc/50?img=12'
+            },
+            {
+                quote: 'The customer support is excellent and always available to help with queries.',
+                name: 'Rajesh, Chennai',
+                image: 'https://i.pravatar.cc/50?img=23'
+            }
+        ],
+        cardsPerView: 1,
+        init() {
+            // Set cards per view based on screen size
+            this.updateCardsPerView();
+            window.addEventListener('resize', () => this.updateCardsPerView());
+        },
+        updateCardsPerView() {
+            if (window.innerWidth >= 1024) {
+                this.cardsPerView = 3; // Desktop: 3 cards
+            } else if (window.innerWidth >= 768) {
+                this.cardsPerView = 2; // Tablet: 2 cards
+            } else {
+                this.cardsPerView = 1; // Mobile: 1 card
+            }
+        },
+        get translateX() {
+            return `translateX(-${this.current * (100 / this.cardsPerView)}%)`;
+        },
+        next() {
+            if (this.current >= this.testimonials.length - this.cardsPerView) {
+                // Reset to start for infinite loop
+                this.current = 0;
+            } else {
+                this.current++;
+            }
+        },
+        prev() {
+            if (this.current <= 0) {
+                // Go to end for infinite loop
+                this.current = this.testimonials.length - this.cardsPerView;
+            } else {
+                this.current--;
+            }
+        },
+        goTo(index) {
+            this.current = index;
+        }
+    }" x-init="init()">
+
+            <!-- Badge -->
+            <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium">
+                Testimonials
+            </span>
+
+            <!-- Heading -->
+            <h2 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-100 text-2xl md:text-3xl lg:text-4xl font-bold text-[#0A0E23] mt-6">
+                Real experiences from our subscribers
+            </h2>
+
+            <!-- TESTIMONIAL CARDS CONTAINER -->
+            <div class="relative mt-12">
+                <!-- Cards Wrapper with Transition -->
+                <div class="overflow-hidden">
+                    <div class="flex transition-transform duration-500 ease-in-out" :style="`transform: ${translateX}`">
+
+                        <!-- Loop through testimonials -->
+                        <template x-for="(testimonial, index) in testimonials" :key="index">
+                            <!-- Card -->
+                            <div class="w-full sm:w-1/2 md:w-1/3 flex-shrink-0 px-3">
+                                <div
+                                    class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 h-full flex flex-col">
+                                    <div class="flex-grow">
+                                        <div class="text-4xl md:text-5xl text-gray-300 leading-none mb-4">❝</div>
+                                        <p class="text-gray-700 text-sm md:text-base lg:text-lg leading-relaxed">
+                                            <span x-text="testimonial.quote"></span>
+                                        </p>
+                                    </div>
+
+                                    <!-- USER -->
+                                    <div class="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100">
+                                        <img :src="testimonial.image" class="w-10 h-10 rounded-full object-cover" />
+                                        <p class="font-medium text-[#0A0E23] text-sm md:text-base"
+                                            x-text="testimonial.name"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- SLIDER CONTROLS -->
+                <div class="flex justify-center items-center gap-4 md:gap-6 mt-10">
+                    <!-- Prev Button -->
+                    <button @click="prev()"
+                        class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border border-gray-300 rounded-full bg-white shadow hover:bg-gray-50 transition-all duration-300 text-base md:text-lg hover:scale-105">
+                        ‹
+                    </button>
+
+                    <!-- Dots -->
+                    <div class="flex items-center gap-1.5 md:gap-2">
+                        <template x-for="(dot, index) in Array.from({ length: testimonials.length - cardsPerView + 1 })"
+                            :key="index">
+                            <button @click="goTo(index)"
+                                class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all duration-300"
+                                :class="current === index ? 'bg-blue-600 scale-125' : 'bg-gray-300 hover:bg-gray-400'">
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Next Button -->
+                    <button @click="next()"
+                        class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border border-gray-300 rounded-full bg-white shadow hover:bg-gray-50 transition-all duration-300 text-base md:text-lg hover:scale-105">
+                        ›
+                    </button>
+                </div>
+
+                <!-- Optional: Desktop side arrows -->
+                <button @click="prev()"
+                    class="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-12 w-12 h-12 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 z-10">
+                    ‹
+                </button>
+
+                <button @click="next()"
+                    class="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-12 w-12 h-12 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 z-10">
+                    ›
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+
+
+
+
+    <!-- FAQ SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-28 flex justify-center">
+        <div class="max-w-[1500px] w-full grid md:grid-cols-2 gap-16">
+
+            <!-- LEFT TITLE AREA -->
+            <div class="space-y-8">
+                <!-- Badge with its own animation -->
+                <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-100 inline-block bg-blue-600 text-white px-6 py-2 rounded-full text-sm md:text-base mb-4">
+                    FAQ
+                </span>
+
+                <!-- Heading with its own animation -->
+                <h2 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200 text-[28px] md:text-[34px] font-semibold text-[#0A0E23] leading-snug max-w-sm">
+                    Common questions from our users
+                </h2>
+            </div>
+
+            <!-- RIGHT ACCORDION -->
+            <div class="space-y-8">
+
+                <!-- FAQ ITEM 1 -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-100 border-b pb-4">
+                    <button class="w-full flex justify-between items-center text-left faq-toggle py-2">
+                        <span class="text-[16px] text-[#0A0E23] font-medium">
+                            What does this platform provide?
+                        </span>
+                        <span class="faq-arrow transition-transform duration-300 text-xl">▾</span>
+                    </button>
+                    <div class="faq-content overflow-hidden transition-all duration-300 ease-in-out max-h-0">
+                        <p class="text-gray-600 pt-3 pb-2">
+                            The platform provides stock recommendations, alerts, dashboards, and real-time market
+                            insights.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ ITEM 2 -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-150 border-b pb-4">
+                    <button class="w-full flex justify-between items-center text-left faq-toggle py-2">
+                        <span class="text-[16px] text-[#0A0E23] font-medium">
+                            Do I need to complete KYC before accessing recommendations?
+                        </span>
+                        <span class="faq-arrow transition-transform duration-300 text-xl">▾</span>
+                    </button>
+                    <div class="faq-content overflow-hidden transition-all duration-300 ease-in-out max-h-0">
+                        <p class="text-gray-600 pt-3 pb-2">
+                            Yes, regulatory guidelines require every user to complete KYC for subscription activation.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ ITEM 3 -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200 border-b pb-4">
+                    <button class="w-full flex justify-between items-center text-left faq-toggle py-2">
+                        <span class="text-[16px] text-[#0A0E23] font-medium">
+                            What types of recommendations do you offer?
+                        </span>
+                        <span class="faq-arrow transition-transform duration-300 text-xl">▾</span>
+                    </button>
+                    <div class="faq-content overflow-hidden transition-all duration-300 ease-in-out max-h-0">
+                        <p class="text-gray-600 pt-3 pb-2">
+                            We provide intraday, short-term, medium-term, futures, and options-based research.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ ITEM 4 -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-250 border-b pb-4">
+                    <button class="w-full flex justify-between items-center text-left faq-toggle py-2">
+                        <span class="text-[16px] text-[#0A0E23] font-medium">
+                            How do I receive updates when targets change?
+                        </span>
+                        <span class="faq-arrow transition-transform duration-300 text-xl">▾</span>
+                    </button>
+                    <div class="faq-content overflow-hidden transition-all duration-300 ease-in-out max-h-0">
+                        <p class="text-gray-600 pt-3 pb-2">
+                            Alerts are immediately delivered through the dashboard and notification system.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ ITEM 5 -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-300 border-b pb-4">
+                    <button class="w-full flex justify-between items-center text-left faq-toggle py-2">
+                        <span class="text-[16px] text-[#0A0E23] font-medium">
+                            Does this platform guarantee returns? (Mandatory risk clarification)
+                        </span>
+                        <span class="faq-arrow transition-transform duration-300 text-xl">▾</span>
+                    </button>
+                    <div class="faq-content overflow-hidden transition-all duration-300 ease-in-out max-h-0">
+                        <p class="text-gray-600 pt-3 pb-2">
+                            No platform can guarantee returns. All recommendations come with inherent market risks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- CONTACT SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-28 flex justify-center">
+        <div class="max-w-[1500px] w-full grid md:grid-cols-2 gap-16">
+
+            <!-- LEFT SIDE CONTENT -->
+            <div>
+                <!-- Badge -->
+                <span x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-100 inline-block bg-blue-600 text-white px-6 py-2 rounded-full text-sm md:text-base mb-6">
+                    FAQ
+                </span>
+
+                <!-- Title -->
+                <h2 x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200 text-[28px] md:text-[34px] font-semibold text-[#0A0E23] leading-snug mb-6">
+                    Have questions about subscriptions?<br>
+                    Check our FAQ section or Contact<br>
+                    Us for support.
+                </h2>
+
+                <!-- Email -->
+                <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-300 text-[16px] text-[#0A0E23] mb-4">
+                    <span class="font-semibold">Email :</span> email@gmail.com
+                </p>
+
+                <!-- Address -->
+                <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-400 text-[16px] text-[#0A0E23] leading-relaxed mb-4">
+                    <span class="font-semibold">Address :</span> 1234/1, Dubai main road,<br>
+                    Dubai Kuruku Sandhu, Dubai
+                </p>
+
+                <!-- Phone -->
+                <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-500 text-[16px] text-[#0A0E23] mb-8">
+                    <span class="font-semibold">Phone No :</span> +91 1234567890
+                </p>
+
+                <!-- Social Icons -->
+                <p x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-600 font-semibold text-[#0A0E23] mb-4">
+                    Follow Us
+                </p>
+
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-700 flex gap-6 text-2xl text-black">
+                    <i class="fa-brands fa-instagram cursor-pointer hover:text-blue-600 transition"></i>
+                    <i class="fa-brands fa-facebook cursor-pointer hover:text-blue-600 transition"></i>
+                    <i class="fa-brands fa-linkedin cursor-pointer hover:text-blue-600 transition"></i>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE FORM -->
+            <div class="space-y-6">
+                <!-- Row: First & Last Name -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up">
+                        <label class="block text-sm text-gray-700 mb-2">First Name</label>
+                        <input type="text" placeholder="Your First Name"
+                            class="w-full border border-gray-300 px-4 py-3 rounded-full outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                        class="fade-up delay-100">
+                        <label class="block text-sm text-gray-700 mb-2">Last Name</label>
+                        <input type="text" placeholder="Your Last Name"
+                            class="w-full border border-gray-300 px-4 py-3 rounded-full outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200">
+                    <label class="block text-sm text-gray-700 mb-2">Email Address</label>
+                    <input type="email" placeholder="Your Email Address"
+                        class="w-full border border-gray-300 px-4 py-3 rounded-full outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+
+                <!-- Message -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-300">
+                    <label class="block text-sm text-gray-700 mb-2">Your Message</label>
+                    <textarea placeholder="Write Something........"
+                        class="w-full border border-gray-300 px-4 py-3 rounded-2xl outline-none min-h-[180px] focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-400">
+                    <button
+                        class="w-full bg-blue-600 text-white py-4 rounded-full text-lg font-medium hover:bg-blue-700 transition">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+    <!-- DOWNLOAD APP SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-24 flex justify-center">
+        <div class="max-w-[1600px] w-full">
+
+            <div x-data="{ visible: false }" x-intersect.half="visible = true"
+                :class="{ 'animate-section animated': visible }"
+                class="grid md:grid-cols-2 bg-[#F5F7FB] rounded-[30px] overflow-hidden shadow-sm">
+
+                <!-- LEFT TEXT -->
+                <div class="p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+
+                    <!-- Badge -->
+                    <div>
+                        <span x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                            class="fade-up inline-block bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium mb-6">
+                            Download the App
+                        </span>
+                    </div>
+
+                    <!-- Heading -->
+                    <h2 x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-100 text-2xl md:text-3xl lg:text-4xl font-bold text-[#0A0E23] leading-snug mb-4">
+                        Trade smarter with<br>instant updates
+                    </h2>
+
+                    <!-- Subtext -->
+                    <p x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-200 text-gray-600 text-sm md:text-base max-w-md mb-8">
+                        Stay connected to the market with real-time alerts and research updates — wherever you are.
+                    </p>
+
+                    <!-- Store Buttons -->
+                    <div x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="fade-up delay-300 flex flex-wrap gap-4">
+
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                            class="h-12 cursor-pointer" />
+
+                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                            class="h-12 cursor-pointer" />
+                    </div>
+
+                </div>
+
+                <!-- RIGHT IMAGE -->
+                <div class="relative overflow-hidden">
+                    <img x-data="{ show: false }" x-intersect.half="show = true" :class="{ 'animated': show }"
+                        class="zoom-in delay-200 w-full h-full object-cover object-center"
+                        src="https://cdn.pixabay.com/photo/2022/10/10/06/29/city-7510927_1280.jpg" />
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+
+
+    <!-- FOOTER -->
+    <footer class="flex justify-center" id="footer">
+        <div class="flex bg-[#F5F7FB] w-full flex-col px-8 mt-20 pt-16 pb-10 gap-10 max-w-[1600px]"
+            x-data="{ sectionVisible: false }" x-intersect.half="sectionVisible = true"
+            :class="{ 'animate-section animated': sectionVisible }">
+
+            <div class="grid md:grid-cols-4 gap-12">
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 bg-blue-600 rounded-full"></div>
+                        <h2 class="font-semibold text-lg">Bharat Stock Market Research</h2>
+                    </div>
+                    <p class="text-gray-600 mt-4">Save Money, Time and Efforts</p>
+                </div>
+
+                <div></div>
+                <div></div>
+
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-100">
+                    <h3 class="font-semibold mb-3">Follow Us</h3>
+                    <div class="flex gap-4 text-gray-800 mb-6 text-2xl">
+                        <i
+                            class="fa-brands fa-instagram hover:text-blue-600 transition duration-300 cursor-pointer"></i>
+                        <i class="fa-brands fa-facebook hover:text-blue-600 transition duration-300 cursor-pointer"></i>
+                        <i class="fa-brands fa-linkedin hover:text-blue-600 transition duration-300 cursor-pointer"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-12">
+                <!-- PAGES -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-200">
+                    <h3 class="font-semibold text-gray-900 mb-4">Pages</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a class="hover:text-black transition duration-300" href="#">Home</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">About</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Service</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Blog</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- LEGAL SECTION -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-300">
+                    <h3 class="font-semibold text-gray-900 mb-4">LEGAL & COMPLIANCE</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a class="hover:text-black transition duration-300" href="#">Terms of Service</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Privacy Policy</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Refund Policy</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">SEBI Disclosures</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Disclaimers</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Risk Warnings</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Grievance Redressal /
+                                Escalation Matrix</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Investor Charter</a></li>
+                    </ul>
+                </div>
+
+                <!-- SUPPORT + CONTACT -->
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-400">
+                    <h3 class="font-semibold text-gray-900 mb-4">CUSTOMER SUPPORT</h3>
+                    <ul class="space-y-2 text-gray-600 mb-6">
+                        <li><a class="hover:text-black transition duration-300" href="#">FAQs</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Help Center</a></li>
+                        <li><a class="hover:text-black transition duration-300" href="#">Report an issue</a></li>
+                    </ul>
+                </div>
+
+                <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                    class="fade-up delay-500">
+                    <p class="text-gray-600"><span class="font-semibold">Email :</span> email@gmail.com</p>
+                    <p class="text-gray-600 mt-4">
+                        <span class="font-semibold">Address :</span> 1234/1, Dubai main road,<br>
+                        Dubai Kuruku <br>
+                        Sandhu, Dubai
+                    </p>
+                    <p class="text-gray-600 mt-4">
+                        <span class="font-semibold">Phone No :</span> +91 1234567890
+                    </p>
+                </div>
+            </div>
+
+            <!-- BOTTOM COPYRIGHT SECTION -->
+            <div x-data="{ visible: false }" x-intersect.half="visible = true" :class="{ 'animated': visible }"
+                class="fade-up delay-600 mt-16 border-t pt-6 text-center text-gray-600 text-sm">
+                <p class="font-semibold text-gray-900">Bharath Stock Market Research</p>
+                <p class="mt-1">2025 Bharath Stock Market Research. All rights reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/script.js"></script>
+
+</body>
+
+</html>

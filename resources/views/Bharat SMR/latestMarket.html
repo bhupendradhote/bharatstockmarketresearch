@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market News & Blog</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-white">
+
+    <!-- HERO SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-10 flex justify-center">
+        <div class="max-w-[1600px] w-full bg-[#F5F7FB] rounded-[30px] py-20 text-center">
+
+            <!-- Badge -->
+            <span data-animate
+                class="fade-up delay-100 inline-block bg-blue-600 text-white px-6 py-2 rounded-full text-sm md:text-base mb-6">
+                Blog
+            </span>
+
+            <!-- Heading -->
+            <h1 data-animate
+                class="fade-up delay-200 text-[22px] md:text-[32px] lg:text-[36px] font-semibold text-[#0A0E23] mt-4">
+                Market News & Important Developments
+            </h1>
+
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-16 flex justify-center">
+        <div class="max-w-[1600px] w-full grid lg:grid-cols-3 gap-10">
+
+            <!-- LEFT SIDE — ARTICLE -->
+            <div>
+
+                <!-- Article Title -->
+                <h2 class="text-[22px] md:text-[28px] font-semibold text-[#0A0E23] leading-snug mb-4">
+                    Amazon, Flipkart festive blitz fuels 29% YoY surge in first-week sales to record Rs 60,700 crore
+                </h2>
+
+                <!-- Subtext -->
+                <p class="text-gray-600 text-sm md:text-base mb-6">
+                    GST reform, early access deals and a surge in Gen-Z spending have turbocharged demand across
+                    categories, from smartphones to appliances.
+                </p>
+
+                <!-- Featured Image -->
+                <div class="rounded-2xl overflow-hidden mb-6">
+                    <img src="https://cdn.pixabay.com/photo/2025/10/12/07/32/italy-9889149_1280.jpg"
+                        class="w-full h-auto object-cover" />
+                </div>
+
+                <!-- Additional Article Content -->
+                <p class="text-gray-700 text-sm md:text-base leading-relaxed mb-4">
+                    Congress likely to boycott JPC on 3 key bills to oust jailed CM; ministers wary after recent
+                    political developments.
+                </p>
+
+                <p class="text-gray-700 text-sm md:text-base leading-relaxed mb-4">
+                    TVK district secretary arrested in Kaur stampede case as investigation deepens.
+                </p>
+
+                <!-- Tabs -->
+                <div class="flex gap-6 mt-8 text-sm font-medium">
+                    <button class="text-blue-600 underline">More News</button>
+                    <button class="text-gray-600 hover:text-blue-600 transition">Recent News</button>
+                </div>
+
+                <!-- List Items -->
+                <ul class="mt-4 space-y-3 text-sm text-gray-700">
+                    <li>• Must step treating Kerala... Tharoor flags concerns over Air India Express plans to curtail
+                        flights.</li>
+                    <li>• ‘With our right to hum…’ Trump hails Pakistan’s Sharif, Azim Munir for supporting Gaza peace
+                        plan.</li>
+                    <li>• Hindujas likely to boycott JPC on 3 key bills.</li>
+                    <li>• Indian High Commission condemns vandalism of Gandhi statue in London.</li>
+                </ul>
+
+            </div>
+
+            <!-- RIGHT SIDE — SIDEBAR -->
+            <div class="space-y-10">
+
+                <!-- Market Insight Section -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-3">Market Insight</h3>
+                    <p class="text-sm text-gray-700 mb-3">Indian markets set for flat start on global cues</p>
+
+                    <ul class="space-y-2 text-sm text-blue-600 underline">
+                        <li>• Stock Market LIVE Updates: Nifty opens near 24,700…</li>
+                        <li>• Japan-based UMFSL Capital closes Rs 300 crore fintech fund…</li>
+                        <li>• Is India’s private sector taking its animal spirits?</li>
+                    </ul>
+                </div>
+
+                <!-- In The News Section -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-3">In The News</h3>
+                    <p class="text-sm text-gray-700 mb-3">
+                        PM Modi welcomes US President Trump’s Gaza peace plan: ‘Viable pathway to long-term sustainable
+                        peace’
+                    </p>
+
+                    <ul class="space-y-2 text-sm text-blue-600 underline">
+                        <li>• Stock Market LIVE Updates: Nifty opens near…</li>
+                        <li>• UMFSL Capital closes Rs 300 crore fintech fund…</li>
+                        <li>• India’s private sector taking its animal spirits?</li>
+                    </ul>
+                </div>
+
+                <!-- Chat of the Day -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-3">Chat of the Day</h3>
+                    <p class="text-sm text-gray-700">
+                        Hindustan Aeronautics, Bharat Electronics holding on to their ground despite a rise in
+                        competition.
+                    </p>
+                </div>
+
+                <!-- Women's ODI Section -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-3">Women’s ODI World Cup</h3>
+                    <p class="text-sm text-gray-700">
+                        Breaking New Ground: Women’s Cricket’s $13.88 million leap forward.
+                    </p>
+                </div>
+
+                <!-- Market Index -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Market Actions</h3>
+                    <table class="w-full text-sm">
+                        <tr class="border-b">
+                            <th class="text-left py-1">Index</th>
+                            <th class="text-left py-1">Price</th>
+                            <th class="text-left py-1">%Chg</th>
+                        </tr>
+                        <tr>
+                            <td>Nifty 50</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600 font-medium">+0.21</td>
+                        </tr>
+                        <tr>
+                            <td>BSE Sensex</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600 font-medium">+0.21</td>
+                        </tr>
+                        <tr>
+                            <td>Nifty IT</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600 font-medium">+0.21</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+
+
+            <!-- EXTRA RIGHT-SIDE MARKET SECTIONS -->
+            <div class="space-y-8">
+
+                <!-- MARKET ACTIONS -->
+                <div>
+                    <h3 class="font-semibold text-base mb-2">Market Actions</h3>
+
+                    <table class="w-full text-sm">
+                        <tr class="border-b">
+                            <th class="text-left py-1">Index</th>
+                            <th class="text-left py-1">Price</th>
+                            <th class="text-left py-1">Change</th>
+                            <th class="text-left py-1">%chg</th>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty 50</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>BSE Sensex</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty IT</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+                    </table>
+                </div>
+
+
+                <!-- STOCK ACTION WITH FLAG FILTER -->
+                <div>
+                    <h3 class="font-semibold text-base mb-2">Stock Action</h3>
+
+                    <!-- Country Buttons -->
+                    <div class="flex items-center gap-2 mb-2">
+                        <button class="px-2 py-1 rounded-full border text-xs flex items-center gap-1">
+                            <img src="https://flagsapi.com/IN/shiny/24.png" class="w-4" /> IN
+                        </button>
+
+                        <button class="px-2 py-1 rounded-full border text-xs flex items-center gap-1">
+                            <img src="https://flagsapi.com/US/shiny/24.png" class="w-4" /> USA
+                        </button>
+                    </div>
+
+                    <table class="w-full text-sm">
+                        <tr class="border-b">
+                            <th class="text-left py-1">Index</th>
+                            <th class="text-left py-1">Price</th>
+                            <th class="text-left py-1">Change</th>
+                            <th class="text-left py-1">%chg</th>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty 50</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>BSE Sensex</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty IT</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+                    </table>
+                </div>
+
+
+                <!-- TOP GAINERS -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-semibold text-base">Top Gainers</h3>
+
+                        <button class="border px-2 py-1 text-xs rounded-full flex items-center gap-1">
+                            Nifty <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <table class="w-full text-sm">
+                        <tr class="border-b">
+                            <th class="text-left py-1">Index</th>
+                            <th class="text-left py-1">Price</th>
+                            <th class="text-left py-1">Change</th>
+                            <th class="text-left py-1">%chg</th>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty 50</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>BSE Sensex</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty IT</td>
+                            <td>80532.39</td>
+                            <td class="text-green-600">167.45</td>
+                            <td class="text-green-600">0.21</td>
+                        </tr>
+                    </table>
+                </div>
+
+
+                <!-- TOP LOSERS -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-semibold text-base">Top Losers</h3>
+
+                        <button class="border px-2 py-1 text-xs rounded-full flex items-center gap-1">
+                            Nifty <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <table class="w-full text-sm">
+                        <tr class="border-b">
+                            <th class="text-left py-1">Index</th>
+                            <th class="text-left py-1">Price</th>
+                            <th class="text-left py-1">Change</th>
+                            <th class="text-left py-1">%chg</th>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty 50</td>
+                            <td>80532.39</td>
+                            <td class="text-red-600">167.45</td>
+                            <td class="text-red-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>BSE Sensex</td>
+                            <td>80532.39</td>
+                            <td class="text-red-600">167.45</td>
+                            <td class="text-red-600">0.21</td>
+                        </tr>
+
+                        <tr>
+                            <td>Nifty IT</td>
+                            <td>80532.39</td>
+                            <td class="text-red-600">167.45</td>
+                            <td class="text-red-600">0.21</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+
+    <!-- STOCK & CURRENCY SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-16 flex justify-center">
+        <div class="max-w-[1600px] w-full grid md:grid-cols-3 gap-10">
+
+            <!-- STOCK ACTION (LEFT) -->
+            <div>
+                <h3 class="font-semibold text-lg mb-3">Stock Action</h3>
+
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-3">
+                    <button class="px-3 py-1 bg-black text-white text-xs rounded-full">MCX</button>
+                    <button class="px-3 py-1 border text-xs rounded-full">NCDEX</button>
+                </div>
+
+                <table class="w-full text-sm">
+                    <tr class="border-b">
+                        <th class="text-left py-1">Commodity</th>
+                        <th class="text-left py-1">Price</th>
+                        <th class="text-left py-1">Change</th>
+                        <th class="text-left py-1">%chg</th>
+                    </tr>
+                    <tr>
+                        <td>Silver</td>
+                        <td>80532.39</td>
+                        <td class="text-green-600">167.45</td>
+                        <td class="text-green-600">0.21</td>
+                    </tr>
+                    <tr>
+                        <td>Silver</td>
+                        <td>80532.39</td>
+                        <td class="text-green-600">167.45</td>
+                        <td class="text-green-600">0.21</td>
+                    </tr>
+                    <tr>
+                        <td>Crudeoil</td>
+                        <td>80532.39</td>
+                        <td class="text-green-600">167.45</td>
+                        <td class="text-green-600">0.21</td>
+                    </tr>
+                    <tr>
+                        <td>Naturalgas</td>
+                        <td>80532.39</td>
+                        <td class="text-green-600">167.45</td>
+                        <td class="text-green-600">0.21</td>
+                    </tr>
+                </table>
+
+                <div class="mt-3">
+                    <a href="#" class="text-xs underline text-gray-700 hover:text-blue-600">
+                        See all commodity prices
+                    </a>
+                </div>
+            </div>
+
+            <!-- CURRENCIES -->
+            <div>
+                <h3 class="font-semibold text-lg mb-3">Currencies</h3>
+
+                <table class="w-full text-sm">
+                    <tr class="border-b">
+                        <th class="text-left py-1">Currency</th>
+                        <th class="text-left py-1">Price</th>
+                        <th class="text-left py-1">Change</th>
+                        <th class="text-left py-1">%chg</th>
+                    </tr>
+
+                    <tr>
+                        <td>USDINR</td>
+                        <td>88.8525</td>
+                        <td class="text-red-600">167.45</td>
+                        <td class="text-red-600">0.21</td>
+                    </tr>
+                    <tr>
+                        <td>EURINR</td>
+                        <td>104.3800</td>
+                        <td class="text-green-600">167.45</td>
+                        <td class="text-green-600">0.21</td>
+                    </tr>
+                    <tr>
+                        <td>JPYINR</td>
+                        <td>60.0000</td>
+                        <td class="text-green-600">167.45</td>
+                        <td class="text-green-600">0.21</td>
+                    </tr>
+                    <tr>
+                        <td>GBPINR</td>
+                        <td>119.4700</td>
+                        <td class="text-red-600">167.45</td>
+                        <td class="text-red-600">0.21</td>
+                    </tr>
+                </table>
+
+                <div class="mt-3">
+                    <a href="#" class="text-xs underline text-gray-700 hover:text-blue-600">
+                        See all Exchange rates
+                    </a>
+                </div>
+            </div>
+
+            <!-- STOCK ACTION (RIGHT) -->
+            <div>
+                <h3 class="font-semibold text-lg mb-3">Stock Action</h3>
+
+                <table class="w-full text-sm">
+                    <tr class="border-b">
+                        <th class="text-left py-1">Commodity</th>
+                        <th class="text-left py-1">Price</th>
+                        <th class="text-left py-1">Coupon Rate</th>
+                        <th class="text-left py-1">Rating</th>
+                    </tr>
+
+                    <tr>
+                        <td>NIRMAL BANG <br><span class="text-[10px] text-gray-500">28/04/2027</span></td>
+                        <td>100</td>
+                        <td>10.25%</td>
+                        <td>A</td>
+                    </tr>
+
+                    <tr>
+                        <td>TELANGANA STATE <br><span class="text-[10px] text-gray-500">05/Dec/2034</span></td>
+                        <td>101.94</td>
+                        <td>9.85%</td>
+                        <td>AA+(CE)</td>
+                    </tr>
+
+                    <tr>
+                        <td>TELANGANA STATE <br><span class="text-[10px] text-gray-500">24/Feb/2034</span></td>
+                        <td>100</td>
+                        <td>10.25%</td>
+                        <td>AA+(CE)</td>
+                    </tr>
+                </table>
+
+                <div class="mt-3">
+                    <a href="#" class="text-xs underline text-gray-700 hover:text-blue-600">
+                        See all Listed bonds
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+
+
+    <!-- TRENDING NEWS SECTION -->
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-16 flex justify-center py-10">
+        <div class="max-w-[1600px] w-full">
+
+            <!-- Heading -->
+            <h2 class="text-lg md:text-xl font-semibold underline mb-6">
+                Trending News
+            </h2>
+
+            <!-- NEWS LIST -->
+            <div class="space-y-6">
+
+                <!-- Item 1 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    'Must stop treating Kerala...': Tharoor flags concerns over Air India Express plans to curtail
+                    flights
+                </p>
+                <hr>
+
+                <!-- Item 2 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    'With us right from...': Trump hails Pakistan’s Sharif, Asim Munir for supporting Gaza peace plan
+                </p>
+                <hr>
+
+                <!-- Item 3 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    Congress likely to boycott JPC on 3 key bills to oust jailed CMs, ministers
+                </p>
+                <hr>
+
+                <!-- Item 4 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    TVK district secretary arrested in Karur stampede case
+                </p>
+                <hr>
+
+                <!-- Item 5 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    Indian High Commission condemns vandalism of Gandhi statue in London ahead of International Day of
+                    Non-Violence
+                </p>
+                <hr>
+
+                <!-- Item 6 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    TVK district secretary arrested in Karur stampede case
+                </p>
+                <hr>
+
+                <!-- Item 7 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    Indian High Commission condemns vandalism of Gandhi statue in London ahead of International Day of
+                    Non-Violence
+                </p>
+                <hr>
+
+                <!-- Item 8 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    TVK district secretary arrested in Karur stampede case
+                </p>
+                <hr>
+
+                <!-- Item 9 -->
+                <p class="text-sm md:text-base text-[#0A0E23]">
+                    Indian High Commission condemns vandalism of Gandhi statue in London ahead of International Day of
+                    Non-Violence
+                </p>
+
+            </div>
+
+        </div>
+    </section>
+
+
+
+    <!-- Custom Script -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>

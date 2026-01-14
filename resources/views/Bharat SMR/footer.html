@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+
+<body>
+
+    <footer class="flex justify-center bg-[#F5F7FB] mt-20 pt-16 pb-10 px-8">
+
+        <div class="max-w-[1600px] w-full">
+
+            <div class="grid md:grid-cols-4 gap-12">
+                <!-- Branding -->
+                <div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 bg-blue-600 rounded-full"></div>
+                        <h2 class="font-semibold text-lg">Bharat Stock Market Research</h2>
+                    </div>
+                    <p class="text-gray-600 mt-4">Save Money, Time and Efforts</p>
+                </div>
+
+                <!-- Pages -->
+                <div>
+                    <h3 class="font-semibold mb-3">Pages</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about.html">About</a></li>
+                        <li><a href="/service.html">Service</a></li>
+                        <li><a href="/blog.html">Blog</a></li>
+                        <li><a href="/contact.html">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h3 class="font-semibold mb-3">LEGAL & COMPLIANCE</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li>Terms of Service</li>
+                        <li>Privacy Policy</li>
+                        <li>Refund Policy</li>
+                        <li>SEBI Disclosures</li>
+                        <li>Risk Warnings</li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h3 class="font-semibold mb-3">CONTACT</h3>
+                    <p class="text-gray-600">Email: email@gmail.com</p>
+                    <p class="text-gray-600 mt-4">
+                        Address : Dubai main road,<br>Dubai Kuruku Sandhu
+                    </p>
+                    <p class="text-gray-600 mt-4">Phone: +91 1234567890</p>
+                </div>
+            </div>
+
+            <div class="mt-16 border-t pt-6 text-center text-gray-600 text-sm">
+                <p class="font-semibold text-gray-900">Bharat Stock Market Research</p>
+                <p class="mt-1">2025 All rights reserved.</p>
+            </div>
+
+        </div>
+
+    </footer>
+
+    <script>
+        fetch("/footer.html")
+            .then(res => res.text())
+            .then(data => document.getElementById("footer").innerHTML = data);
+    </script>
+
+</body>
+
+</html>

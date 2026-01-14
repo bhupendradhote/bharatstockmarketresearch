@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <header class="w-full fixed top-0 z-40 flex justify-center items-center" x-data="{ mobileMenuOpen: false }">
+
+        <div class="max-w-[1600px] w-full py-4 md:py-6 px-4 md:px-8 lg:px-16 flex items-center justify-between relative 
+                lg:bg-white/30 lg:backdrop-blur lg:rounded-full bg-white">
+
+            <!-- Menu Button -->
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden text-gray-700 focus:outline-none">
+                <i class="fas fa-bars text-2xl" x-show="!mobileMenuOpen"></i>
+                <i class="fas fa-times text-2xl" x-show="mobileMenuOpen" x-cloak></i>
+            </button>
+
+            <!-- Logo -->
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-blue-600 rounded-full"></div>
+                <span class="font-bold text-xl text-gray-900">BSMR</span>
+            </div>
+
+            <!-- Desktop Menu -->
+            <nav class="hidden lg:flex gap-8 text-gray-700 font-medium">
+                <a href="/" class="text-black relative after:absolute after:left-0 after:bottom-[-6px] 
+                 after:w-full after:h-[3px] after:bg-blue-600 after:rounded-full">Home</a>
+
+                <a href="/about.html" class="hover:text-black transition">About</a>
+                <a href="/service.html" class="hover:text-black transition">Service</a>
+                <a href="/blog.html" class="hover:text-black transition">News & Blog</a>
+                <a href="/contact.html" class="hover:text-black transition">Contact</a>
+            </nav>
+
+            <!-- Sign in -->
+            <button class="hidden lg:block bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700">
+                Sign in
+            </button>
+
+            <!-- Mobile Menu Overlay -->
+            <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false"
+                class="fixed inset-0 bg-black/50 z-40 lg:hidden" x-cloak></div>
+
+            <!-- Mobile Menu Panel -->
+            <div x-show="mobileMenuOpen" x-cloak
+                class="mobile-menu fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-50 p-6 lg:hidden" x-transition>
+
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-600 rounded-full"></div>
+                        <span class="font-bold text-xl text-gray-900">BSMR</span>
+                    </div>
+                    <button @click="mobileMenuOpen=false" class="text-gray-600"><i
+                            class="fas fa-times text-xl"></i></button>
+                </div>
+
+                <!-- Links -->
+                <nav class="flex flex-col space-y-6">
+                    <a href="/" class="text-lg font-semibold pb-2 border-b">Home</a>
+                    <a href="/about.html" class="text-lg hover:text-black">About</a>
+                    <a href="/service.html" class="text-lg hover:text-black">Service</a>
+                    <a href="/blog.html" class="text-lg hover:text-black">News & Blog</a>
+                    <a href="/contact.html" class="text-lg hover:text-black">Contact</a>
+                </nav>
+
+                <button class="mt-10 w-full bg-blue-600 text-white py-3 rounded-full font-semibold">Sign in</button>
+            </div>
+
+        </div>
+
+    </header>
+
+    <script>
+        fetch("/header.html")
+            .then(res => res.text())
+            .then(data => document.getElementById("header").innerHTML = data);
+    </script>
+
+</body>
+
+</html>
+
