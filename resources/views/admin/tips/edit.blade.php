@@ -85,13 +85,27 @@
                                     <div class="px-4 py-1.5 text-[11px] font-black cursor-pointer select-box rounded-md {{ old('tip_type', $tip->tip_type) == 'option' ? 'active-box' : '' }}"
                                         @click="tipType = 'option'" data-single="instrument" data-type="option">OPTION</div>
                                 </div>
+ 
+                              <div class="flex items-center space-x-2 bg-white border rounded-lg p-1">
 
-                                <div class="flex items-center space-x-2 bg-white border rounded-lg p-1">
-                                    <div class="px-6 py-1.5 text-[11px] font-black cursor-pointer select-box rounded-md {{ old('call_type', $tip->call_type) == 'Buy' ? 'active-box' : '' }}"
-                                        data-single="trade" data-value="Buy">BUY</div>
-                                    <div class="px-6 py-1.5 text-[11px] font-black cursor-pointer select-box rounded-md {{ old('call_type', $tip->call_type) == 'Sell' ? 'active-box' : '' }}"
-                                        data-single="trade" data-value="Sell">SELL</div>
-                                </div>
+    <div
+        class="px-6 py-1.5 text-[11px] font-black cursor-pointer select-box rounded-md buy-box
+        {{ old('call_type', $tip->call_type) == 'Buy' ? 'active-buy' : '' }}"
+        data-single="trade"
+        data-value="Buy">
+        BUY
+    </div>
+
+    <div
+        class="px-6 py-1.5 text-[11px] font-black cursor-pointer select-box rounded-md sell-box
+        {{ old('call_type', $tip->call_type) == 'Sell' ? 'active-sell' : '' }}"
+        data-single="trade"
+        data-value="Sell">
+        SELL
+    </div>
+
+</div>
+
                             </div>
 
                             <div class="p-6">
@@ -248,6 +262,28 @@
             }
         }
     </style>
+<style>
+    /* BUY / SELL COLORS */
+    .buy-box {
+        color: #166534; /* green-800 */
+    }
+
+    .sell-box {
+        color: #991b1b; /* red-800 */
+    }
+
+    .active-buy {
+        background-color: #16a34a !important; /* green-600 */
+        color: white !important;
+        border-color: #16a34a !important;
+    }
+
+    .active-sell {
+        background-color: #dc2626 !important; /* red-600 */
+        color: white !important;
+        border-color: #dc2626 !important;
+    }
+</style>
 
     <script>
         document.querySelectorAll('.select-box').forEach(box => {
@@ -279,5 +315,41 @@
                 document.getElementById('selected_category').value = box.dataset.id;
             });
         });
+document.querySelectorAll('.select-box').forEach(box => {
+    box.addEventListener('click', () => {
+        const group = box.dataset.single;
+
+        if (group === 'trade') {
+            document.querySelectorAll('[data-single="trade"]').forEach(b => {
+                b.classList.remove('active-buy', 'active-sell');
+            });
+
+            if (box.dataset.value === 'Buy') {
+                box.classList.add('active-buy');
+            }
+
+            if (box.dataset.value === 'Sell') {
+                box.classList.add('active-sell');
+            }
+
+            document.getElementById('selected_call').value = box.dataset.value;
+            return;
+        }
+
+        if (group) {
+            document.querySelectorAll(`[data-single="${group}"]`)
+                .forEach(b => b.classList.remove('active-box'));
+
+            box.classList.add('active-box');
+
+            if (group === 'cepe')
+                document.getElementById('selected_option_type').value = box.dataset.value;
+
+            if (group === 'instrument')
+                document.getElementById('tip_type').value = box.dataset.type;
+        }
+    });
+});
+
     </script>
 @endsection

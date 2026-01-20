@@ -140,7 +140,7 @@
                                 </ul>
                             </div>
 
-                            <a href="{{ route('admin.service-plans.edit', $plan->id) }}" class="mt-5 w-full block text-center py-2 bg-gray-800 text-white rounded text-xs hover:bg-black transition">
+                            <a href="{{ route('admin.service-plans.edit', $plan->id) }}" class="mt-5 w-full block text-center py-2 bg-blue-700 text-white rounded text-xs hover:bg-blue-800 transition">
                                 Edit Plan Details
                             </a>
                         </div>

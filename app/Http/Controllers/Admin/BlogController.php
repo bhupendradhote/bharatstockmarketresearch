@@ -145,7 +145,7 @@ public function store(Request $request)
         $blog->update(['reading_time' => $readingTime]);
     }
 
-    return redirect()->route('blogs.index')->with('success', 'Blog created successfully!');
+    return redirect()->route('admin.blogs.index')->with('success', 'Blog created successfully!');
 }
 
     // AJAX category store

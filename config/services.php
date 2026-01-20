@@ -44,19 +44,23 @@ return [
     'base_url'    => env('SMS_BASE_URL'),
 ],
 
-'angel' => [
-    'api_key' => env('ANGEL_API_KEY'),
-    'client_code' => env('ANGEL_CLIENT_CODE'),
-    'password' => env('ANGEL_PASSWORD'),
-    'totp_secret' => env('ANGEL_TOTP_SECRET'),
-    'base_url' => env('ANGEL_BASE_URL'),
-    'market_base_url' => env('ANGEL_MARKET_BASE_URL'),
-    'jwt_ttl_seconds' => env('ANGEL_JWT_TTL_SECONDS', 3300),
-    'default_symbol' => env('ANGEL_DEFAULT_SYMBOL', '99926000'),
-    'scrip_master_url' => env('ANGEL_SCRIP_MASTER_URL', 'https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json'),
-    'scrip_master_cache_ttl' => env('ANGEL_SCRIP_MASTER_CACHE_TTL', 3600),
-],
+	'angel' => [
+	    'api_key' => env('ANGEL_API_KEY'),
+	    'client_code' => env('ANGEL_CLIENT_CODE'),
+	    'password' => env('ANGEL_PASSWORD'),
+	    'totp_secret' => env('ANGEL_TOTP_SECRET'),
+	    'base_url' => env('ANGEL_BASE_URL'),
+	    'market_base_url' => env('ANGEL_MARKET_BASE_URL'),
+	    'jwt_ttl_seconds' => env('ANGEL_JWT_TTL_SECONDS', 3300),
+	    'default_symbol' => env('ANGEL_DEFAULT_SYMBOL', '99926000'),
+	    'scrip_master_url' => env('ANGEL_SCRIP_MASTER_URL', 'https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json'),
+	    'scrip_master_cache_ttl' => env('ANGEL_SCRIP_MASTER_CACHE_TTL', 3600),
+	],
 
-
+	'razorpay' => [
+	    'key'    => env('RAZORPAY_KEY'),
+	    'secret' => env('RAZORPAY_SECRET'),
+	],
 
 ];
+	

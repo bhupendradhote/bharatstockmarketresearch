@@ -87,7 +87,7 @@ public function store(Request $request)
         }
 
         // Default redirect for normal users
-        return redirect()->intended('/')
+        return redirect()->intended('/dashboard')
             ->with('success', 'Welcome back! Login successful.');
     }
 

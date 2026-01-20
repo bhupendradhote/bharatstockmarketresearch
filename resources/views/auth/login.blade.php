@@ -65,7 +65,7 @@
                 <div class="flex items-center gap-3 mb-4">
                     <div class="h-12 w-12 bg-white rounded-full shadow-sm flex items-center justify-center text-[#1239B0] font-bold text-xs border border-blue-50">
                         <img 
-                        src="{{ asset('public/assets/images/bharatlogo.webp') }}" 
+                        src="{{ asset('assets/images/bharatlogo.webp') }}" 
                         alt="Bharat Stock Market Research Logo"
                         class="h-12 w-12 object-contain rounded-full"
                     >
@@ -86,7 +86,7 @@
             <div class="flex items-center gap-3 mb-6">
                <div class="h-12 w-12 bg-white rounded-full shadow flex items-center justify-center">
                     <img 
-                        src="{{ asset('public/assets/images/bharatlogo.webp') }}" 
+                        src="{{ asset('assets/images/bharatlogo.webp') }}" 
                         alt="Bharat Stock Market Research Logo"
                         class="h-12 w-12 object-contain rounded-full"
                     >

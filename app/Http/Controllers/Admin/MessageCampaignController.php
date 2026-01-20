@@ -47,7 +47,7 @@ public function store(Request $request)
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('campaigns', 'public');
-            $imageUrl = asset('public/storage/' . $path);
+            $imageUrl = asset('/storage/' . $path);
         }
 
         $campaign = MessageCampaign::create([

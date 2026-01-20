@@ -33,11 +33,11 @@
 
             <div class="flex flex-wrap items-center gap-2">
                 {{-- NEW: Category Creation Button --}}
-                <button @click="showCategoryModal = true"
+               
+  <a href="{{ url('admin/tips-categories') }}"
                     class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-black hover:bg-emerald-700 transition flex items-center gap-2 shadow-lg shadow-emerald-200">
-                    <i class="fa-solid fa-plus"></i> CATEGORY
-                </button>
-
+                    <i class="fa-solid fa-plus"></i> CATEGORIES
+                </a>
                 <button @click="openRandomTip()"
                     class="px-4 py-2 bg-purple-600 text-white rounded-lg text-xs font-black hover:bg-purple-700 transition flex items-center gap-2 shadow-lg shadow-purple-200">
                     <i class="fa-solid fa-dice"></i> RANDOM PREVIEW
@@ -150,7 +150,7 @@
                     </tbody>
                 </table>
                 <div class="mt-8 p-5 border-t-2">
-                    {{ $tips->links() }}
+                    {{ $tips->links('pagination.dots') }}
                 </div>
             </div>
         </div>
@@ -196,7 +196,7 @@
                         </div>
 
                         <button @click="activeTip = tip; showModal = true;"
-                            class="w-full py-3 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] hover:bg-blue-600 transition-all shadow-lg shadow-gray-200">
+                            class="w-full py-3 bg-blue-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] hover:bg-blue-600 transition-all shadow-lg shadow-gray-200">
                             Analyze details
                         </button>
                     </div>

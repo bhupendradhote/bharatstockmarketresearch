@@ -34,16 +34,15 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserDashboardController\UserSettingsController;
 use App\Http\Controllers\UserDashboardController\MarketCallController;
-use App\Http\Controllers\ProxyController;
+use App\Http\Controllers\DigioKycController;
+use App\Http\Controllers\Admin\InvestorCharterPolicyController;
 use App\Http\Controllers\Admin\OfferBannerController;
 use App\Http\Controllers\Admin\MessageCampaignController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\NewsController as FrontendNewsController;
-use App\Http\Controllers\Admin\InvestorCharterPolicyController;
-
-
-
-
+use App\Http\Controllers\InvestorCharterController;
+use App\Http\Controllers\PaymentInvoiceController;
+use App\Http\Controllers\ProxyController;
 
 
 Route::get('/api/proxy/scrips', [ProxyController::class, 'scripMaster'])->name('proxy.scrips');
@@ -62,9 +61,6 @@ Route::middleware('auth')->group(function () {
 
 
 require __DIR__.'/auth.php';
-
-
-
 
 
 
@@ -104,7 +100,14 @@ require __DIR__.'/auth.php';
 
                 
             });
-            
+             Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+
+                Route::get('blog-categories', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'index'])->name('blog-categories.index');
+                Route::post('blog-categories', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'store'])->name('blog-categories.store');
+                Route::put('blog-categories/{category}', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'update'])->name('blog-categories.update');
+                Route::delete('blog-categories/{category}', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'destroy'])->name('blog-categories.destroy');
+            });
+
 
             // =============================
             // ADMIN PACKAGE MANAGEMENT
@@ -127,17 +130,10 @@ require __DIR__.'/auth.php';
                 // header routes
                 Route::resource('header-menus', HeaderMenuController::class);
                 Route::post('header-menus/reorder', [HeaderMenuController::class, 'reorder'])->name('header-menus.reorder');
-
-                Route::patch('/header-menus/{menu}/toggle', [HeaderMenuController::class, 'toggleStatus'])
-                    ->name('header-menus.toggle');
-                Route::patch('/header-menus/{menu}/quick-update', [HeaderMenuController::class, 'quickUpdate'])
-                    ->name('header-menus.quick-update');
-                Route::delete('/header-menus/{menu}', [HeaderMenuController::class, 'destroy'])
-                    ->name('admin.header-menus.destroy');
-                    
-                Route::post('/header-menus/append', [HeaderMenuController::class, 'appendLink'])
-                     ->name('header-menus.applylink'); 
-
+                Route::patch('/header-menus/{menu}/toggle', [HeaderMenuController::class, 'toggleStatus'])->name('header-menus.toggle');
+                Route::patch('/header-menus/{menu}/quick-update', [HeaderMenuController::class, 'quickUpdate'])->name('header-menus.quick-update');
+                Route::delete('/header-menus/{menu}', [HeaderMenuController::class, 'destroy'])->name('admin.header-menus.destroy');
+                Route::post('/header-menus/append', [HeaderMenuController::class, 'appendLink'])->name('header-menus.applylink'); 
             });
 
             // =============================
@@ -150,8 +146,7 @@ require __DIR__.'/auth.php';
                 Route::get('footer/create', [FooterController::class, 'create'])->name('footer.column.create');
 
                 // Footer Branding Section (NEW)
-                Route::post('footer/brand/update', [FooterController::class, 'updateBrand'])
-                    ->name('footer.brand.update');
+                Route::post('footer/brand/update', [FooterController::class, 'updateBrand'])->name('footer.brand.update');
 
                 // Footer Columns
                 Route::post('footer/column', [FooterController::class, 'storeColumn'])->name('footer.column.store');
@@ -188,10 +183,7 @@ require __DIR__.'/auth.php';
                 Route::put('/hero-banners/{id}', [HeroBannerController::class, 'update'])->name('hero-banners.update');
                 Route::delete('/hero-banners/{id}', [HeroBannerController::class, 'destroy'])->name('hero-banners.destroy');
                 Route::post('/hero-banners/reorder', [HeroBannerController::class, 'reorder'])->name('hero-banners.reorder');
-                Route::patch(
-                        '/hero-banners/{id}/toggle-status',
-                        [HeroBannerController::class, 'toggleStatus']
-                    )->name('hero-banners.toggle-status');
+                Route::patch('/hero-banners/{id}/toggle-status',[HeroBannerController::class, 'toggleStatus'])->name('hero-banners.toggle-status');
 
                         
                 // Media inside SAME controller
@@ -341,7 +333,7 @@ require __DIR__.'/auth.php';
     
   
 
-
+        // Chat Routes
 
                 // get messages from session
                 Route::get('/get-messages', [ChatController::class, 'getMessages']);
@@ -353,225 +345,236 @@ require __DIR__.'/auth.php';
 
 
                 Route::middleware(['auth', 'admin'])->group(function () {    
-                        Route::post('/admin/chat/send', [AdminChatController::class, 'sendMessage'])->name('admin.chat.send');
-                        Route::get('/admin/chat/conversation/{userId}',[AdminChatController::class, 'getConversation'])->name('admin.chat.conversation');
-                        Route::get('/admin/chat/inbox-unread', [AdminChatController::class, 'inboxWithUnread']);
-                        Route::post('/admin/chat/mark-read/{userId}', [AdminChatController::class, 'markAsRead']);
-                        Route::get('/admin/chat', function () {
-                            return view('admin.chat.index');})->name('admin.chat');
-                    });
+                    Route::post('/admin/chat/send', [AdminChatController::class, 'sendMessage'])->name('admin.chat.send');
+                    Route::get('/admin/chat/conversation/{userId}',[AdminChatController::class, 'getConversation'])->name('admin.chat.conversation');
+                    Route::get('/admin/chat/inbox-unread', [AdminChatController::class, 'inboxWithUnread']);
+                    Route::post('/admin/chat/mark-read/{userId}', [AdminChatController::class, 'markAsRead']);
+                    Route::get('/admin/chat', function () {
+                        return view('admin.chat.index');})->name('admin.chat');
+                });
 
 
 
 
 
-                
                 Route::middleware(['auth'])->group(function () {
                     Route::post('/user/chat/send', [UserChatController::class, 'sendMessage'])->name('user.chat.send');
                 });
+
 
 
             // User chat page
                 Route::get('/support/chat', function () {
                     return view('user.chat');
                 })->middleware('auth');
-        
+
                 // User send
-                Route::post('/user/chat/send',[UserChatController::class, 'sendMessage'])->middleware('auth');
+                Route::post('/user/chat/send',
+                    [UserChatController::class, 'sendMessage']
+                )->middleware('auth');
+
                 // User history
-                Route::get('/user/chat/history',[UserChatController::class, 'history'])->middleware('auth');
-        
-        
-        
+                Route::get('/user/chat/history',
+                    [UserChatController::class, 'history']
+                )->middleware('auth');
+
+
+
             // Notification Routes....
                 Route::get('/admin/notifications/latest', function () {
-                    return \App\Models\NotificationUser::with('notification')
-                        ->where('user_id', auth()->id())
-                        ->latest()
-                        ->take(5)
-                        ->get();
+                    return \App\Models\NotificationUser::with('notification')->where('user_id', auth()->id())->latest()->take(5)->get();
                 })->middleware('auth');
-            
+
                 Route::post('/admin/notifications/mark-read', function () {
-                    \App\Models\NotificationUser::where('user_id', auth()->id())
-                        ->whereNull('read_at')
-                        ->update(['read_at' => now()]);
+                    \App\Models\NotificationUser::where('user_id', auth()->id())->whereNull('read_at')->update(['read_at' => now()]);
                     return response()->json(['success' => true]);
                 });
-    
 
 
-            // User Dashboard Routes.....
-            Route::get('/dashboard',function(){
-                return view('UserDashboard.userdashboard');
-            });
-            
-            
-            Route::middleware(['auth'])
-                // ->prefix('settings')
-                ->group(function () {
-                    Route::get('/market-calls', [MarketCallController::class, 'index'])
-                        ->name('marketCall.index');
+
+                // User Dashboard Routes.....
+                Route::get('/dashboard',function(){
+                    return view('UserDashboard.userdashboard');
+                })->name('user.dashboard')->middleware('auth');
+
+
+                Route::middleware(['auth'])->group(function () {
+                    Route::get('/market-calls', [MarketCallController::class, 'index'])->name('marketCall.index');
                 });
-            
-            Route::get('/market-calls/detail',function(){
-                return view('UserDashboard.marketCall.marketCall_detail');
-            });
-            
-            // Latest News
-            Route::get('/latestNews',function(){
-                return view('UserDashboard.latestNews.latest_news');
-            });
-            
-            
-            // Announcement Route
-            Route::get('/announcement',function(){
-                return view('UserDashboard.announcement.announcement');
-            });
 
-
-            
-            Route::middleware(['auth'])
-                // ->prefix('settings')
-                ->group(function () {
-                    Route::get('/settings', [UserSettingsController::class, 'profile'])
-                        ->name('user.settings.profile');
+                Route::get('/market-calls/detail',function(){
+                    return view('UserDashboard.marketCall.marketCall_detail');
                 });
-            
-            
-            Route::get('/payment-invoice',function(){
-                return view('UserDashboard.settings.payment&invoice');
-            });
-            
-            Route::get('/settings/kyc',function(){
-                return view('UserDashboard.settings.kyc_upgrade');
-            });
 
-
-
-            Route::prefix('admin')->middleware(['auth'])->group(function () {
-                Route::get('tips', [TipController::class, 'index'])->name('admin.tips.index');
-                Route::get('/tips/create', [TipController::class, 'EquityTips'])->name('admin.tips.create');
-                Route::post('/tips/equity/store', [TipController::class, 'storeEquityTip'])->name('tips.equity.store');
-                Route::get('/future-option', [TipController::class, 'FutureAndOption'])->name('admin.tips.future_Option');
-                Route::post('/tips/derivative/store', [TipController::class, 'storeDerivativeTip'])->name('tips.derivative.store');
-                Route::post('/tips/category/store', [TipController::class, 'storeCategory'])->name('admin.tips.category.store');
-                Route::get('/tips/{tip}/edit', [TipController::class, 'edit'])->name('admin.tips.edit');
-                Route::put('/tips/{tip}/update', [TipController::class, 'update'])->name('admin.tips.update');
-            });
-            
-            
-
-
-
-            // subscription Routes
-            Route::middleware('auth')->group(function () {
-                Route::get('/subscribe/confirm', [SubscriptionController::class, 'confirm'])->name('subscription.confirm');
-                Route::post('/subscribe/pay', [SubscriptionController::class, 'pay'])->name('subscription.pay');
-                Route::get('/subscribe/success', fn () => view('subscription.success'))->name('subscription.success');
-            });
-            
-
-
-            // ==========================================
-            // ADMIN ROUTES (Policy Management)
-            // ==========================================
-            Route::prefix('admin')->name('admin.')->group(function () {
-                Route::get('/policies', [PolicyController::class, 'index'])->name('policies.index');
-                Route::get('/policies/create', [PolicyController::class, 'create'])->name('policies.create');
-                Route::post('/policies/store', [PolicyController::class, 'store'])->name('policies.store');
-                
-                // Edit & Update Routes
-                Route::get('/policies/{id}/edit', [PolicyController::class, 'edit'])->name('policies.edit');
-                Route::put('/policies/{id}/update', [PolicyController::class, 'update'])->name('policies.update');
-            });
-
-
-            // ==========================================
-            // ADMIN ROUTES (INVESTOR CHARTER Management)
-            // ==========================================
-            
-            Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-                    Route::get('/investor-charter-policy',[InvestorCharterPolicyController::class, 'index'])->name('investor-charter-policy.index');
-                    Route::get('/investor-charter-policy/create',[InvestorCharterPolicyController::class, 'create'])->name('investor-charter-policy.create');
-                    Route::post('/investor-charter-policy',[InvestorCharterPolicyController::class, 'store'])->name('investor-charter-policy.store');
-            
+                // Latest News
+                Route::get('/latestNews',function(){
+                    return view('UserDashboard.latestNews.latest_news');
                 });
 
 
-            // ==========================================
-            //  ROUTES (Policy Management)
-            // ==========================================
-            
-                // Separate Routes for each policy
-                Route::get('/privacy-policy', [PolicyDisplayController::class, 'privacy'])->name('policy.privacy');
-                Route::get('/terms-and-conditions', [PolicyDisplayController::class, 'terms'])->name('policy.terms');
-                Route::get('/grievance-redressal-policy', [PolicyDisplayController::class, 'grievance'])->name('policy.grievance');
-                
-                use App\Http\Controllers\InvestorCharterController;
-                
-                Route::get('/investor-charter', [InvestorCharterController::class, 'show'])
-                    ->name('investor.charter');
-                
-                
-                // Legal Pages
-                
-                Route::get('/legal',function(){
-                    return view('legal.index');
-                });
-                
-                
-                
-                Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
-                        Route::resource('marquees', \App\Http\Controllers\Admin\MarqueeController::class);
-                        Route::post('marquees/{marquee}/toggle',[\App\Http\Controllers\Admin\MarqueeController::class, 'toggle'])->name('marquees.toggle');
-                });
-                
-             // ==========================================
-            //  Offer BANNERS ROUTES 
-            // ==========================================
-                
-
-                Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-                    Route::resource('offer-banners', OfferBannerController::class);
-                    Route::patch('offer-banners/{offerBanner}/toggle-status', [OfferBannerController::class, 'toggleStatus'])
-                        ->name('offer-banners.toggle-status');
+                // Announcement Route
+                Route::get('/announcement',function(){
+                    return view('UserDashboard.announcement.announcement');
                 });
 
-                
-                
-            // ==========================================
-            //  MESSAGE CAMPAIGN ROUTES 
-            // ==========================================            
-                
-                Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-                        Route::resource('message-campaigns',MessageCampaignController::class)->except(['show', 'edit', 'update']);
-                        Route::patch('message-campaigns/{campaign}/toggle',[MessageCampaignController::class, 'toggle'])->name('message-campaigns.toggle');
+
+                //UserDashboard  Settings Route
+                    Route::middleware(['auth'])->group(function () {
+                        Route::get('/settings', [UserSettingsController::class, 'profile'])->name('user.settings.profile');
+                        Route::get('/profile/edit', [UserSettingsController::class, 'edit'])->name('user.settings.edit');                        
+                        Route::get('/payment-invoice-list', [PaymentInvoiceController::class, 'index'])->name('payment.invoice.list');
+                        Route::get('/payment-invoice', [PaymentInvoiceController::class, 'show'])->name('payment.invoice.list');
+                        Route::get('/invoice/{invoice}/download', [PaymentInvoiceController::class, 'download'])->name('invoice.download');
                     });
-                
-            // ==========================================
-            //  NEWS ADMIN ROUTES 
-            // ==========================================            
-                
-                
-                Route::prefix('admin')->name('admin.')->group(function () {
+
+
+
+                    Route::prefix('settings')->group(function () {
+                        Route::post('/profile/update', [UserSettingsController::class, 'updateGeneralProfile'])->name('settings.profile.update');
+                        Route::post('/send-otp', [UserSettingsController::class, 'sendOtp'])->name('profile.sendOtp');
+                        Route::post('/verify-otp', [UserSettingsController::class, 'verifyAndUpdate'])->name('profile.verifyOtp');
+                    });
+
+
+
                     
-                    // News Resource
-                    Route::resource('news', NewsController::class);
-                    
-                    // Category Routes within same NewsController
-                    Route::get('news-categories', [NewsController::class, 'categoryIndex'])->name('news.categories');
-                    Route::post('news-categories', [NewsController::class, 'categoryStore'])->name('news.categories.store');
-                    Route::put('news-categories/{id}', [NewsController::class, 'categoryUpdate'])->name('news.categories.update');
-                    Route::delete('news-categories/{id}', [NewsController::class, 'categoryDestroy'])->name('news.categories.destroy');
-                });
+
+
                 
-            // ==========================================
-            // Frontend News Routes
-            // ==========================================          
-               
-                Route::prefix('news')->name('news.')->group(function () {
-                    Route::get('/', [FrontendNewsController::class, 'index'])->name('index');           
-                    Route::get('/all', [FrontendNewsController::class, 'archive'])->name('archive');    
-                    Route::get('/{slug}', [FrontendNewsController::class, 'show'])->name('show');       
-                });
+
+
+                    Route::get('/settings/kyc', [DigioKycController::class, 'index'])->name('kyc.index');
+                    Route::post('/digio/start-kyc', [DigioKycController::class, 'testDirectRedirect'])->name('digio.test.redirect');
+                    Route::get('/digio/callback', [DigioKycController::class, 'callback'])->name('digio.callback');
+                    Route::post('/kyc/check-direct', [DigioKycController::class, 'checkKycStatusDirect'])->name('digio.check.kyc.status');
+
+                    Route::prefix('admin')->middleware(['auth'])->group(function () {
+                        Route::get('tips', [TipController::class, 'index'])->name('admin.tips.index');                   
+                        Route::get('/tips/create', [TipController::class, 'EquityTips'])->name('admin.tips.create');
+                        Route::post('/tips/equity/store', [TipController::class, 'storeEquityTip'])->name('tips.equity.store');
+                        Route::get('/future-option', [TipController::class, 'FutureAndOption'])->name('admin.tips.future_Option');
+                        Route::post('/tips/derivative/store', [TipController::class, 'storeDerivativeTip'])->name('tips.derivative.store');
+                        Route::post('/tips/category/store', [TipController::class, 'storeCategory'])->name('admin.tips.category.store');
+                        Route::get('/tips/{tip}/edit', [TipController::class, 'edit'])->name('admin.tips.edit');
+                        Route::put('/tips/{tip}/update', [TipController::class, 'update'])->name('admin.tips.update');
+                    });
+
+                     // Tip Categories Management
+                    Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+                        Route::get('tips-categories', [\App\Http\Controllers\Admin\TipCategoryController::class, 'index'])->name('tips-categories.index');
+                        Route::post('tips-categories', [\App\Http\Controllers\Admin\TipCategoryController::class, 'store'])->name('tips-categories.store');
+                        Route::put('tips-categories/{category}', [\App\Http\Controllers\Admin\TipCategoryController::class, 'update'])->name('tips-categories.update');
+                        Route::delete('tips-categories/{category}', [\App\Http\Controllers\Admin\TipCategoryController::class, 'destroy'])->name('tips-categories.destroy');
+                    });
+
+                    // subscription Routes
+                    Route::middleware('auth')->group(function () {
+                        Route::get('/subscribe/confirm', [SubscriptionController::class, 'confirm'])->name('subscription.confirm');
+                        Route::post('/subscribe/pay', [SubscriptionController::class, 'pay'])->name('subscription.pay');
+                        Route::get('/subscribe/success', fn () => view('subscription.success'))->name('subscription.success');
+                    });
+
+
+
+                    // ==========================================
+                    // ADMIN ROUTES (Policy Management)
+                    // ==========================================
+                    Route::prefix('admin')->name('admin.')->group(function () {
+                        Route::get('/policies', [PolicyController::class, 'index'])->name('policies.index');
+                        Route::get('/policies/create', [PolicyController::class, 'create'])->name('policies.create');
+                        Route::post('/policies/store', [PolicyController::class, 'store'])->name('policies.store');
+                        
+                        // Edit & Update Routes
+                        Route::get('/policies/{id}/edit', [PolicyController::class, 'edit'])->name('policies.edit');
+                        Route::put('/policies/{id}/update', [PolicyController::class, 'update'])->name('policies.update');
+                    });
+
+
+                    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+                        Route::get('/investor-charter-policy',[InvestorCharterPolicyController::class, 'index'])->name('investor-charter-policy.index');
+                        Route::get('/investor-charter-policy/create',[InvestorCharterPolicyController::class, 'create'])->name('investor-charter-policy.create');
+                        Route::post('/investor-charter-policy',[InvestorCharterPolicyController::class, 'store'])->name('investor-charter-policy.store');
+
+                    });
+
+
+
+                    // Separate Routes for each policy
+                    Route::get('/privacy-policy', [PolicyDisplayController::class, 'privacy'])->name('policy.privacy');
+                    Route::get('/terms-and-conditions', [PolicyDisplayController::class, 'terms'])->name('policy.terms');
+                    Route::get('/grievance-redressal-policy', [PolicyDisplayController::class, 'grievance'])->name('policy.grievance');
+
+
+                    Route::get('/investor-charter', [InvestorCharterController::class, 'show'])
+                        ->name('investor.charter');
+
+
+
+
+                        Route::get('/banner-test', function () {
+                            $banner = App\Models\HeroBanner::first();
+                            return [
+                                'hasMedia' => $banner->hasMedia('background'),
+                                'url' => $banner->getFirstMediaUrl('background'),
+                                'collections' => $banner->media->pluck('collection_name'),
+                            ];
+                        });
+
+
+
+                        // Legal Pages
+
+                        Route::get('/legal',function(){
+                            return view('legal.index');
+                        });
+
+
+
+
+                        Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
+                                Route::resource('marquees', \App\Http\Controllers\Admin\MarqueeController::class);
+                                Route::post('marquees/{marquee}/toggle',[\App\Http\Controllers\Admin\MarqueeController::class, 'toggle'])->name('marquees.toggle');
+                        });
+
+
+
+                        Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+                            Route::resource('offer-banners', OfferBannerController::class);
+                            Route::patch('offer-banners/{offerBanner}/toggle-status', [OfferBannerController::class, 'toggleStatus'])
+                                ->name('offer-banners.toggle-status');
+                        });
+
+
+                        Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+                                Route::resource('message-campaigns',MessageCampaignController::class)->except(['show', 'edit', 'update']);
+                                Route::patch('message-campaigns/{campaign}/toggle',[MessageCampaignController::class, 'toggle'])->name('message-campaigns.toggle');
+                        });
+
+
+                        Route::prefix('admin')->name('admin.')->group(function () {
+                            // News Resource
+                            Route::resource('news', NewsController::class);
+                            
+                            // Category Routes within same NewsController
+                            Route::get('news-categories', [NewsController::class, 'categoryIndex'])->name('news.categories');
+                            Route::post('news-categories', [NewsController::class, 'categoryStore'])->name('news.categories.store');
+                            Route::put('news-categories/{id}', [NewsController::class, 'categoryUpdate'])->name('news.categories.update');
+                            Route::delete('news-categories/{id}', [NewsController::class, 'categoryDestroy'])->name('news.categories.destroy');
+                        });
+
+
+
+                        // Frontend News Routes
+                        Route::prefix('news')->name('news.')->group(function () {
+                            Route::get('/', [FrontendNewsController::class, 'index'])->name('index');           // News Hub
+                            Route::get('/all', [FrontendNewsController::class, 'archive'])->name('archive');    // Archive (Latest/Oldest)
+                            Route::get('/{slug}', [FrontendNewsController::class, 'show'])->name('show');       // Single News Page
+                        });
+
+
+
+                    Route::post('/subscription/razorpay/initiate',[SubscriptionController::class, 'initiateRazorpay'])->name('subscription.razorpay.initiate');
+                    Route::post('/subscription/razorpay/verify',[SubscriptionController::class, 'verifyRazorpay'])->name('subscription.razorpay.verify');                             // 4️⃣ Success page
+             
+
+              

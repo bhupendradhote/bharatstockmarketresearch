@@ -92,11 +92,14 @@
                             </div>
                             {{-- Buy/Sell Toggle --}}
                             <div class="flex items-center space-x-2 bg-white border rounded-lg p-1">
-                                <div class="px-6 py-1.5 text-[11px] font-black cursor-pointer select-box {{ old('call_type', 'Buy') == 'Buy' ? 'active-box' : '' }} rounded-md"
-                                    data-single="trade" data-value="Buy">BUY</div>
-                                <div class="px-6 py-1.5 text-[11px] font-black cursor-pointer select-box {{ old('call_type') == 'Sell' ? 'active-box' : '' }} rounded-md"
-                                    data-single="trade" data-value="Sell">SELL</div>
-                            </div>
+                                    {{-- BUY Button --}}
+                                    <div class="px-6 py-1.5 text-[11px] font-black cursor-pointer buy-select-box select-box {{ old('call_type', 'Buy') == 'Buy' ? 'buy-active' : '' }} rounded-md"
+                                        data-single="trade" data-value="Buy">BUY</div>
+
+                                    {{-- SELL Button --}}
+                                    <div class="px-6 py-1.5 text-[11px] font-black cursor-pointer sell-select-box select-box {{ old('call_type') == 'Sell' ? 'sell-active' : '' }} rounded-md"
+                                        data-single="trade" data-value="Sell">SELL</div>
+                                </div>
                         </div>
 
                         <div class="p-6">
@@ -424,6 +427,8 @@
         }));
     });
 
+        
+
     // Vanilla JS for UI Interaction & Calculations
     document.querySelectorAll('.select-box').forEach(box => {
         box.addEventListener('click', () => {
@@ -453,6 +458,46 @@
             }
         });
     });
+document.querySelectorAll('.select-box').forEach(box => {
+            box.addEventListener('click', () => {
+                const group = box.dataset.single;
+                const isCategory = box.classList.contains('category-item');
+
+                if (isCategory) {
+                    document.querySelectorAll('.category-item').forEach(b => b.classList.remove(
+                        'active-box'));
+                    box.classList.add('active-box');
+                    document.getElementById('selected_category').value = box.dataset.id;
+                    return;
+                }
+
+                if (group) {
+                    // Sabhi buttons se purani classes hatayein
+                    document.querySelectorAll(`[data-single="${group}"]`).forEach(b => {
+                        b.classList.remove('active-box', 'buy-active', 'sell-active');
+                    });
+
+                    // Agar "trade" group hai (Buy/Sell)
+                    if (group === 'trade') {
+                        const val = box.dataset.value;
+                        document.getElementById('selected_call').value = val;
+
+                        // Condition ke hisaab se color lagayein
+                        if (val === 'Buy') {
+                            box.classList.add('buy-active');
+                        } else {
+                            box.classList.add('sell-active');
+                        }
+                    }
+                    // Baki exchange buttons ke liye purana blue style
+                    else {
+                        box.classList.add('active-box');
+                        if (group === 'exchange') document.getElementById('selected_exchange').value = box
+                            .dataset.value;
+                    }
+                }
+            });
+        });
 
     // Dynamic Calculation Logic
     const entry = document.getElementById('entry'),
@@ -498,4 +543,59 @@
     .overflow-y-auto::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .overflow-y-auto::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
+<style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .active-box {
+            background-color: #2a5298 !important;
+            color: white !important;
+            border-color: #2a5298 !important;
+        }
+
+
+        .select-box {
+            transition: all 0.15s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* Pehle se maujood active-box ko waisa hi rehne dein categories ke liye */
+        .active-box {
+            background-color: #2a5298 !important;
+            color: white !important;
+            border-color: #2a5298 !important;
+        }
+
+        /* BUY aur SELL ke liye naye styles */
+        .buy-active {
+            background-color: #10b981 !important;
+            /* Emerald Green */
+            color: white !important;
+            border-color: #10b981 !important;
+        }
+
+        .sell-active {
+            background-color: #ef4444 !important;
+            /* Red */
+            color: white !important;
+            border-color: #ef4444 !important;
+        }
+    </style>
+
 @endsection

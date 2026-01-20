@@ -17,15 +17,16 @@
 
 <section class="w-full flex justify-center px-4 md:px-8 lg:px-16 mt-24">
     <div
-        class="relative hero-banner max-w-[1600px] w-full rounded-[30px]
-        py-40 px-6 md:px-10 text-center
-        bg-[#F5F7FB] bg-no-repeat bg-cover bg-center"
-        style="
-            @if($desktopBg)
-                background-image: url('{{ $desktopBg }}');
-            @endif
-        "
-    >
+    class="relative hero-banner has-overlay max-w-[1600px] w-full rounded-[30px]
+    py-40 px-6 md:px-10 text-center
+    bg-[#F5F7FB] bg-no-repeat bg-cover bg-center"
+    style="
+        @if($desktopBg)
+            background-image: url('{{ $desktopBg }}');
+        @endif
+    "
+>
+
 
         <!-- Overlay (only when image exists) -->
         @if($desktopBg || $mobileBg)
@@ -269,5 +270,30 @@
             </div>
         </section>
     @endif
+
+
+    <style>
+.hero-banner.has-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65); /* overlay strength */
+    border-radius: 30px;
+    z-index: 1;
+}
+
+/* Keep content above overlay */
+.hero-banner > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Mobile background switch */
+@media (max-width: 768px) {
+    .hero-banner {
+        background-image: url('{{ $mobileBg ?: $desktopBg }}') !important;
+    }
+}
+</style>
 
 @endsection

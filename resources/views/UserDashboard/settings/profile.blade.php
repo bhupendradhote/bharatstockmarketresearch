@@ -1,8 +1,4 @@
-
-
-
-
-@extends('layouts.userdashboard')
+{{-- @extends('layouts.userdashboard')
 
 @section('content')
     <div class="bg-[#f8fafc]" x-data="{
@@ -214,6 +210,254 @@
                         </div>
                     @endforeach
 
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+@endsection --}}
+
+
+@extends('layouts.userdashboard')
+
+@section('content')
+    <div class="bg-[#f8fafc]" x-data="{
+        showUpgradeModal: false,
+        currentPlan: '{{ $currentPlan }}',
+        daysRemaining: '{{ $daysRemaining ? $daysRemaining . ' Days' : '-' }}',
+        validityTill: '{{ $validityTill }}',
+    
+        // 🔐 KYC FLAGS (FROM CONTROLLER)
+        isKycCompleted: {{ $isKycCompleted ? 'true' : 'false' }},
+        kycStatus: '{{ strtoupper(str_replace('_', ' ', $kycStatus)) }}'
+    }">
+
+        <!-- ================= PROFILE CARD ================= -->
+        <div class="bg-white rounded-[24px] border shadow-sm p-4 md:p-8 max-w-9xl mx-auto relative">
+
+            <div class="absolute top-6 right-6">
+                <a href="{{ url('profile/edit') }}"
+                    class="inline-block bg-[#0939a4] text-white text-[9px] font-bold px-4 py-1.5 rounded-lg hover:bg-blue-800 transition-colors">
+                    Edit Profile
+                </a>
+            </div>
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-20 h-20 rounded-full bg-[#0939a4] overflow-hidden">
+                    <img src="{{ auth()->user()->getFirstMediaUrl('profile_image') ?: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' . auth()->user()->id }}"
+                        alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
+                </div>
+                <h1 class="text-2xl font-bold text-[#0939a4]">
+                    {{ auth()->user()->name }}
+                </h1>
+            </div>
+
+            <!-- ================= USER INFO ================= -->
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10 pb-8 border-b">
+                <div>
+                    <p class="text-[10px] text-gray-400 font-semibold">USER ID</p>
+                    <p class="text-xs font-bold">{{ auth()->user()->id }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-semibold">EMAIL</p>
+                    <p class="text-xs font-bold truncate">{{ auth()->user()->email }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-semibold">PHONE</p>
+                    <p class="text-xs font-bold">{{ auth()->user()->phone ?? '-' }}</p>
+                </div>
+
+                @php
+                    // Latest approved KYC record fetch karein
+                    $kyc = \App\Models\KycVerification::where('user_id', auth()->id())
+                        ->where('status', 'approved')
+                        ->latest()
+                        ->first();
+
+                    $aadhaar = 'Not Verified';
+                    $pan = 'Not Verified';
+
+                    if ($kyc && !empty($kyc->raw_response)) {
+                        $raw = $kyc->raw_response;
+
+                        // Raw response se action details extract karein (Digio structure)
+                        $digioDetails = $raw['actions'][0]['details'] ?? null;
+
+                        if ($digioDetails) {
+                            // 1. Aadhaar extract from raw_response
+                            if (isset($digioDetails['aadhaar']['id_number'])) {
+                                $aadhaar = '**** **** ' . substr($digioDetails['aadhaar']['id_number'], -4);
+                            }
+
+                            // 2. PAN extract from raw_response
+                            if (isset($digioDetails['pan']['id_number'])) {
+                                $pan = '******' . substr($digioDetails['pan']['id_number'], -4);
+                            }
+                        }
+                    }
+
+                    // Fallback: Agar raw_response mein PAN nahi mila toh users table check karein
+                    if ($pan == 'Not Verified' && auth()->user()->pan_card) {
+                        $pan = '******' . substr(auth()->user()->pan_card, -4);
+                    }
+                @endphp
+
+                <div>
+                    <p class="text-[10px] text-gray-400 font-semibold">PAN</p>
+                    <p class="text-xs font-bold">{{ $pan }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 font-semibold">AADHAR</p>
+                    <p class="text-xs font-bold">{{ $aadhaar }}</p>
+                </div>
+            </div>
+
+            <!-- ================= PLAN + KYC ================= -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <div>
+                    <h3 class="text-sm font-bold mb-2">Plan Details</h3>
+                    <p class="text-xs">Validity: <b x-text="daysRemaining"></b></p>
+                    <p class="text-xs">Valid Till: <b x-text="validityTill"></b></p>
+
+                    <p class="text-xs mt-2">
+                        KYC:
+                        <span class="font-bold" :class="isKycCompleted ? 'text-green-600' : 'text-red-600'"
+                            x-text="kycStatus">
+                        </span>
+                    </p>
+                </div>
+
+                <!-- CURRENT PLAN -->
+                <div class="flex flex-col items-center justify-center border-x">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">Current Plan</p>
+                    <h2 class="text-xl font-black" x-text="currentPlan"></h2>
+
+                    <!-- 🔐 UPGRADE BUTTON -->
+                    <button @click="isKycCompleted ? showUpgradeModal = true : null" :disabled="!isKycCompleted"
+                        class="mt-3 px-4 py-2 rounded-lg text-[9px] font-bold text-white"
+                        :class="isKycCompleted
+                            ?
+                            'bg-[#0939a4] hover:bg-blue-800' :
+                            'bg-gray-300 cursor-not-allowed'">
+                        Upgrade Plan
+                    </button>
+
+                    <p x-show="!isKycCompleted" class="text-[9px] text-red-500 mt-2 font-bold">
+                        Complete KYC to upgrade
+                    </p>
+                </div>
+
+                <!-- KYC CTA -->
+                <div class="flex items-center justify-center">
+                    <a href="{{ url('/settings/kyc') }}" x-show="!isKycCompleted"
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg text-[9px] font-bold">
+                        Complete KYC
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <!-- PAYMENTS -->
+                <a @if ($isKycCompleted) href="{{ url('/payment-invoice') }}" 
+    @else 
+        href="javascript:void(0)" 
+        onclick="alert('Please complete your KYC first to access Payments & Invoices.')" @endif
+                    class="flex items-center gap-3 p-4 bg-white rounded-xl border transition group"
+                    :class="isKycCompleted ? 'hover:border-blue-600' : 'opacity-60 cursor-not-allowed bg-gray-50'">
+                    <div class="w-10 h-10 flex items-center justify-center rounded-lg"
+                        :class="isKycCompleted ? 'bg-blue-50' : 'bg-gray-200'">
+                        💳
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold">Payments & Invoices</p>
+                        <p class="text-xs text-gray-500">
+                            <template x-if="isKycCompleted">
+                                <span>All transactions & bills</span>
+                            </template>
+                            <template x-if="!isKycCompleted">
+                                <span class="text-red-500 font-semibold text-[10px]">KYC REQUIRED</span>
+                            </template>
+                        </p>
+                    </div>
+                </a>
+
+                <!-- KYC -->
+                <a href=""
+                    class="flex items-center gap-3 p-4 bg-white rounded-xl border hover:border-blue-600 transition">
+                    <div class="w-10 h-10 flex items-center justify-center bg-yellow-50 rounded-lg">
+                        📄
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold">KYC & Agreement</p>
+                        <p class="text-xs text-gray-500">Documents & verification</p>
+                    </div>
+                </a>
+
+                <!-- SUPPORT -->
+                <a href=""
+                    class="flex items-center gap-3 p-4 bg-white rounded-xl border hover:border-blue-600 transition">
+                    <div class="w-10 h-10 flex items-center justify-center bg-green-50 rounded-lg">
+                        🛟
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold">Support</p>
+                        <p class="text-xs text-gray-500">Need help?</p>
+                    </div>
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- ================= UPGRADE MODAL ================= -->
+        <div x-show="showUpgradeModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+
+            <div class="bg-white rounded-[24px] w-full max-w-5xl p-6 max-h-[85vh] overflow-y-auto relative"
+                @click.away="showUpgradeModal = false">
+
+                <button @click="showUpgradeModal = false" class="absolute top-6 right-6 text-gray-400">
+                    ✕
+                </button>
+
+                <h2 class="text-xl font-bold mb-6">Choose a Plan</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    @foreach ($plans as $plan)
+                        @php $durations = $plan->durations->values(); @endphp
+
+                        <div class="border rounded-[20px] p-4 shadow-sm flex flex-col h-full" x-data="{ activeIndex: 0 }">
+
+                            <h3 class="text-sm font-bold mb-3">{{ $plan->name }}</h3>
+
+                            <div class="mb-4">
+                                <span class="text-lg font-black">
+                                    ₹{{ $durations[0]->price }}
+                                </span>
+                                <p class="text-[9px] text-gray-400">Incl. GST</p>
+                            </div>
+
+                            <!-- 🔐 PURCHASE -->
+                            <a @if ($isKycCompleted) href="{{ route('subscription.confirm') }}?plan={{ $plan->id }}&duration=0"
+                            @else
+                                href="javascript:void(0)" @endif
+                                class="w-full text-center bg-[blue] py-2 rounded-lg text-xs font-bold text-white"
+                                @class([
+                                    'bg-[#0939a4] hover:bg-blue-800' => $isKycCompleted,
+                                    'bg-gray-300 cursor-not-allowed' => !$isKycCompleted,
+                                ])>
+                                {{ $isKycCompleted ? 'Purchase' : 'KYC Required' }}
+                            </a>
+                        </div>
+                    @endforeach
 
                 </div>
             </div>

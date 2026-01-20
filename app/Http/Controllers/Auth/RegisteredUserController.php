@@ -26,7 +26,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
-            'dob'      => 'required|date',
+            'dob'      => 'nullable|date',
             'password' => 'required|min:8|confirmed', // 'confirmed' automatically 'password_confirmation' check karta hai
         ]);
 
@@ -87,8 +87,7 @@ class RegisteredUserController extends Controller
             $user = User::create([
                 'name'     => $userData['name'],
                 'email'    => $userData['email'],
-                'phone'    => $phone, // Correct phone number
-                'dob'      => $userData['dob'],
+                'phone'    => $phone, // Correct phone number                
                 'password' => Hash::make($userData['password']), 
             ]);
 
@@ -103,7 +102,7 @@ class RegisteredUserController extends Controller
             // Session::forget(['reg_otp', 'reg_data', 'reg_phone']);
             Session::forget(['reg_data', 'reg_otp', 'reg_phone']);
 
-            return redirect('/')->with('success', 'Registration Successful!');
+            return redirect('/dashboard')->with('success', 'Registration Successful!');
         }
 
         return back()->withErrors(['otp' => 'Invalid OTP, please try again.']);

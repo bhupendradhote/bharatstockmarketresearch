@@ -41,7 +41,7 @@
 
                         @if ($popup->image)
                             <div class="relative h-[250px] shrink-0 overflow-hidden">
-                                <img src="{{ asset('public/storage/' . $popup->image) }}"
+                                <img src="{{ asset('/storage/' . $popup->image) }}"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
                                 <div
                                     class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent p-8 flex flex-col justify-end">

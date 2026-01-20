@@ -47,7 +47,7 @@
 
 <section class="w-full px-4 md:px-8 lg:px-16 flex justify-center mt-10">
     <div
-        class="relative hero-banner max-w-[1500px] w-full xl:h-[600px] rounded-[30px]
+        class="relative hero-banner has-overlay max-w-[1500px] w-full xl:h-[600px] rounded-[30px]
         p-10 md:px-20 md:py-24 flex flex-col justify-center items-center
         bg-[#F5F7FB] bg-no-repeat bg-cover bg-center"
         style="
@@ -911,4 +911,30 @@
 
         <!--</div>-->
     </div>
+
+    
+    <style>
+.hero-banner.has-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65); /* overlay strength */
+    border-radius: 30px;
+    z-index: 1;
+}
+
+/* Keep content above overlay */
+.hero-banner > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Mobile background switch */
+@media (max-width: 768px) {
+    .hero-banner {
+        background-image: url('{{ $mobileBg ?: $desktopBg }}') !important;
+    }
+}
+</style>
+
 @endsection

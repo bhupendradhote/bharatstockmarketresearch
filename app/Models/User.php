@@ -112,16 +112,25 @@ class User extends Authenticatable implements HasMedia
                 }
 
                 public function subscriptions()
-{
-    return $this->hasMany(UserSubscription::class);
-}
+                {
+                    return $this->hasMany(UserSubscription::class);
+                }
 
-public function activeSubscription()
-{
-    return $this->hasOne(UserSubscription::class)
-        ->where('status', 'active')
-        ->whereDate('end_date', '>=', now());
-}
+                public function activeSubscription()
+                {
+                    return $this->hasOne(UserSubscription::class)
+                        ->where('status', 'active')
+                        ->whereDate('end_date', '>=', now());
+                }
+
+                 /**
+     * User has many invoices
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
 
 
 

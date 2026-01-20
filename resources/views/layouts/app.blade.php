@@ -58,7 +58,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ asset('public/assets/js/admin_sidebar.js') }}"></script>
+    <script src="{{ asset('assets/js/admin_sidebar.js') }}"></script>
     <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 
 

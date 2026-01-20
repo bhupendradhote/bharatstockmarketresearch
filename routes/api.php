@@ -20,7 +20,24 @@ use App\Http\Controllers\Api\InquiryApiController;
 use App\Http\Controllers\Api\PageSectionApiController;
 use App\Http\Controllers\Api\ContactDetailApiController;
 use App\Http\Controllers\AngelData\AngelController;
+use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\LogoutController;
+use App\Http\Controllers\Api\Auth\RegisterController;
 
+//-----------------------------------------
+                    // Authentication Api's 
+                    //-----------------------------------------
+                    Route::prefix('auth')->group(function () {
+
+                        Route::post('login', [LoginController::class, 'login']);
+                        Route::middleware('auth:sanctum')->post('logout', [LogoutController::class, 'logout']);
+                    });
+                    Route::prefix('auth/register')->group(function () {
+
+                        Route::post('details', [RegisterController::class, 'storeDetails']);
+                        Route::post('phone', [RegisterController::class, 'sendOtp']);
+                        Route::post('verify-otp', [RegisterController::class, 'verifyOtp']);
+                    });
 
 
 

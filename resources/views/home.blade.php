@@ -201,7 +201,7 @@
           <div class="flex flex-col items-center justify-center h-full p-10 text-center">
             <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
             <p class="text-gray-600 mb-4">PDF preview not supported in this browser.</p>
-            <a href="{{ asset('public/pdf/SEBI_Certificate.pdf') }}" class="bg-gray-800 text-white px-6 py-2 rounded-lg font-bold">Open Registration PDF</a>
+            <a href="{{ asset('/pdf/SEBI_Certificate.pdf') }}" target="blank" class="bg-gray-800 text-white px-6 py-2 rounded-lg font-bold">Open Registration PDF</a>
           </div>
         </object>
       </div>

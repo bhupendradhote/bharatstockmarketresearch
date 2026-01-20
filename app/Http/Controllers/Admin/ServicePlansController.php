@@ -58,51 +58,7 @@ class ServicePlansController extends Controller
     // ========================================
     // STORE LOGIC
     // ========================================
-    // public function store(Request $request)
-    // {
-    //     DB::beginTransaction();
-
-    //     try {
-    //         // 1. Save main plan
-    //         $plan = ServicePlan::create([
-    //             'name' => $request->name,
-    //             'tagline' => $request->tagline,
-    //             'featured' => $request->featured ? 1 : 0,
-    //             'status' => $request->status ? 1 : 0,
-    //             'sort_order' => $request->sort_order ?? 1,
-    //             'button_text' => $request->button_text ?? 'Subscribe Now',
-    //         ]);
-
-    //         // 2. Save each duration
-    //         if ($request->plans) {
-    //             foreach ($request->plans as $key => $durationData) {
-
-    //                 $duration = ServicePlanDuration::create([
-    //                     'service_plan_id' => $plan->id,
-    //                     'duration' => $durationData['duration'],
-    //                     'price' => $durationData['price'],
-    //                 ]);
-
-    //                 // 3. Save features per duration
-    //                 if (isset($durationData['features'])) {
-    //                     foreach ($durationData['features'] as $feat) {
-    //                         ServicePlanFeature::create([
-    //                             'service_plan_duration_id' => $duration->id,
-    //                             'svg_icon' => $feat['svg'] ?? null,
-    //                             'text' => $feat['text'] ?? null,
-    //                         ]);
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         DB::commit();
-    //         return redirect()->route('admin.service.plans_index')->with('success', 'Plan Created Successfully!');
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return back()->with('error', 'Error: ' . $e->getMessage());
-    //     }
-    // }
+ 
 
     public function store(Request $request)
 {
@@ -165,7 +121,6 @@ class ServicePlansController extends Controller
 
 
 
-    // app/Http/Controllers/Admin/ServicePlanController.php
 public function edit($id)
 {
     $servicePlan = ServicePlan::with('durations.features')->findOrFail($id);
@@ -190,93 +145,175 @@ public function edit($id)
 
 
 
+// public function update(Request $request, ServicePlan $servicePlan)
+// {
+//     // 1️⃣ UPDATE MAIN PLAN
+//     $servicePlan->update([
+//         'name' => $request->name,
+//         'tagline' => $request->tagline,
+//         'featured' => $request->featured ? 1 : 0,
+//         'status' => $request->status ? 1 : 0,
+//         'sort_order' => $request->sort_order,
+//         'button_text' => $request->button_text,
+//     ]);
+
+//     // 2️⃣ GET CURRENT DURATIONS IN DB
+//     $existingDurations = $servicePlan->durations->pluck('duration')->toArray();
+//     $incomingDurations = array_column($request->plans ?? [], 'duration');
+
+//     // 3️⃣ DELETE REMOVED DURATIONS
+//     $toDelete = array_diff($existingDurations, $incomingDurations);
+
+//     if (count($toDelete)) {
+//         ServicePlanDuration::where('service_plan_id', $servicePlan->id)
+//             ->whereIn('duration', $toDelete)
+//             ->delete();
+//     }
+
+//     // 4️⃣ LOOP THROUGH EACH DURATION FROM FORM
+//     foreach ($request->plans ?? [] as $key => $data) {
+        
+//         // check if duration exists already
+//         $duration = ServicePlanDuration::where('service_plan_id', $servicePlan->id)
+//             ->where('duration', $data['duration'])
+//             ->first();
+
+//         // if new → create
+//         if (!$duration) {
+//             $duration = ServicePlanDuration::create([
+//                 'service_plan_id' => $servicePlan->id,
+//                 'duration' => $data['duration'],
+//                 'price' => $data['price'],
+//             ]);
+//         } else {
+//             // if existing → update price
+//             $duration->update([
+//                 'price' => $data['price'],
+//             ]);
+//         }
+
+//         // 5️⃣ HANDLE FEATURES
+//         $existingFeatures = $duration->features->pluck('text')->toArray();
+//         $incomingFeatures = array_column($data['features'] ?? [], 'text');
+
+//         // delete removed features ONLY
+//         $removeFeat = array_diff($existingFeatures, $incomingFeatures);
+
+//         if (count($removeFeat)) {
+//             ServicePlanFeature::where('service_plan_duration_id', $duration->id)
+//                 ->whereIn('text', $removeFeat)
+//                 ->delete();
+//         }
+
+//         // 6️⃣ INSERT / UPDATE features
+//         foreach ($data['features'] ?? [] as $feat) {
+
+//             // check existing feature by text & svg
+//             $existing = ServicePlanFeature::where('service_plan_duration_id', $duration->id)
+//                 ->where('text', $feat['text'])
+//                 ->first();
+
+//             if ($existing) {
+//                 // update feature
+//                 $existing->update([
+//                     'svg_icon' => $feat['svg'] ?? '',
+//                     'text'     => $feat['text'] ?? '',
+//                 ]);
+//             } else {
+//                 // new feature
+//                 $duration->features()->create([
+//                     'svg_icon' => $feat['svg'] ?? '',
+//                     'text'     => $feat['text'] ?? '',
+//                 ]);
+//             }
+//         }
+//     }
+
+//     return redirect()->route('admin.service-plans.index')
+//         ->with('success','Plan updated successfully with durations & features');
+// }
+
 public function update(Request $request, ServicePlan $servicePlan)
 {
     // 1️⃣ UPDATE MAIN PLAN
     $servicePlan->update([
-        'name' => $request->name,
-        'tagline' => $request->tagline,
-        'featured' => $request->featured ? 1 : 0,
-        'status' => $request->status ? 1 : 0,
-        'sort_order' => $request->sort_order,
+        'name'        => $request->name,
+        'tagline'     => $request->tagline,
+        'featured'    => $request->featured ? 1 : 0,
+        'status'      => $request->status ? 1 : 0,
+        'sort_order'  => $request->sort_order,
         'button_text' => $request->button_text,
     ]);
 
-    // 2️⃣ GET CURRENT DURATIONS IN DB
-    $existingDurations = $servicePlan->durations->pluck('duration')->toArray();
-    $incomingDurations = array_column($request->plans ?? [], 'duration');
+    // 🟢 ONLY SELECTED PLANS
+    $selectedPlans = collect($request->plans ?? [])
+        ->filter(fn($p) => isset($p['selected']) && $p['selected']);
 
-    // 3️⃣ DELETE REMOVED DURATIONS
+    // 2️⃣ EXISTING DURATIONS
+    $existingDurations = $servicePlan->durations->pluck('duration')->toArray();
+    $incomingDurations = $selectedPlans->pluck('duration')->toArray();
+
+    // 3️⃣ DELETE UNSELECTED DURATIONS
     $toDelete = array_diff($existingDurations, $incomingDurations);
 
-    if (count($toDelete)) {
+    if (!empty($toDelete)) {
         ServicePlanDuration::where('service_plan_id', $servicePlan->id)
             ->whereIn('duration', $toDelete)
             ->delete();
     }
 
-    // 4️⃣ LOOP THROUGH EACH DURATION FROM FORM
-    foreach ($request->plans ?? [] as $key => $data) {
-        
-        // check if duration exists already
-        $duration = ServicePlanDuration::where('service_plan_id', $servicePlan->id)
-            ->where('duration', $data['duration'])
-            ->first();
+    // 4️⃣ LOOP ONLY SELECTED DURATIONS
+    foreach ($selectedPlans as $data) {
 
-        // if new → create
-        if (!$duration) {
-            $duration = ServicePlanDuration::create([
+        $duration = ServicePlanDuration::firstOrCreate(
+            [
                 'service_plan_id' => $servicePlan->id,
-                'duration' => $data['duration'],
+                'duration'        => $data['duration'],
+            ],
+            [
                 'price' => $data['price'],
-            ]);
-        } else {
-            // if existing → update price
-            $duration->update([
-                'price' => $data['price'],
-            ]);
-        }
+            ]
+        );
 
-        // 5️⃣ HANDLE FEATURES
+        // update price
+        $duration->update([
+            'price' => $data['price'],
+        ]);
+
+        // 5️⃣ FEATURES
         $existingFeatures = $duration->features->pluck('text')->toArray();
-        $incomingFeatures = array_column($data['features'] ?? [], 'text');
+        $incomingFeatures = collect($data['features'] ?? [])
+            ->pluck('text')
+            ->toArray();
 
-        // delete removed features ONLY
+        // delete removed features
         $removeFeat = array_diff($existingFeatures, $incomingFeatures);
 
-        if (count($removeFeat)) {
+        if (!empty($removeFeat)) {
             ServicePlanFeature::where('service_plan_duration_id', $duration->id)
                 ->whereIn('text', $removeFeat)
                 ->delete();
         }
 
-        // 6️⃣ INSERT / UPDATE features
+        // insert / update features
         foreach ($data['features'] ?? [] as $feat) {
-
-            // check existing feature by text & svg
-            $existing = ServicePlanFeature::where('service_plan_duration_id', $duration->id)
-                ->where('text', $feat['text'])
-                ->first();
-
-            if ($existing) {
-                // update feature
-                $existing->update([
-                    'svg_icon' => $feat['svg'] ?? '',
-                    'text'     => $feat['text'] ?? '',
-                ]);
-            } else {
-                // new feature
-                $duration->features()->create([
-                    'svg_icon' => $feat['svg'] ?? '',
-                    'text'     => $feat['text'] ?? '',
-                ]);
-            }
+            ServicePlanFeature::updateOrCreate(
+                [
+                    'service_plan_duration_id' => $duration->id,
+                    'text' => $feat['text'],
+                ],
+                [
+                    'svg_icon' => $feat['svg'] ?? '✔',
+                ]
+            );
         }
     }
 
-    return redirect()->route('admin.service-plans.index')
-        ->with('success','Plan updated successfully with durations & features');
+    return redirect()
+        ->route('admin.service-plans.index')
+        ->with('success', 'Plan updated successfully (unchecked durations removed)');
 }
+
 
 public function destroy($id)
 {

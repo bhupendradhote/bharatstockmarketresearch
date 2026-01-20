@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <!--<link rel="icon" type="image/svg+xml" href="/favicon.svg">-->
-    <link rel="icon" type="image/svg+xml" href="{{ asset('public/storage/favicon/icon.svg') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('/storage/favicon/icon.svg') }}">
 
 
 
@@ -26,10 +26,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
     
-    <link rel="stylesheet" href="{{ asset('public/assets/css/animation.css') }}">
-    <link rel="stylesheet" href="{{ asset('public/assets/css/testimonial.css') }}">
-    <script src="{{asset('public/assets/js/animation.js')}}"></script>
-    <script src="{{asset('public/assets/js/testimonial.js')}}"></script>
+    <link rel="stylesheet" href="{{ asset('assets/css/animation.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/testimonial.css') }}">
+    <script src="{{asset('assets/js/animation.js')}}"></script>
+    <script src="{{asset('assets/js/testimonial.js')}}"></script>
     <script defer src="https://unpkg.com/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <style>
     [x-cloak] { display: none !important; }
@@ -279,7 +279,7 @@
                         <div class="flex flex-col">
                             @if ($activePopup->image)
                                 <div class="relative h-64 overflow-hidden">
-                                    <img src="{{ asset('public/storage/' . $activePopup->image) }}"
+                                    <img src="{{ asset('/storage/' . $activePopup->image) }}"
                                         class="w-full h-full object-cover">
                                     <div
                                         class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/20">
@@ -543,7 +543,7 @@
 
 
     
-    <script src="{{ asset('public/assets/js/animation.js') }}"></script>
+    <script src="{{ asset('assets/js/animation.js') }}"></script>
 
     
 
