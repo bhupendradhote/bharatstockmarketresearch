@@ -167,7 +167,61 @@ public function getIndices(AngelOneService $angel): JsonResponse
         return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
     }
 }
-    
+
+/**
+     * Fetch 52 Week High/Low Data for specific symbols
+     */
+    public function fetch52WeekHighLowData(Request $request, AngelOneService $angel): JsonResponse
+    {
+        $single = $request->query('symbol');
+        $multi = $request->query('symbols');
+        $exchange = $request->query('exchange', 'NSE');
+
+        // Determine symbols list
+        $symbols = [];
+        if (!empty($multi)) {
+            $symbols = is_array($multi) ? $multi : array_filter(array_map('trim', explode(',', (string)$multi)));
+        } elseif (!empty($single)) {
+            $symbols = [trim((string)$single)];
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Please provide a symbol or comma-separated symbols.'
+            ], 400);
+        }
+
+        // 52-week data is available in 'FULL' mode
+        $res = $angel->quote($symbols, 'FULL', $exchange);
+
+        if (empty($res['status']) || empty($res['data'])) {
+            return response()->json([
+                'status' => false,
+                'message' => $res['message'] ?? 'Failed to fetch data from broker',
+            ], 400);
+        }
+
+        // Extract specifically the 52-week data from the response
+        $rawFetched = $res['data']['fetched'] ?? [];
+        $formattedData = [];
+
+        foreach ($rawFetched as $item) {
+            $formattedData[] = [
+                'symbolToken'   => $item['symbolToken'] ?? null,
+                'tradingSymbol' => $item['tradingSymbol'] ?? null,
+                'ltp'           => $item['ltp'] ?? 0,
+                // Angel One API usually returns these as 'high52' and 'low52'
+                '52_week_high'  => $item['high52'] ?? ($item['52WeekHigh'] ?? null),
+                '52_week_low'   => $item['low52'] ?? ($item['52WeekLow'] ?? null),
+            ];
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Success',
+            'data' => $formattedData,
+            'unfetched' => $res['data']['unfetched'] ?? []
+        ]);
+    }
     
     public function wsToken(AngelOneService $angel): JsonResponse
     {

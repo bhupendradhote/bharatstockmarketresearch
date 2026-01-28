@@ -17,7 +17,8 @@ class UserController extends Controller
 
 public function index(Request $request)
 {
-    $users = User::with('roles', 'media')->get()->map(function($user) {
+    $users = User::with('roles', 'media')
+    ->role('customer')->get()->map(function($user) {
         return [
             'id' => $user->id,
             'name' => $user->name,
@@ -47,11 +48,13 @@ public function index(Request $request)
 
 public function listUsers()
 {
-    $users = User::with('roles', 'media')->paginate(10);
-    
-    // Don't transform to arrays - keep as objects
+    $users = User::with(['roles', 'media'])
+        ->role('customer')          // ✅ sirf customer role
+        ->paginate(10);
+
     return view('admin.users.listedUsers', compact('users'));
 }
+
 
 
 public function update(Request $request, User $user)

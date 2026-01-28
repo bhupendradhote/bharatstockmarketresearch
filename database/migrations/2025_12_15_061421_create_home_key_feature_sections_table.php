@@ -4,20 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void
+return new class extends Migration
+{
+    public function up()
     {
-        Schema::create('home_key_feature_sections', function (Blueprint $table) {
-            $table->id();
-            $table->string('heading')->nullable();
-            $table->text('description')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            // Adding bsmr_id after 'id'
+            // We use string to safely handle the concatenation, 
+            // but BigInteger works if strictly numeric.
+            $table->string('bsmr_id')->after('id')->nullable()->unique();
         });
     }
 
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('home_key_feature_sections');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('bsmr_id');
+        });
     }
 };

@@ -23,23 +23,20 @@ use App\Http\Controllers\AngelData\AngelController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\Customer\CustomerDetailsController;
 
 //-----------------------------------------
-                    // Authentication Api's 
-                    //-----------------------------------------
-                    Route::prefix('auth')->group(function () {
-
-                        Route::post('login', [LoginController::class, 'login']);
-                        Route::middleware('auth:sanctum')->post('logout', [LogoutController::class, 'logout']);
-                    });
-                    Route::prefix('auth/register')->group(function () {
-
-                        Route::post('details', [RegisterController::class, 'storeDetails']);
-                        Route::post('phone', [RegisterController::class, 'sendOtp']);
-                        Route::post('verify-otp', [RegisterController::class, 'verifyOtp']);
-                    });
-
-
+    // Authentication Api's 
+//-----------------------------------------
+Route::prefix('auth')->group(function () {
+    Route::post('login', [LoginController::class, 'login']);
+    Route::middleware('auth:sanctum')->post('logout', [LogoutController::class, 'logout']);
+});
+Route::prefix('auth/register')->group(function () {
+    Route::post('details', [RegisterController::class, 'storeDetails']);
+    Route::post('phone', [RegisterController::class, 'sendOtp']);
+    Route::post('verify-otp', [RegisterController::class, 'verifyOtp']);
+});
 
 Route::prefix('angel')->group(function () {
     Route::get('login', [AngelController::class, 'login']);
@@ -48,6 +45,7 @@ Route::prefix('angel')->group(function () {
     Route::get('ws-token', [AngelController::class, 'wsToken']);
     Route::get('gainers-losers', [AngelController::class, 'gainersLosers']);
     Route::get('indices', [AngelController::class, 'getIndices']);
+    Route::get('52-week-data', [AngelController::class, 'fetch52WeekHighLowData']);
 });
 
 // Public
@@ -55,7 +53,6 @@ Route::post('send-otp', [AuthApiController::class, 'sendOtp']);
 Route::post('verify-otp', [AuthApiController::class, 'verifyOtp']);
 
 Route::middleware('auth:sanctum')->group(function () {
-
     Route::post('logout', [AuthApiController::class, 'logout']);
     Route::get('user', [UserApiController::class, 'user']);
      Route::put('user/update', [UserApiController::class, 'update']); // Update current user
@@ -146,7 +143,6 @@ Route::middleware('auth:sanctum')->prefix('footer')->group(function () {
     Route::post('/social/reorder', [FooterApiController::class, 'reorderSocial']);
 });
 
-
 // About Api Routes for these sections 
 Route::middleware('auth:sanctum')->prefix('about')->group(function () {
 
@@ -170,8 +166,6 @@ Route::middleware('auth:sanctum')->prefix('about')->group(function () {
     Route::delete('why-platform/{id}', [WhyPlatformApiController::class, 'deleteSection']); 
 });
 
-
-
 // FAQ API Routes 
 Route::middleware('auth:sanctum')->prefix('faq')->group(function () {
 
@@ -180,7 +174,6 @@ Route::middleware('auth:sanctum')->prefix('faq')->group(function () {
     Route::put('/{id}', [FaqApiController::class, 'update']);    
     Route::delete('/{id}', [FaqApiController::class, 'destroy']); 
 });
-
 
 // Hero Banner API Routes 
 Route::middleware('auth:sanctum')->prefix('hero-banners')->group(function () {
@@ -262,3 +255,5 @@ Route::middleware('auth:sanctum')->prefix('contact-details')->group(function () 
 });
 
 
+
+Route::middleware('auth:sanctum')->get('/customer/profile',[CustomerDetailsController::class, 'index'])->name('customer.profile');

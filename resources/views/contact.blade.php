@@ -40,7 +40,7 @@
 
 
     <!-- CONTACT FORM SECTION -->
-    <section class="w-full mt-10 px-4 md:px-12 py-12 bg-white flex justify-center">
+    {{-- <section class="w-full mt-10 px-4 md:px-12 py-12 bg-white flex justify-center">
         <div class="max-w-[1380px] w-full">
             <div class="grid md:grid-cols-12 gap-12 items-start">
 
@@ -123,14 +123,14 @@
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">First Name</label>
                             <input type="text" name="first_name" required
                                 class="w-full text-sm py-2 px-0 border-0 border-b border-gray-200 outline-none focus:outline-none focus:ring-0 focus:border-[#032687] transition-all placeholder:text-gray-300 bg-transparent"
-                                placeholder="e.g. Namita">
+                                placeholder="e.g. JOHN ">
                         </div>
 
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Last Name</label>
                             <input type="text" name="last_name"
                                 class="w-full text-sm py-2 px-0 border-0 border-b border-gray-200 outline-none focus:outline-none focus:ring-0 focus:border-[#2f58c7] transition-all placeholder:text-gray-300 bg-transparent"
-                                placeholder="e.g. Rathore">
+                                placeholder="e.g. DOE ">
                         </div>
 
                         <div class="space-y-1">
@@ -181,7 +181,179 @@
                 </div>
             </div>
         </div>
+    </section> --}}
+
+
+    <section class="w-full px-4 md:px-8 lg:px-16 mt-12 flex justify-center font-sans">
+        <div
+            class="max-w-[1600px] w-full bg-white rounded-2xl border border-gray-200 p-6 md:p-10 grid md:grid-cols-2 gap-10">
+
+            <!-- LEFT PANEL -->
+            <div class="bg-[#F5F7FB] rounded-xl p-8 flex flex-col justify-between">
+
+                <div>
+                    <h2 class="text-[22px] font-medium text-[#0A0E23] mb-1">
+                        Contact Information
+                    </h2>
+                    <p class="text-gray-500 text-sm font-light mb-8">
+                        Say something to start a live chat!
+                    </p>
+
+                    <!-- Phone -->
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fa-solid fa-phone text-base text-gray-600"></i>
+                        <p class="text-gray-700 text-sm font-light">
+                            {{ $contactDetail->phone ?? '-' }}
+                        </p>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fa-solid fa-envelope text-base text-gray-600"></i>
+                        <p class="text-gray-700 text-sm font-light">
+                            {{ $contactDetail->email ?? '-' }}
+                        </p>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="flex items-start gap-3 mb-8">
+                        <i class="fa-solid fa-location-dot text-base text-gray-600 mt-0.5"></i>
+                        <p class="text-gray-700 text-sm font-light leading-relaxed">
+                            {!! nl2br(e($contactDetail->address ?? '-')) !!}
+                        </p>
+                    </div>
+
+                    <!-- PROPRIETOR / REGULATORY DETAILS -->
+                    <div class="p-5 rounded-2xl border border-blue-100 bg-blue-50/30 space-y-4">
+                        <div class="flex justify-between items-center border-b border-blue-100 pb-3">
+                            <div>
+                                <p class="text-[10px] text-blue-600 uppercase tracking-widest font-normal">
+                                    Proprietor
+                                </p>
+                                <h4 class="text-sm font-medium text-gray-900">
+                                    Namita Rathore
+                                </h4>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                                    BSE Enlistment
+                                </p>
+                                <p class="text-xs font-light text-gray-800">
+                                    6838
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 pt-1">
+                            <div>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                                    SEBI Reg. No.
+                                </p>
+                                <p class="text-xs font-mono font-light text-blue-700">
+                                    INH000023728
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                                    Validity
+                                </p>
+                                <p class="text-xs font-light text-gray-800">
+                                    31 Oct 2025 – 2030
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="text-[9px] text-blue-500 uppercase tracking-widest text-center font-normal pt-2">
+                            Registered Research Analyst
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL — FORM -->
+            <form action="{{ route('inquiry.store') }}" method="POST" class="flex flex-col gap-6 font-sans">
+                @csrf
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs text-gray-500 font-light">First Name</label>
+                        <input type="text" name="first_name" required
+                            class="w-full border-0 border-b border-gray-300 bg-transparent text-sm font-light focus:border-[#0939a4] focus:ring-0 outline-none ps-0 transition">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-500 font-light">Last Name</label>
+                        <input type="text" name="last_name"
+                            class="w-full border-0 border-b border-gray-300 bg-transparent text-sm font-light focus:border-[#0939a4] focus:ring-0 outline-none ps-0 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs text-gray-500 font-light">Email</label>
+                        <input type="email" name="email" required
+                            class="w-full border-0 border-b border-gray-300 bg-transparent text-sm font-light focus:border-[#0939a4] focus:ring-0 outline-none ps-0 transition">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-500 font-light">Phone Number</label>
+                        <input type="text" name="phone"
+                            class="w-full border-0 border-b border-gray-300 bg-transparent text-sm font-light focus:border-[#0939a4] focus:ring-0 outline-none ps-0 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500 font-light">Select Subject</label>
+                    <div class="flex flex-wrap gap-6 mt-3 text-sm text-gray-700 font-light">
+                        @foreach (['General Inquiry', 'Support', 'Billing', 'Partnership'] as $subject)
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="subject" value="{{ $subject }}"
+                                    {{ $loop->first ? 'checked' : '' }}
+                                    class="w-3 h-3 appearance-none border border-gray-400 rounded-full checked:bg-[#0939a4] checked:border-[#0939a4] checked:ring-1 checked:ring-blue-200">
+                                {{ $subject }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500 font-light">Message</label>
+                    <textarea name="message" rows="3"
+                        class="w-full border-0 border-b border-gray-300 bg-transparent text-sm font-light focus:border-[#0939a4] focus:ring-0 outline-none ps-0 resize-none transition"></textarea>
+                </div>
+
+                <!-- SOCIAL ICONS (MOVED TO RIGHT PANEL) -->
+                <div class="flex items-center justify-between pt-4">
+                    <div class="flex gap-4">
+                        <a href="{{ $contactDetail->twitter ?? '#' }}"
+                            class="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-blue-500">
+                            <i class="fa-brands fa-twitter"></i>
+                        </a>
+                        <a href="{{ $contactDetail->instagram ?? '#' }}"
+                            class="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-pink-500">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="{{ $contactDetail->facebook ?? '#' }}"
+                            class="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-blue-700">
+                            <i class="fa-brands fa-facebook"></i>
+                        </a>
+                        <a href="{{ $contactDetail->discord ?? '#' }}"
+                            class="w-9 h-9 rounded-full bg-white border shadow-sm flex items-center justify-center text-purple-600">
+                            <i class="fa-brands fa-discord"></i>
+                        </a>
+                    </div>
+
+                    <button
+                        class="bg-[#0939a4] text-white px-10 py-3 rounded-lg text-sm font-medium shadow hover:bg-blue-700 transition">
+                        Send Message
+                    </button>
+                </div>
+            </form>
+
+        </div>
     </section>
+
+
 
 
     <!-- FAQ SECTION -->

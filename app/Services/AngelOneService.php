@@ -358,6 +358,14 @@ class AngelOneService
         }
     }
 
+
+    public function fetch52WeekHighLow(array $symbols, string $exchange = 'NSE'): array
+    {
+        // The 'FULL' mode in quote API provides fundamental details including 52 week high/low
+        return $this->quote($symbols, 'FULL', $exchange);
+    }
+
+
     public function wsToken(): array
     {
         $jwt = Cache::get($this->cachePrefix . 'jwt');

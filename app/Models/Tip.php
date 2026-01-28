@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -22,16 +23,19 @@ class Tip extends Model
         'strike_price',    
         'option_type',
         'status',
+        'trade_status', // <--- Added this
         'version',
         'admin_note',
         'created_by'
     ];
 
     protected $attributes = [
-    'status'  => 'active',
-    'version' => 1,
+        'status' => 'active',
+        'trade_status' => 'Open', // Default attribute
+        'version' => 1,
     ];
 
+    // Scopes
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -42,7 +46,7 @@ class Tip extends Model
         return $query->where('status', 'archived');
     }
 
-
+    // Relationships
     public function category()
     {
         return $this->belongsTo(TipCategory::class, 'category_id');
@@ -51,10 +55,5 @@ class Tip extends Model
     public function planAccess()
     {
         return $this->hasMany(TipPlanAccess::class);
-    }
-
-    public function updates()
-    {
-        return $this->hasMany(TipUpdate::class);
     }
 }

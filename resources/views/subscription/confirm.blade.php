@@ -15,12 +15,12 @@
             <!-- ================= PLAN CARDS (SCROLLABLE CONTAINER) ================= -->
             <div
                 class="lg:col-span-2
-           max-h-[85vh]   /* 👈 80–90% viewport height */
-           overflow-y-auto
-           pr-2
-           scrollbar-thin
-           scrollbar-thumb-[#0939a4]
-           scrollbar-track-transparent">
+                    max-h-[85vh]   /* 👈 80–90% viewport height */
+                    overflow-y-auto
+                    pr-2
+                    scrollbar-thin
+                    scrollbar-thumb-[#0939a4]
+                    scrollbar-track-transparent">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -66,16 +66,30 @@
                             </div>
 
                             <!-- FEATURES -->
-                            <div>
+                            <div class="mt-6">
                                 <h4 class="text-sm font-bold mb-3 text-gray-700">Features</h4>
 
                                 <ul class="space-y-2 text-sm">
-                                    @foreach ($durations[0]->features as $feature)
-                                        <li class="flex justify-between items-center">
-                                            <span class="text-gray-600">
+                                    @php
+                                        // Jis duration ko user ne select kiya hai ya phir pehli duration ke features
+                                        $currentFeatures =
+                                            $selectedPlan->id === $plan->id
+                                                ? $selectedDuration->features
+                                                : $durations[0]->features;
+                                    @endphp
+
+                                    @foreach ($currentFeatures as $feature)
+                                        <li class="flex justify-between items-start gap-4">
+                                            <span class="text-gray-600 text-left">
                                                 {{ $feature->text }}
                                             </span>
-                                            <span class="text-green-600 font-bold">✔</span>
+
+                                            {{-- Dynamic Icon logic based on svg_icon column --}}
+                                            <span
+                                                class="font-bold flex-shrink-0 
+                    {{ $feature->svg_icon === '✖' ? 'text-red-500' : ($feature->svg_icon === '✔' ? 'text-green-600' : 'text-blue-600') }}">
+                                                {{ $feature->svg_icon ?? '✔' }}
+                                            </span>
                                         </li>
                                     @endforeach
                                 </ul>

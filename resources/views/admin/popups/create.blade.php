@@ -209,7 +209,7 @@
                     <button type="button" onclick="window.history.back()"
                         class="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-800 transition">Discard</button>
                     <button form="popupForm" type="submit"
-                        class="px-8 py-3 bg-slate-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all active:scale-95">
+                        class="px-8 py-3 bg-blue-700 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95">
                         Launch Campaign
                     </button>
                 </div>

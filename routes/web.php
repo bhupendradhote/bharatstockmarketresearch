@@ -27,6 +27,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\NewsBlogsController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Admin\ReviewController as ReviewAdminController;
 use App\Http\Controllers\Admin\AdminChatController;
 use App\Events\ChatMessageSent;
 use App\Http\Controllers\PolicyDisplayController;
@@ -43,7 +44,17 @@ use App\Http\Controllers\NewsController as FrontendNewsController;
 use App\Http\Controllers\InvestorCharterController;
 use App\Http\Controllers\PaymentInvoiceController;
 use App\Http\Controllers\ProxyController;
-
+use App\Http\Controllers\Admin\RiskRewardMasterController;
+use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\CertificateController;
+use App\Http\Controllers\UserCertificateShowController;
+use App\Http\Controllers\NotificationController;
+// Add this inside your admin middleware group
+Route::post('/admin/tips/{id}/update-live-status', [App\Http\Controllers\Admin\TipController::class, 'updateLiveStatus'])->name('admin.tips.update_live');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications/fetch', [NotificationController::class, 'fetchNotifications'])->name('notifications.fetch');
+    Route::post('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+});
 
 Route::get('/api/proxy/scrips', [ProxyController::class, 'scripMaster'])->name('proxy.scrips');
 
@@ -397,7 +408,9 @@ require __DIR__.'/auth.php';
                     return view('UserDashboard.userdashboard');
                 })->name('user.dashboard')->middleware('auth');
 
-
+Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
+    ->name('user.dashboard')
+    ->middleware('auth');
                 Route::middleware(['auth'])->group(function () {
                     Route::get('/market-calls', [MarketCallController::class, 'index'])->name('marketCall.index');
                 });
@@ -575,6 +588,47 @@ require __DIR__.'/auth.php';
 
                     Route::post('/subscription/razorpay/initiate',[SubscriptionController::class, 'initiateRazorpay'])->name('subscription.razorpay.initiate');
                     Route::post('/subscription/razorpay/verify',[SubscriptionController::class, 'verifyRazorpay'])->name('subscription.razorpay.verify');                             // 4️⃣ Success page
-             
+                   
+                      Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function() {
+                        Route::get('/reviews', [ReviewAdminController::class, 'index'])->name('reviews.index');
+                        Route::patch('/reviews/{review}/status', [ReviewAdminController::class, 'updateStatus'])->name('reviews.status');
+                        Route::post('/reviews/{review}/featured', [ReviewAdminController::class, 'toggleFeatured'])->name('reviews.featured');
+                    });
 
-              
+
+            
+
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+
+    Route::get('/risk-reward-master', [RiskRewardMasterController::class, 'index'])
+        ->name('admin.risk-reward.index');
+
+    Route::post('/risk-reward-master', [RiskRewardMasterController::class, 'store'])
+        ->name('admin.risk-reward.store');
+
+    Route::post('/risk-reward-master/{riskRewardMaster}/activate', [RiskRewardMasterController::class, 'activate'])
+        ->name('admin.risk-reward.activate');
+
+});
+
+
+
+                Route::post('/campaign/mark-as-seen', [App\Http\Controllers\CampaignController::class, 'markAsSeen'])->middleware('auth');
+
+		  Route::prefix('admin')->middleware(['auth'])->group(function () {
+                Route::resource('employees', EmployeeController::class);
+            });
+
+
+	Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('certificates', CertificateController::class);
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/my-certificates', [UserCertificateShowController::class, 'index'])->name('user.certificates.index');
+    Route::get('/certificates/download/{certificate}', [UserCertificateShowController::class, 'download'])->name('user.certificates.download');
+});	
+
+
+
+

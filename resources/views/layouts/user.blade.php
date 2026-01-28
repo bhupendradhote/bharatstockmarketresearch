@@ -25,16 +25,21 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
-    
+
     <link rel="stylesheet" href="{{ asset('assets/css/animation.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/testimonial.css') }}">
-    <script src="{{asset('assets/js/animation.js')}}"></script>
-    <script src="{{asset('assets/js/testimonial.js')}}"></script>
+    <script src="{{ asset('assets/js/animation.js') }}"></script>
+    <script src="{{ asset('assets/js/testimonial.js') }}"></script>
     <script defer src="https://unpkg.com/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <style>
-    [x-cloak] { display: none !important; }
-</style>
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        [x-cloak] {
+            display: none !important;
+        }
+        .offer-pop-cont h3{
+            text-align: justify !important;
+        }
+    </style>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     @stack('scripts')
 </head>
 
@@ -110,7 +115,7 @@
 
         <div class="flex-1 flex flex-col">
             {{-- @include('components.user_header') --}}
-             @php
+            @php
                 $header = \App\Http\Controllers\HeaderController::data();
 
                 // ✅ Only menus with valid link & active
@@ -122,7 +127,7 @@
             @endphp
 
 
-          @include('components.user_header', [
+            @include('components.user_header', [
                 'settings' => $header['settings'],
                 'menus' => $menus,
             ])
@@ -133,101 +138,88 @@
                 @yield('content')
             </main>
 
-    
 
-<!-- ================= CHAT FLOATING BUTTON ================= -->
-<div 
-    class="fixed bottom-6 right-6 z-50"
-    x-data="{ open: false }"
-    x-cloak
-    x-init="open = false"
->
 
-    <!-- Floating Actions -->
-    <div 
-        x-show="open"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 translate-y-10 scale-90"
-        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-        x-transition:leave-end="opacity-0 translate-y-10 scale-90"
-        class="flex flex-col gap-4 mb-4 items-center"
-        @click.away="open = false"
-    >
+            <!-- ================= CHAT FLOATING BUTTON ================= -->
+            <div class="fixed bottom-6 right-6 z-50" x-data="{ open: false }" x-cloak x-init="open = false">
 
-        <!-- Review -->
-        <a href="{{ url('/reviews') }}"
-            class="w-12 h-12 rounded-full bg-orange-500 hover:bg-orange-600 
+                <!-- Floating Actions -->
+                <div x-show="open" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-10 scale-90"
+                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-10 scale-90"
+                    class="flex flex-col gap-4 mb-4 items-center" @click.away="open = false">
+
+                    <!-- Review -->
+                    <a href="{{ url('/reviews') }}"
+                        class="w-12 h-12 rounded-full bg-orange-500 hover:bg-orange-600 
                    shadow-lg flex items-center justify-center transition-all 
                    group relative">
-            <i class="fa-solid fa-star text-white text-lg"></i>
-            <span
-                class="absolute right-14 bg-gray-800 text-white text-[10px] 
+                        <i class="fa-solid fa-star text-white text-lg"></i>
+                        <span
+                            class="absolute right-14 bg-gray-800 text-white text-[10px] 
                        px-2 py-1 rounded opacity-0 group-hover:opacity-100 
                        transition-opacity whitespace-nowrap shadow-md">
-                Write Review
-            </span>
-        </a>
+                            Write Review
+                        </span>
+                    </a>
 
-        <!-- Support Chat -->
-        <a href="{{ url('/support/chat') }}"
-            class="w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 
+                    <!-- Support Chat -->
+                    <a href="{{ url('/support/chat') }}"
+                        class="w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 
                    shadow-lg flex items-center justify-center transition-all 
                    group relative">
-            <i class="fa-solid fa-comments text-white text-lg"></i>
-            <span
-                class="absolute right-14 bg-gray-800 text-white text-[10px] 
+                        <i class="fa-solid fa-comments text-white text-lg"></i>
+                        <span
+                            class="absolute right-14 bg-gray-800 text-white text-[10px] 
                        px-2 py-1 rounded opacity-0 group-hover:opacity-100 
                        transition-opacity whitespace-nowrap shadow-md">
-                Support Chat
-            </span>
-        </a>
+                            Support Chat
+                        </span>
+                    </a>
 
-        <!-- WhatsApp -->
-        <a href="https://wa.me/919457296893?text={{ urlencode('Hello, I need some help regarding your services.') }}"
-            target="_blank"
-            class="w-12 h-12 rounded-full bg-[#25D366] hover:bg-[#128C7E] 
+                    <!-- WhatsApp -->
+                    <a href="https://wa.me/919457296893?text={{ urlencode('Hello, I need some help regarding your services.') }}"
+                        target="_blank"
+                        class="w-12 h-12 rounded-full bg-[#25D366] hover:bg-[#128C7E] 
                    shadow-lg flex items-center justify-center transition-all 
                    group relative">
-            <i class="fa-brands fa-whatsapp text-white text-2xl"></i>
-            <span
-                class="absolute right-14 bg-gray-800 text-white text-[10px] 
+                        <i class="fa-brands fa-whatsapp text-white text-2xl"></i>
+                        <span
+                            class="absolute right-14 bg-gray-800 text-white text-[10px] 
                        px-2 py-1 rounded opacity-0 group-hover:opacity-100 
                        transition-opacity whitespace-nowrap shadow-md">
-                WhatsApp Us
-            </span>
-        </a>
-    </div>
+                            WhatsApp Us
+                        </span>
+                    </a>
+                </div>
 
-    <!-- Main Toggle Button -->
-    <button 
-        @click="open = !open"
-        class="w-14 h-14 rounded-full bg-[#0939a4] hover:bg-blue-700 
+                <!-- Main Toggle Button -->
+                <button @click="open = !open"
+                    class="w-14 h-14 rounded-full bg-[#0939a4] hover:bg-blue-700 
                shadow-2xl flex items-center justify-center 
                transition-all duration-300 relative group overflow-hidden"
-        :class="open ? 'rotate-90 bg-red-500' : ''"
-    >
-        <template x-if="!open">
-            <i class="fa-solid fa-headset text-white text-2xl"></i>
-        </template>
+                    :class="open ? 'rotate-90 bg-red-500' : ''">
+                    <template x-if="!open">
+                        <i class="fa-solid fa-headset text-white text-2xl"></i>
+                    </template>
 
-        <template x-if="open">
-            <i class="fa-solid fa-xmark text-white text-2xl"></i>
-        </template>
+                    <template x-if="open">
+                        <i class="fa-solid fa-xmark text-white text-2xl"></i>
+                    </template>
 
-        <!-- Ping Animation -->
-        <span 
-            x-show="!open"
-            class="absolute inline-flex h-full w-full rounded-full 
+                    <!-- Ping Animation -->
+                    <span x-show="!open"
+                        class="absolute inline-flex h-full w-full rounded-full 
                    bg-blue-400 opacity-40 animate-ping">
-        </span>
-    </button>
-</div>
+                    </span>
+                </button>
+            </div>
 
-
-
- @php
+            {{-- POPUP SECTION --}}
+            @php
                 // Fetch the highest priority active popup
                 $activePopup = \App\Models\Popup::where('status', 'active')
                     ->orderBy('priority', 'desc')
@@ -241,44 +233,52 @@
                     storageKey: 'popup_last_shown_{{ $activePopup->id }}',
                 
                     init() {
-                        const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
-                        const lastShownDate = localStorage.getItem(this.storageKey);
+                        const today = new Date().toISOString().slice(0, 10);
+                        const lastShown = localStorage.getItem(this.storageKey);
                 
-                        // Check if it was NOT shown today
-                        if (lastShownDate !== today) {
-                            setTimeout(() => { this.showPopup = true }, 2000);
+                        // Show only if NOT shown today
+                        if (lastShown !== today) {
+                            setTimeout(() => {
+                                this.showPopup = true;
+                            }, 2000);
                         }
                     },
                 
                     dismiss() {
                         this.showPopup = false;
                         const today = new Date().toISOString().slice(0, 10);
-                        // Save today's date so it won't show until tomorrow
                         localStorage.setItem(this.storageKey, today);
                     }
-                }" x-show="showPopup"
-                    class="fixed inset-0 z-[999] flex items-center justify-center px-4" x-cloak>
+                }" x-show="showPopup" x-cloak
+                    class="fixed inset-0 z-[999] flex items-center justify-center px-4">
 
-                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" x-show="showPopup"
-                        x-transition:enter="duration-300" x-transition:leave="duration-200"
+                    <!-- BACKDROP -->
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-show="showPopup" x-transition
                         @if ($activePopup->is_dismissible) @click="dismiss()" @endif>
                     </div>
 
-                    <div class="relative bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden transform transition-all"
+                    <!-- POPUP CARD -->
+                    <div class="relative bg-white w-full
+                   max-w-[92%] sm:max-w-md md:max-w-lg
+                   rounded-3xl shadow-2xl overflow-hidden
+                   transform transition-all"
                         x-show="showPopup" x-transition:enter="ease-out duration-500"
                         x-transition:enter-start="opacity-0 scale-90 translate-y-10"
                         x-transition:enter-end="opacity-100 scale-100 translate-y-0">
 
+                        {{-- Close button --}}
                         @if ($activePopup->is_dismissible)
                             <button @click="dismiss()"
-                                class="absolute top-5 right-5 z-20 w-10 h-10 bg-black/10 hover:bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-lg">
-                                <i class="fa-solid fa-xmark text-lg"></i>
+                                class="absolute top-4 right-4 z-20 w-9 h-9 bg-black/10 hover:bg-black/20 backdrop-blur rounded-full flex items-center justify-center text-white shadow">
+                                <i class="fa-solid fa-xmark"></i>
                             </button>
                         @endif
 
                         <div class="flex flex-col">
+
+                            {{-- IMAGE (only if exists) --}}
                             @if ($activePopup->image)
-                                <div class="relative h-64 overflow-hidden">
+                                <div class="relative h-40 md:h-64 overflow-hidden">
                                     <img src="{{ asset('/storage/' . $activePopup->image) }}"
                                         class="w-full h-full object-cover">
                                     <div
@@ -287,53 +287,339 @@
                                 </div>
                             @endif
 
-                            <div class="p-8 md:p-10 text-center">
+                            {{-- CONTENT --}}
+                            <div class="p-5 md:p-10 text-center">
+
                                 @if ($activePopup->type === 'offer')
                                     <span
-                                        class="inline-block px-4 py-1 bg-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-4">Limited
-                                        Offer</span>
+                                        class="inline-block px-4 py-1 mb-4
+                                   bg-indigo-100 text-indigo-600
+                                   text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                                        Limited Offer
+                                    </span>
                                 @endif
 
-                                <h2 class="text-3xl font-black text-slate-900 leading-tight mb-4 tracking-tight">
+                                <h2 class="text-xl md:text-3xl font-black text-slate-900 mb-4">
                                     {{ $activePopup->title }}
                                 </h2>
 
-                                <div class="prose prose-slate prose-sm mx-auto text-slate-500 font-medium italic">
+                                {{-- RESPONSIVE CONTENT HEIGHT --}}
+                                <div
+                                    class="prose prose-slate prose-sm mx-auto text-slate-500 font-medium italic
+                               max-h-[90px] overflow-y-auto
+                               md:max-h-none md:overflow-visible offer-pop-cont">
                                     {!! $activePopup->content !!}
                                 </div>
 
+                                {{-- BUTTON --}}
                                 @if ($activePopup->button_text)
-                                    <div class="mt-8">
+                                    <div class="mt-6">
                                         <a href="{{ $activePopup->button_url ?? '#' }}" @click="dismiss()"
-                                            class="inline-block w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-600 transition-all active:scale-95">
+                                            class="inline-block w-full py-3 md:py-4
+                                       bg-slate-900 text-white
+                                       rounded-2xl font-black text-xs uppercase tracking-[0.2em]
+                                       hover:bg-indigo-600 transition-all">
                                             {{ $activePopup->button_text }}
                                         </a>
                                     </div>
                                 @endif
 
+                                {{-- Don't show today --}}
                                 @if ($activePopup->is_dismissible)
                                     <button @click="dismiss()"
                                         class="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">
                                         Don't show this today
                                     </button>
                                 @endif
+
                             </div>
                         </div>
                     </div>
                 </div>
             @endif
-            
-            
-                  {{-- Message Campaigns show here  --}}
-            <div id="campaign-toast"
-                class="fixed top-5 right-5 z-50 hidden bg-white shadow border rounded-lg p-4 max-w-sm">
-                <button onclick="closeCampaignToast()" class="absolute top-2 right-2">✕</button>
+            {{-- End POPUP SECTION --}}
 
-                <img id="campaign-image" class="w-full h-32 object-cover rounded mb-2 hidden">
 
-                <h4 id="campaign-title" class="font-semibold text-sm"></h4>
-                <p id="campaign-message" class="text-sm mt-1"></p>
+            {{-- Message Campaigns show here  --}}
+
+            @php
+                use Carbon\Carbon;
+
+                $today = Carbon::today();
+
+                $activeCampaigns = \App\Models\MessageCampaign::where('is_active', 1)
+                    ->whereDate('starts_at', '<=', $today)
+                    ->whereDate('ends_at', '>=', $today)
+                    ->latest()
+                    ->get(['id', 'title', 'message', 'description', 'image']);
+
+                $seenCampaignIds = auth()->check()
+                    ? \App\Models\MessageCampaignLog::where('user_id', auth()->id())
+                        ->pluck('message_campaign_id')
+                        ->toArray()
+                    : [];
+            @endphp
+
+            <script>
+                window.AUTH_USER_ID = {{ auth()->check() ? auth()->id() : 'null' }};
+                window.ALL_CAMPAIGNS = @json($activeCampaigns);
+                window.SEEN_CAMPAIGNS = @json($seenCampaignIds);
+            </script>
+
+
+            <div id="campaign-bell-container" class="fixed top-5 right-5 z-[60] hidden">
+                <button onclick="openCampaignDetails()"
+                    class="relative flex items-center justify-center w-12 h-12 bg-yellow-400 rounded-full shadow-lg hover:bg-yellow-500 transition-all animate-vibrate">
+                    <i class="fa-solid fa-bell text-white text-xl"></i>
+                    <span class="absolute top-0 right-0 flex h-3 w-3">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                </button>
             </div>
+
+
+
+            <div id="campaign-toast"
+                class="fixed z-50 hidden
+                    w-[92%] max-w-[340px]
+                    left-[97%] -translate-x-1/2 top-3
+                    sm:left-auto sm:translate-x-0 sm:top-5 sm:right-5
+                    overflow-hidden rounded-[1.75rem] bg-white shadow-2xl
+                    transition-all duration-500 transform scale-95 border border-white/20">
+
+                <!-- IMAGE WRAPPER -->
+                <div id="campaign-image-wrapper"
+                    class="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-900 hidden">
+
+                    <img id="campaign-image" class="h-full w-full object-cover opacity-90" src=""
+                        alt="">
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent"></div>
+
+                    <button onclick="closeCampaignToast()"
+                        class="absolute top-3 right-3 z-20
+                   flex h-9 w-9 items-center justify-center
+                   rounded-full bg-black/30 text-white backdrop-blur
+                   transition hover:bg-red-500">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- CONTENT -->
+                <div id="campaign-content-wrapper" class="relative bg-white px-5 sm:px-7 pb-6 pt-6 sm:pt-10">
+
+                    <!-- ICON -->
+                    <div id="campaign-icon"
+                        class="relative mx-auto sm:mx-0
+                    flex h-11 w-11 items-center justify-center
+                    rounded-xl bg-yellow-400 shadow-md ring-4 ring-white">
+                        <i class="fa-solid fa-bolt-lightning text-white text-lg"></i>
+                    </div>
+
+                    <div class="mt-4 space-y-2 text-center sm:text-left">
+                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-blue-600">
+                            New Announcement
+                        </span>
+
+                        <h4 id="campaign-title" class="text-lg sm:text-xl font-black leading-snug text-slate-900">
+                        </h4>
+
+                        <div class="h-1 w-10 bg-slate-100 rounded-full mx-auto sm:mx-0"></div>
+
+                        <p id="campaign-message"
+                            class="text-[13px] sm:text-sm font-medium leading-relaxed text-slate-500 italic">
+                        </p>
+                    </div>
+
+                    <button onclick="closeCampaignToast()"
+                        class="group mt-6 flex w-full items-center justify-center gap-2
+                   rounded-xl bg-slate-900 py-3.5
+                   text-[10px] font-bold uppercase tracking-[0.18em]
+                   text-white shadow-lg transition-all
+                   active:scale-95 hover:bg-blue-600">
+                        <span>Got it, Thanks!</span>
+                        <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+                    </button>
+                    <button onclick="closeAllCampaigns()"
+                        class="mt-3 text-[10px] font-bold uppercase text-slate-400 hover:text-red-500">
+                        Close all notifications
+                    </button>
+
+                </div>
+            </div>
+
+            <style>
+                @keyframes vibrate {
+
+                    0%,
+                    100% {
+                        transform: rotate(0deg);
+                    }
+
+                    20% {
+                        transform: rotate(15deg);
+                    }
+
+                    40% {
+                        transform: rotate(-15deg);
+                    }
+
+                    60% {
+                        transform: rotate(10deg);
+                    }
+
+                    80% {
+                        transform: rotate(-10deg);
+                    }
+                }
+
+                .animate-vibrate {
+                    animation: vibrate 0.6s cubic-bezier(.36, .07, .19, .97) both infinite;
+                    animation-delay: 1.5s;
+                }
+
+                #campaign-toast {
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    const bell = document.getElementById('campaign-bell-container');
+                    const toast = document.getElementById('campaign-toast');
+
+                    const title = document.getElementById('campaign-title');
+                    const message = document.getElementById('campaign-message');
+                    const image = document.getElementById('campaign-image');
+                    const imageWrap = document.getElementById('campaign-image-wrapper');
+                    const icon = document.getElementById('campaign-icon');
+
+                    let pendingCampaigns = [];
+                    let activeCampaign = null;
+
+                    /* ===============================
+                        🧠 BUILD PENDING QUEUE
+                    ================================*/
+                    if (window.AUTH_USER_ID && Array.isArray(window.ALL_CAMPAIGNS)) {
+
+                        pendingCampaigns = window.ALL_CAMPAIGNS.filter(c => {
+                            return !window.SEEN_CAMPAIGNS.includes(c.id);
+                        });
+
+                        if (pendingCampaigns.length) {
+                            showNextCampaign();
+                        }
+                    }
+
+                    /* ===============================
+                        🔴 PUSHER REALTIME
+                    ================================*/
+                    const pusher = new Pusher("{{ config('broadcasting.connections.pusher.key') }}", {
+                        cluster: "{{ config('broadcasting.connections.pusher.options.cluster') }}",
+                        forceTLS: true
+                    });
+
+                    pusher.subscribe('all-users')
+                        .bind('message.campaign.sent', function(data) {
+
+                            if (!data || window.SEEN_CAMPAIGNS.includes(data.id)) return;
+
+                            pendingCampaigns.push(data);
+
+                            if (!activeCampaign) {
+                                showNextCampaign();
+                            }
+                        });
+
+                    /* ===============================
+                        🔔 SHOW NEXT CAMPAIGN
+                    ================================*/
+                    function showNextCampaign() {
+
+                        if (!pendingCampaigns.length) return;
+
+                        activeCampaign = pendingCampaigns[0];
+
+                        title.innerText = activeCampaign.title || 'Announcement';
+                        message.innerText = activeCampaign.message || activeCampaign.description || '';
+
+                        if (activeCampaign.image) {
+                            image.src = activeCampaign.image;
+                            imageWrap.classList.remove('hidden');
+                            icon.classList.add('absolute', '-top-6', 'left-6');
+                        } else {
+                            imageWrap.classList.add('hidden');
+                            icon.classList.remove('absolute', '-top-6', 'left-6');
+                        }
+
+                        bell.classList.remove('hidden');
+                    }
+
+                    /* ===============================
+                        🔔 OPEN MODAL
+                    ================================*/
+                    window.openCampaignDetails = function() {
+                        bell.classList.add('hidden');
+                        toast.classList.remove('hidden');
+                        toast.classList.add('scale-100');
+                    };
+
+                    /* ===============================
+                        ❌ CLOSE ONE (NEXT AUTO)
+                    ================================*/
+                    window.closeCampaignToast = function() {
+
+                        if (!activeCampaign) return;
+
+                        logCampaign(activeCampaign.id);
+
+                        pendingCampaigns.shift();
+                        activeCampaign = null;
+
+                        toast.classList.add('hidden');
+
+                        if (pendingCampaigns.length) {
+                            setTimeout(showNextCampaign, 400);
+                        }
+                    };
+
+                    /* ===============================
+                        ❌ CLOSE ALL (ONE CLICK)
+                    ================================*/
+                    window.closeAllCampaigns = function() {
+
+                        pendingCampaigns.forEach(c => logCampaign(c.id));
+
+                        pendingCampaigns = [];
+                        activeCampaign = null;
+
+                        toast.classList.add('hidden');
+                        bell.classList.add('hidden');
+                    };
+
+                    /* ===============================
+                        🧾 LOG SEEN
+                    ================================*/
+                    function logCampaign(id) {
+                        fetch('/campaign/mark-as-seen', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                campaign_id: id
+                            })
+                        }).catch(() => {});
+                    }
+
+                });
+            </script>
+
+            {{-- END message campaign --}}
 
 
 
@@ -360,89 +646,6 @@
     <!-- Load your script AFTER Alpine -->
     <script src="{{ asset('assets/js/script.js') }}"></script>
 
-   {{-- @if (auth()->check())
-        <div x-data="profilePopup({
-            phone: '{{ auth()->user()->phone }}',
-            name: '{{ auth()->user()->name }}'
-        })" x-init="init()">
-
-            <!-- Light Overlay -->
-            <div x-show="show" x-transition.opacity class="fixed inset-0 bg-black/20 z-40" @click="closePopup()">
-            </div>
-
-            <!-- Popup Box (Top Right) -->
-            <div x-show="show" x-transition
-                class="fixed top-5 right-5 z-50 bg-white w-[320px] rounded-xl shadow-2xl p-4">
-
-                <!-- Close -->
-                <button @click="closePopup()" class="absolute top-2 right-2 text-gray-400 hover:text-black text-lg">
-                    &times;
-                </button>
-
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">
-                    Complete your profile
-                </h3>
-
-                <p class="text-sm text-gray-600 mb-3">
-                    Hi,
-                    <template x-if="hasName">
-                        <strong x-text="name"></strong>
-                    </template>
-                    <template x-if="!hasName">
-                        <strong>User</strong>
-                    </template>,
-                    your profile is incomplete.
-                </p>
-
-                <div class="bg-gray-50 rounded-md p-3 text-xs mb-4">
-                    <p><strong>Phone:</strong> +91 <span x-text="phone"></span></p>
-                    <template x-if="!hasName">
-                        <p class="text-red-500 font-medium mt-1">
-                            Name not added yet
-                        </p>
-                    </template>
-                </div>
-
-               
-            </div>
-        </div>
-    @endif
-    --}}
-    <script>
-        function profilePopup(data) {
-            return {
-                show: false,
-                phone: data.phone,
-                name: data.name,
-                maxCancels: 3,
-
-                get hasName() {
-                    return this.name && this.name.trim() !== "";
-                },
-
-                get cancelCount() {
-                    return parseInt(localStorage.getItem('profilePopupCancelCount') || 0);
-                },
-
-                init() {
-                    // ✅ Show popup ONLY if:
-                    // 1. Name empty
-                    // 2. Cancel count < 3
-                    if (!this.hasName && this.cancelCount < this.maxCancels) {
-                        this.show = true;
-                    }
-                },
-
-                closePopup() {
-                    // ➕ Increase cancel count
-                    let count = this.cancelCount + 1;
-                    localStorage.setItem('profilePopupCancelCount', count);
-
-                    this.show = false;
-                }
-            }
-        }
-    </script>
 
 
 
@@ -481,72 +684,13 @@
 
         });
     </script>
-    
+
     {{-- message campaign --}}
     <script src="https://js.pusher.com/8.2/pusher.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            const toast = document.getElementById('campaign-toast');
-            const titleEl = document.getElementById('campaign-title');
-            const msgEl = document.getElementById('campaign-message');
-            const imgEl = document.getElementById('campaign-image');
-
-            const pusher = new Pusher("{{ config('broadcasting.connections.pusher.key') }}", {
-                cluster: "{{ config('broadcasting.connections.pusher.options.cluster') }}",
-                forceTLS: true
-            });
-
-            const channel = pusher.subscribe('all-users');
-
-            channel.bind('message.campaign.sent', function(data) {
-
-                console.log('Campaign data:', data); // 🔍 DEBUG
-
-                if (!data || !data.id) return;
-
-                if (seenToday(data.id)) return;
-
-                titleEl.innerText = data.title ?? '';
-                msgEl.innerText = data.message || data.description || '';
-
-                // ✅ IMAGE FIX
-                if (data.image && data.image.startsWith('http')) {
-                    imgEl.src = data.image;
-                    imgEl.classList.remove('hidden');
-                } else {
-                    imgEl.classList.add('hidden');
-                }
-
-                toast.classList.remove('hidden');
-                markSeen(data.id);
-            });
-
-            window.closeCampaignToast = function() {
-                toast.classList.add('hidden');
-            };
-
-            function markSeen(id) {
-                localStorage.setItem('campaign_seen_' + id, today());
-            }
-
-            function seenToday(id) {
-                return localStorage.getItem('campaign_seen_' + id) === today();
-            }
-
-            function today() {
-                return new Date().toISOString().split('T')[0];
-            }
-        });
-    </script>
 
 
-    
     <script src="{{ asset('assets/js/animation.js') }}"></script>
-
-    
-
 </body>
 
 </html>

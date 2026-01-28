@@ -15,29 +15,65 @@ use Illuminate\Support\Facades\Log;
 
 class UserSettingsController extends Controller
 {
-    public function profile()
-    {
-        $user = auth()->user();
 
-        $activeSubscription = UserSubscription::with(['plan', 'duration'])
-            ->where('user_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+public function profile()
+{
+    $user = auth()->user();
 
-        $currentPlan = $activeSubscription?->plan?->name ?? 'No Active Plan';
-        $validityTill = $activeSubscription?->end_date?->format('d M Y') ?? '-';
-        $daysRemaining = $activeSubscription?->end_date ? max(0, now()->diffInDays($activeSubscription->end_date, false)) : null;
+    $data = $this->getProfileData($user);
 
-        $latestKyc = KycVerification::where('user_id', $user->id)->latest()->first();
-        $kycStatus = $latestKyc->status ?? 'none';
-        $isKycCompleted = in_array($kycStatus, ['approved', 'completed', 'success']);
+    return view('UserDashboard.settings.profile', array_merge(
+        ['user' => $user],
+        $data
+    ));
+}
 
-        $plans = ServicePlan::with('durations.features')->where('status', 1)->orderBy('sort_order')->get();
+public function dashboard()
+{
+    $user = auth()->user();
 
-        return view('UserDashboard.settings.profile', compact(
-            'user', 'activeSubscription', 'currentPlan', 'validityTill', 'daysRemaining', 'plans', 'kycStatus', 'isKycCompleted'
-        ));
-    }
+    $data = $this->getProfileData($user); // same method you created
+
+    return view('UserDashboard.userdashboard', array_merge(
+        ['user' => $user],
+        $data
+    ));
+}
+
+
+private function getProfileData($user)
+{
+    $activeSubscription = UserSubscription::with(['plan', 'duration'])
+        ->where('user_id', $user->id)
+        ->where('status', 'active')
+        ->first();
+
+    $currentPlan = $activeSubscription?->plan?->name ?? 'No Active Plan';
+    $validityTill = $activeSubscription?->end_date?->format('d M Y') ?? '-';
+    $daysRemaining = $activeSubscription?->end_date
+        ? max(0, now()->diffInDays($activeSubscription->end_date, false))
+        : null;
+
+    $latestKyc = KycVerification::where('user_id', $user->id)->latest()->first();
+    $kycStatus = $latestKyc->status ?? 'none';
+    $isKycCompleted = in_array($kycStatus, ['approved', 'completed', 'success']);
+
+    $plans = ServicePlan::with('durations.features')
+        ->where('status', 1)
+        ->orderBy('sort_order')
+        ->get();
+
+    return compact(
+        'activeSubscription',
+        'currentPlan',
+        'validityTill',
+        'daysRemaining',
+        'plans',
+        'kycStatus',
+        'isKycCompleted'
+    );
+}
+
 
     public function edit() {
         $user = auth()->user();
@@ -48,7 +84,6 @@ class UserSettingsController extends Controller
     {
         $user = auth()->user();
         
-        // 1. Validate the new fields
         $data = $request->validate([
             'name'    => 'required|string|max:255',
             'dob'     => 'nullable|date', // Added Date of Birth
@@ -58,10 +93,8 @@ class UserSettingsController extends Controller
             'pincode' => 'nullable|string|max:10',
         ]);
 
-        // 2. Update user record
         $user->update($data);
 
-        // 3. Handle Profile Image
         if ($request->hasFile('profile_image')) {
             $user->clearMediaCollection('profile_image');
             $user->addMediaFromRequest('profile_image')->toMediaCollection('profile_image');

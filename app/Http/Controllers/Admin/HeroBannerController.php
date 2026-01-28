@@ -14,18 +14,29 @@ class HeroBannerController extends Controller
     {
         $banners = HeroBanner::orderBy('sort_order')->get();
 
-        $bannersJson = $banners->map(function($b){
+        $bannersJson = $banners->map(function ($b) {
     return [
         'id' => $b->id,
-        'title' => $b->title,
+        'page_key' => $b->page_key,
         'badge' => $b->badge,
+        'title' => $b->title,
         'subtitle' => $b->subtitle,
         'description' => $b->description,
-        'page_key' => $b->page_key,
+
+        // ✅ MISSING FIELDS (MAIN FIX)
+        'button_text_1' => $b->button_text_1,
+        'button_link_1' => $b->button_link_1,
+        'button_text_2' => $b->button_text_2,
+        'button_link_2' => $b->button_link_2,
+
+        'sort_order' => $b->sort_order,
         'status' => $b->status,
+
         'background_url' => $b->getFirstMediaUrl('background'),
         'mobile_background_url' => $b->getFirstMediaUrl('mobile_background'),
     ];
+
+
 });
 return view('admin.hero_banners.index', compact('banners', 'bannersJson'));
 

@@ -67,12 +67,12 @@
                             <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50 space-y-3">
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Primary Button</span>
                                 <input type="text" name="button1_text" value="{{ $offerBanner->button1_text }}" required class="w-full rounded-lg border border-indigo-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none">
-                                <input type="url" name="button1_link" value="{{ $offerBanner->button1_link }}" required class="w-full rounded-lg border border-indigo-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <input type="text" name="button1_link" value="{{ $offerBanner->button1_link }}" required class="w-full rounded-lg border border-indigo-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none">
                             </div>
                             <div class="p-4 rounded-xl border border-gray-200 bg-gray-50 space-y-3">
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Secondary Button</span>
                                 <input type="text" name="button2_text" value="{{ $offerBanner->button2_text }}" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none">
-                                <input type="url" name="button2_link" value="{{ $offerBanner->button2_link }}" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <input type="text" name="button2_link" value="{{ $offerBanner->button2_link }}" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none">
                             </div>
                         </div>
                     </div>

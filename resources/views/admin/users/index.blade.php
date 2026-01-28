@@ -1,19 +1,15 @@
 @extends('layouts.app')
 @section('content')
-    <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-pOZQ7+6iX14a7qYw0r0Yp5O+v6B8+VjsLPL6tYFxOJvOzfiqHRa2hT1/O0G2G45m4Bb8J6GZ7bz5fR5l7De+AA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Font Awesome 6 Free via jsDelivr -->
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha384-MV+VvF0QoI6u0YvBMQK/xh2C2P6Yo3V2v6DlZz/cYt0/nl/7v8EHPbRrP49Y1U5b" crossorigin="anonymous">
 
 
-           <!-- EDIT USER MODAL -->
    <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div class="p-6">
-            <!-- Modal Header -->
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-semibold text-slate-800">Edit User</h3>
                 <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600">
@@ -21,18 +17,15 @@
                 </button>
             </div>
 
-            <!-- Modal Form -->
             <form id="editUserForm" method="POST" action="#" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 
                 <div class="space-y-6">
-                    <!-- Profile Image Upload Section -->
                     <div class="border border-slate-200 rounded-lg p-6 bg-slate-50">
                         <h4 class="text-lg font-medium text-slate-800 mb-4">Profile Image</h4>
                         
                         <div class="flex flex-col md:flex-row items-start gap-6">
-                            <!-- Current Image Preview -->
                             <div class="flex flex-col items-center">
                                 <div class="h-40 w-40 rounded-full overflow-hidden border-4 border-white shadow-lg mb-4">
                                     <img id="currentProfileImage" 
@@ -44,7 +37,6 @@
                                 <p class="text-sm text-slate-600" id="currentImageText">Current profile image</p>
                             </div>
                             
-                            <!-- Upload Area -->
                             <div class="flex-1">
                                 <div class="mb-4">
                                     <label for="profile_image" class="block text-sm font-medium text-slate-700 mb-2">
@@ -107,7 +99,6 @@
 
                     <!-- User Details Section -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Name -->
                         <div>
                             <label for="edit_name" class="block text-sm font-medium text-slate-700 mb-1">
                                 Full Name *
@@ -206,13 +197,13 @@
                                 <div class="bg-white rounded-lg shadow h-[calc(100vh-9rem)] flex flex-col">
                             <div class="p-4 border-b border-slate-200 flex-shrink-0">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h2 class="text-lg font-semibold text-slate-800">Users List</h2>
+                                    <h2 class="text-lg font-semibold text-slate-800">Customers List</h2>
                                     <button class="text-xs bg-emerald-500 text-white px-3 py-1.5 rounded-md hover:bg-emerald-600">
                                         <i class="fas fa-plus mr-1"></i> Add User
                                     </button>
                                 </div>
                                 <div class="relative">
-                                    <input type="text" placeholder="Search users..."
+                                    <input type="text" placeholder="Search Customers..."
                                         class="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-md focus:ring-emerald-500">
                                     <i class="fas fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
                                 </div>
@@ -235,17 +226,14 @@
                                         <div onclick="selectUser({{ $user['id'] }})" id="user-{{ $user['id'] }}"
                                             class="user-item p-3 rounded-md border border-slate-200 hover:bg-slate-50 cursor-pointer transition mb-3">
                                             <div class="flex items-center">
-                                                <!-- Avatar container -->
                                                 <div class="h-10 w-10 rounded-full flex items-center justify-center mr-3 relative overflow-hidden">
                                                     @if ($profileImageUrl)
-                                                        <!-- Show profile image if available -->
                                                         <img src="{{ $profileImageUrl }}" 
                                                             alt="{{ $user['name'] ?? 'User' }}"
                                                             class="h-full w-full object-cover"
                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                     @endif
                                                     
-                                                    <!-- Show initials (background color only when no image) -->
                                                     <div class="h-full w-full rounded-full {{ $profileImageUrl ? 'hidden' : 'bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold' }}">
                                                         {{ $initials }}
                                                     </div>
@@ -263,7 +251,7 @@
 
                             <div class="p-4
         border-t border-slate-200 flex-shrink-0">
-    <p class="text-xs text-slate-500 text-center">{{ count($users) }} users total</p>
+    <p class="text-xs text-slate-500 text-center">{{ count($users) }} customer total</p>
     </div>
     </div>
     </div>
@@ -273,15 +261,15 @@
         <div class="bg-white rounded-lg shadow p-4 mb-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-semibold text-slate-800">User Management</h1>
-                    <p class="text-sm text-slate-500 mt-1">View and manage user profiles and permissions</p>
+                    <h1 class="text-xl font-semibold text-slate-800">Customer Management</h1>
+                    <p class="text-sm text-slate-500 mt-1">View and manage customer profiles and permissions</p>
                 </div>
             </div>
         </div>
 
         <div class="bg-white rounded-lg shadow mb-6 p-6">
             <div id="userDetails">
-                <p class="text-slate-500">Select a user to view details...</p>
+                <p class="text-slate-500">Select a customer to view details...</p>
             </div>
         </div>
     </div>
@@ -290,26 +278,21 @@
         let allUsers = @json($users);
         let selectedUserId = @json($selectedUserId);
 
-        // Ensure type match for find()
         if (selectedUserId) selectedUserId = parseInt(selectedUserId);
 
-        // Get modal elements
         const editUserModal = document.getElementById('editUserModal');
         const editUserForm = document.getElementById('editUserForm');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
 
-        // Debug flag
         const DEBUG = true;
 
-        // Helper function for debugging
         function debugLog(message, data = null) {
             if (DEBUG) {
                 console.log(`[DEBUG] ${message}`, data || '');
             }
         }
 
-        // Helper function to get user initials
         function getUserInitials(userName) {
             if (!userName || userName.trim().length === 0) {
                 return '??';
@@ -317,7 +300,6 @@
             return userName.substring(0, 2).toUpperCase();
         }
 
-        // Function to open modal with user data
         function openEditModal(user) {
             debugLog('Opening edit modal for user:', user);
 
@@ -359,18 +341,15 @@
                 removeImageOption.classList.add('hidden');
             }
 
-            // Reset file input
             document.getElementById('profile_image').value = '';
             document.getElementById('newImagePreview').classList.add('hidden');
             document.getElementById('remove_profile_image').checked = false;
 
-            // Show modal
             editUserModal.classList.remove('hidden');
             editUserModal.classList.add('flex');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         }
 
-        // Function to close modal
         function closeEditModal() {
             editUserModal.classList.add('hidden');
             editUserModal.classList.remove('flex');
@@ -392,11 +371,9 @@
             }, 3000);
         }
 
-        // Function to update user in allUsers array
         function updateUserInArray(updatedUser) {
             const index = allUsers.findIndex(u => u.id === updatedUser.id);
             if (index !== -1) {
-                // Preserve existing properties while updating with new ones
                 allUsers[index] = {
                     ...allUsers[index],
                     ...updatedUser
@@ -407,7 +384,6 @@
             return false;
         }
 
-        // Event listeners for modal
         closeModalBtn.addEventListener('click', closeEditModal);
         cancelEditBtn.addEventListener('click', closeEditModal);
 
@@ -534,8 +510,6 @@
             const url = this.action;
             debugLog('Making request to:', url);
 
-            // Note: For Laravel, when using FormData with PUT method and file uploads,
-            // we need to use POST with _method parameter
             formData.append('_method', 'PUT');
 
             fetch(url, {
@@ -563,10 +537,8 @@
                         const updated = updateUserInArray(data.user);
 
                         if (updated) {
-                            // Refresh the selected user view
                             selectUser(data.user.id);
 
-                            // Show success message
                             showNotification(data.message || 'User updated successfully!', 'success');
 
                             // Close modal
@@ -575,11 +547,9 @@
                             showNotification('User updated but could not refresh view', 'error');
                         }
                     } else {
-                        // Handle validation errors
                         let errorMessage = 'Error updating user';
 
                         if (data.errors) {
-                            // Format validation errors
                             const errors = Object.values(data.errors).flat();
                             errorMessage = errors.join('\n');
                             debugLog('Validation errors:', data.errors);

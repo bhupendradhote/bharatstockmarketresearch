@@ -14,7 +14,7 @@
                         real-time.</p>
                 </div>
                 <a href="{{ route('admin.popups.create') }}"
-                    class="group inline-flex items-center px-8 py-4 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-2xl shadow-2xl shadow-slate-200 transition-all duration-300 active:scale-95 text-sm uppercase tracking-widest">
+                    class="group inline-flex items-center px-8 py-4 bg-blue-700 hover:bg-blue-600 text-white font-bold rounded-2xl shadow-2xl shadow-slate-200 transition-all duration-300 active:scale-95 text-sm uppercase tracking-widest">
                     <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>

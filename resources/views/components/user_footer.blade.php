@@ -153,7 +153,7 @@
         <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
             <div class="flex flex-col md:flex-row items-center gap-1 md:gap-4">
                 <span class="font-semibold text-gray-900">
-                    {{ $settings->website_name ?? 'Bharath Stock Market Research' }}
+                    {{ $settings->website_name ?? 'Bharat Stock Market Research' }}
                 </span>
                 <span class="hidden md:inline text-gray-300">|</span>
                 <span>

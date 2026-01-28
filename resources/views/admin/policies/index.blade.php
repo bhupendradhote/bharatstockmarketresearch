@@ -34,7 +34,8 @@
                                 </span>
                             </td>
                             <td class="px-5 py-4 text-sm text-gray-600">
-                                {{ $policy->activeContent->created_at->format('d M Y') }}
+                                {{-- LOGIC UPDATE: Uses updated_at of active content, falls back to policy updated_at --}}
+                                {{ $policy->activeContent?->updated_at?->format('d M Y') ?? $policy->updated_at->format('d M Y') }}
                             </td>
                             <td class="px-5 py-4 text-sm text-center space-x-3">
                                 <a href="{{ route('admin.policies.edit', $policy->id) }}"
@@ -50,7 +51,6 @@
             </table>
         </div>
 
-        <!-- Preview Section (Initially hidden) -->
         <div id="preview-container" class="hidden px-4">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-600">Policy Preview</h2>
@@ -60,12 +60,10 @@
                 </button>
             </div>
 
-            <!-- Preview content will be dynamically inserted here -->
             <div id="preview-content"></div>
         </div>
     </div>
 
-    <!-- Hidden template for policy preview -->
     <template id="policy-template">
         <div class="policy-container mb-12">
             <div
@@ -84,19 +82,17 @@
 
                 <div class="prose prose-slate max-w-none">
                     <div class="policy-content text-gray-800 leading-relaxed text-justify">
-                        <!-- Content will be inserted here -->
-                    </div>
+                        </div>
                 </div>
 
                 <div class="mt-16 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
-                    &copy; {{ date('Y') }} Bharat Stock Research Market Communication Technologies Private Limited.
+                    © 2025 Bharat Stock Market Research
                 </div>
             </div>
         </div>
     </template>
 
     <style>
-        /* Document Styling to match the provided image precisely */
         .policy-content h1,
         .policy-content h2,
         .policy-content h3 {
@@ -165,15 +161,14 @@
     </style>
 
     <script>
-        // Store policy data in JavaScript object for easy access
         const policiesData = {
             @foreach ($policies as $policy)
                 {{ $policy->id }}: {
                     id: {{ $policy->id }},
                     name: `{{ addslashes($policy->name) }}`,
                     version: `{{ $policy->activeContent->version_number ?? '1' }}`,
-                    updated_at: `{{ $policy->activeContent->created_at->format('d F Y') }}`,
-                    content: `{!! addslashes($policy->activeContent->content) !!}`,
+                    updated_at: `{{ $policy->activeContent?->updated_at?->format('d F Y') ?? $policy->updated_at->format('d F Y') }}`,
+                    content: `{!! addslashes($policy->activeContent->content ?? '') !!}`,
                     edit_url: `{{ route('admin.policies.edit', $policy->id) }}`
                 },
             @endforeach
@@ -183,10 +178,8 @@
             const previewContainer = document.getElementById('preview-container');
             const previewContent = document.getElementById('preview-content');
 
-            // Clear previous content
             previewContent.innerHTML = '';
 
-            // Get policy data
             const policy = policiesData[policyId];
 
             if (!policy) {
@@ -194,11 +187,9 @@
                 return;
             }
 
-            // Get template
             const template = document.getElementById('policy-template');
             const clone = template.content.cloneNode(true);
 
-            // Fill template with data
             const policyContainer = clone.querySelector('.policy-container');
             policyContainer.querySelector('.policy-name').textContent = policy.name;
             policyContainer.querySelectorAll('.policy-name')[1].textContent = policy.name;
@@ -206,13 +197,10 @@
             policyContainer.querySelector('.policy-content').innerHTML = policy.content;
             policyContainer.querySelector('.edit-link').href = policy.edit_url;
 
-            // Add to preview container
             previewContent.appendChild(policyContainer);
 
-            // Show preview container
             previewContainer.classList.remove('hidden');
 
-            // Scroll to preview section
             previewContainer.scrollIntoView({
                 behavior: 'smooth'
             });
@@ -223,7 +211,6 @@
             previewContainer.classList.add('hidden');
         }
 
-        // Close preview when clicking escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closePreview();
