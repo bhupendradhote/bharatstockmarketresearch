@@ -245,6 +245,10 @@
             font-weight: 700;
         }
     </style>
+
+
+<x-stockmarquee />
+
     <section class="relative bg-gray-100 py-12 w-full px-4 sm:px-6 mt-[0.5rem] lg:px-8 border-y-4 border-yellow-400">
         <div class="absolute inset-0 opacity-5 pointer-events-none"
             style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
@@ -628,76 +632,91 @@
 
 
 
-    @if ($offerBanner)
-        <section class="w-full flex justify-center mt-16 mb-12 px-4 md:px-8 lg:px-16" id="offer-banner">
-            <div class="max-w-[1500px] w-full relative overflow-hidden rounded-[2rem] bg-[#030712] shadow-2xl group">
+@if ($offerBanner)
+    <section class="w-full flex justify-center mt-16 mb-12 px-4 md:px-8 lg:px-16" id="offer-banner">
+        <div class="max-w-[1500px] w-full relative overflow-hidden rounded-[2rem] bg-[#030712] shadow-2xl group transform-gpu isolate">
 
-                <div class="absolute inset-0 z-0">
-                    <picture>
-                        <source media="(max-width: 768px)" srcset="{{ $offerBanner->mobile_image_url }}">
-                        <img src="{{ $offerBanner->desktop_image_url }}" alt="{{ $offerBanner->heading }}"
-                            class="w-full h-full object-cover opacity-70 transition-transform duration-[10000ms] ease-in-out group-hover:scale-110">
-                    </picture>
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/60 to-transparent"></div>
-                </div>
+            <div class="absolute inset-0 z-0">
+                <picture>
+                    <source media="(max-width: 768px)" srcset="{{ $offerBanner->mobile_image_url }}">
+                    <img 
+                        src="{{ $offerBanner->desktop_image_url }}" 
+                        alt="{{ $offerBanner->heading }}"
+                        class="w-full h-full object-cover object-center transition-transform duration-[2000ms] ease-out group-hover:scale-105"
+                    >
+                </picture>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20 md:to-transparent"></div>
+            </div>
 
-                <div class="relative z-10 flex flex-col justify-center min-h-[450px] md:min-h-[550px] p-8 md:p-16 lg:p-24"
-                    x-data="{ visible: false }" x-intersect="visible = true">
+            <div class="relative z-10 flex flex-col justify-center min-h-[500px] md:min-h-[600px] p-8 md:p-16 lg:p-24"
+                 x-data="{ visible: false }" 
+                 x-intersect.threshold.20="visible = true">
 
-                    @if ($offerBanner->highlight_text)
-                        <div x-show="visible" x-transition.enter.duration.800ms
-                            class="inline-flex items-center space-x-2 bg-yellow-500/10 border border-yellow-500/30 backdrop-blur-md px-4 py-1.5 rounded-full mb-8 w-fit">
-                            <span class="relative flex h-2.5 w-2.5">
-                                <span
-                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+                @if ($offerBanner->highlight_text)
+                    <div x-show="visible" 
+                         x-transition:enter="transition ease-out duration-700"
+                         x-transition:enter-start="opacity-0 -translate-x-10"
+                         x-transition:enter-end="opacity-100 translate-x-0"
+                         class="inline-flex items-center space-x-2 bg-yellow-500/10 border border-yellow-500/30 backdrop-blur-md px-4 py-1.5 rounded-full mb-8 w-fit">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+                        </span>
+                        <span class="text-yellow-500 text-xs font-bold uppercase tracking-[0.2em]">
+                            {{ $offerBanner->highlight_text }}
+                        </span>
+                    </div>
+                @endif
+
+                <h2 x-show="visible" 
+                    x-transition:enter="transition ease-out duration-700 delay-100"
+                    x-transition:enter-start="opacity-0 translate-y-10"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-6 drop-shadow-lg max-w-4xl">
+                    {{ $offerBanner->heading }}
+                </h2>
+
+                <p x-show="visible" 
+                   x-transition:enter="transition ease-out duration-700 delay-300"
+                   x-transition:enter-start="opacity-0 translate-y-10"
+                   x-transition:enter-end="opacity-100 translate-y-0"
+                   class="text-slate-300 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-light drop-shadow-md">
+                    {{ $offerBanner->content }}
+                </p>
+
+                <div x-show="visible" 
+                     x-transition:enter="transition ease-out duration-700 delay-500"
+                     x-transition:enter-start="opacity-0 scale-90"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     class="flex flex-wrap gap-5">
+                    
+                    @if ($offerBanner->button1_text)
+                        <a href="{{ $offerBanner->button1_link }}" target="{{ $offerBanner->button1_target }}"
+                           class="group/btn relative inline-flex items-center justify-center px-8 py-4 font-bold text-black transition-all duration-300 bg-yellow-500 rounded-2xl hover:bg-yellow-400 hover:shadow-[0_0_20px_rgba(234,179,8,0.6)] hover:-translate-y-1 overflow-hidden">
+                            <span class="relative z-10 flex items-center">
+                                {{ $offerBanner->button1_text }}
+                                <svg class="w-5 h-5 ml-2 transition-transform duration-300 group-hover/btn:translate-x-1"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
                             </span>
-                            <span class="text-yellow-500 text-xs font-bold uppercase tracking-[0.2em]">
-                                {{ $offerBanner->highlight_text }}
-                            </span>
-                        </div>
+                        </a>
                     @endif
 
-                    <h2 x-show="visible" x-transition.enter.delay.200ms
-                        class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-6 drop-shadow-md">
-                        {{ $offerBanner->heading }}
-                    </h2>
-
-                    <p x-show="visible" x-transition.enter.delay.400ms
-                        class="text-slate-300 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-light">
-                        {{ $offerBanner->content }}
-                    </p>
-
-                    <div x-show="visible" x-transition.enter.delay.600ms class="flex flex-wrap gap-5">
-                        @if ($offerBanner->button1_text)
-                            <a href="{{ $offerBanner->button1_link }}" target="{{ $offerBanner->button1_target }}"
-                                class="group/btn relative inline-flex items-center justify-center px-10 py-4 font-bold text-black transition-all duration-300 bg-yellow-500 rounded-2xl hover:bg-yellow-400 active:scale-95 shadow-[0_20px_40px_-15px_rgba(234,179,8,0.4)] overflow-hidden">
-                                <span class="relative z-10 flex items-center">
-                                    {{ $offerBanner->button1_text }}
-                                    <svg class="w-5 h-5 ml-2 transition-transform duration-300 group-hover/btn:translate-x-1"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                </span>
-                            </a>
-                        @endif
-
-                        @if ($offerBanner->button2_text)
-                            <a href="{{ $offerBanner->button2_link }}" target="{{ $offerBanner->button2_target }}"
-                                class="inline-flex items-center justify-center px-10 py-4 font-bold text-white transition-all duration-300 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 backdrop-blur-xl">
-                                {{ $offerBanner->button2_text }}
-                            </a>
-                        @endif
-                    </div>
-                </div>
-
-                <div
-                    class="absolute -bottom-12 -right-12 w-64 h-64 bg-yellow-500/10 blur-[100px] rounded-full pointer-events-none">
+                    @if ($offerBanner->button2_text)
+                        <a href="{{ $offerBanner->button2_link }}" target="{{ $offerBanner->button2_target }}"
+                           class="inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-300 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 backdrop-blur-md hover:border-white/30">
+                            {{ $offerBanner->button2_text }}
+                        </a>
+                    @endif
                 </div>
             </div>
-        </section>
-    @endif
+
+            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-yellow-500/20 blur-[120px] rounded-full pointer-events-none mix-blend-screen"></div>
+        </div>
+    </section>
+@endif
 
 
     <!-- HOW IT WORKS SECTION -->

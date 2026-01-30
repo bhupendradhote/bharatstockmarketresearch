@@ -42,7 +42,7 @@
                         {{ auth()->user()->name }}
                     </h1>
                     <span class="inline-block mt-1 px-2 py-0.5 bg-blue-50 text-[#0939a4] text-[10px] font-bold rounded">
-                        User
+                        {{ auth()->user()->city }}
                     </span>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                 {{-- Standard Fields --}}
                 <div class="space-y-1">
                     <p class="text-[10px] text-gray-400 font-bold tracking-wider uppercase">User ID</p>
-                    <p class="text-xs font-bold text-gray-700 font-mono">{{ auth()->user()->id }}</p>
+                    <p class="text-xs font-bold text-gray-700 font-mono">{{ auth()->user()->bsmr_id }}</p>
                 </div>
                 <div class="space-y-1">
                     <p class="text-[10px] text-gray-400 font-bold tracking-wider uppercase">Email</p>
@@ -340,7 +340,6 @@
         [x-cloak] {
             display: none !important;
         }
-        /* Custom scrollbar for modal content if needed */
         ::-webkit-scrollbar {
             width: 6px;
         }

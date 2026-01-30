@@ -45,6 +45,9 @@ Route::prefix('angel')->group(function () {
     Route::get('ws-token', [AngelController::class, 'wsToken']);
     Route::get('gainers-losers', [AngelController::class, 'gainersLosers']);
     Route::get('indices', [AngelController::class, 'getIndices']);
+    Route::get('nifty50-marquee', [AngelController::class, 'nifty50Marquee']);
+Route::get('search', [AngelController::class, 'searchSymbols']);
+
     Route::get('52-week-data', [AngelController::class, 'fetch52WeekHighLowData']);
 });
 

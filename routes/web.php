@@ -49,12 +49,31 @@ use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\CertificateController;
 use App\Http\Controllers\UserCertificateShowController;
 use App\Http\Controllers\NotificationController;
-// Add this inside your admin middleware group
-Route::post('/admin/tips/{id}/update-live-status', [App\Http\Controllers\Admin\TipController::class, 'updateLiveStatus'])->name('admin.tips.update_live');
+use App\Http\Controllers\UserDashboardController\WatchlistController;
+use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\UserDashboardController\UserAnnouncementController;
+
+Route::get('/announcement', [UserAnnouncementController::class, 'index'])->name('user.announcement.index');
+
+            Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+                Route::resource('announcements', AnnouncementController::class);
+            });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/watchlists', [WatchlistController::class, 'index']);
+    Route::post('/watchlists', [WatchlistController::class, 'store']);
+    Route::delete('/watchlists/{watchlist}', [WatchlistController::class, 'destroy']);
+    Route::post('/watchlists/{watchlist}/scripts', [WatchlistController::class, 'addScript']);
+    Route::delete('/watchlist-scripts/{script}', [WatchlistController::class, 'removeScript']);
+});
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/notifications/fetch', [NotificationController::class, 'fetchNotifications'])->name('notifications.fetch');
     Route::post('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 });
+
+Route::post('/admin/tips/{id}/update-live-status', [App\Http\Controllers\Admin\TipController::class, 'updateLiveStatus'])->name('admin.tips.update_live');
+
 
 Route::get('/api/proxy/scrips', [ProxyController::class, 'scripMaster'])->name('proxy.scrips');
 
@@ -75,7 +94,6 @@ require __DIR__.'/auth.php';
 
 
 
-    // AJAX category
     Route::post('/blogs/category', [BlogController::class, 'storeCategory'])->name('blogs.category.store');
     
     Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -84,7 +102,6 @@ require __DIR__.'/auth.php';
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
     Route::post('/reviews/store', [ReviewController::class, 'store'])->name('reviews.store');    
-    // Inquiry form submission
     Route::post('/inquiry/store', [InquiryController::class, 'store'])->name('inquiry.store');
     Route::get('/newsblogs', [NewsBlogsController::class, 'index'])->name('newsblogs');
     Route::get('/blogdetails/{slug}', [NewsBlogsController::class, 'show'])->name('blogdetails');
@@ -111,6 +128,8 @@ require __DIR__.'/auth.php';
 
                 
             });
+
+
              Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
 
                 Route::get('blog-categories', [\App\Http\Controllers\Admin\BlogCategoryController::class, 'index'])->name('blog-categories.index');
@@ -425,10 +444,7 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
                 });
 
 
-                // Announcement Route
-                Route::get('/announcement',function(){
-                    return view('UserDashboard.announcement.announcement');
-                });
+         
 
 
                 //UserDashboard  Settings Route

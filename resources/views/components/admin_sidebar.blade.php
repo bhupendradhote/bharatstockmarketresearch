@@ -25,6 +25,34 @@
             <span class="sidebar-text">Tips</span>
         </a>
 
+        {{-- NEW ANNOUNCEMENTS DROPDOWN --}}
+        <div class="dropdown-container" data-dropdown-id="announcements" x-data="{ open: {{ request()->routeIs('admin.announcements.*') ? 'true' : 'false' }} }">
+            <button @click="open = !open; toggleDropdown('announcements-menu')"
+                class="flex items-center justify-between w-full px-3 py-2 rounded-md hover:bg-[#3463c8] text-sm text-slate-200 group dropdown-btn">
+                <div class="flex items-center">
+                    <span class="w-4 h-4 mr-2 flex-shrink-0 text-slate-400 group-hover:text-white">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </span>
+                    <span class="sidebar-text">Announcements</span>
+                </div>
+                <span class="arrow-icon transition-transform duration-300" :class="{ 'rotate-180': open }">▼</span>
+            </button>
+
+            <div id="announcements-menu" class="dropdown-content {{ request()->routeIs('admin.announcements.*') ? '' : 'hidden' }} pl-8 mt-1 space-y-1">
+                <a href="{{ route('admin.announcements.index') }}"
+                    class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text {{ request()->routeIs('admin.announcements.index') ? 'bg-[#3463c8] text-white' : '' }}">
+                    All Announcements
+                </a>
+                <a href="{{ route('admin.announcements.create') }}"
+                    class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text {{ request()->routeIs('admin.announcements.create') ? 'bg-[#3463c8] text-white' : '' }}">
+                    Add New
+                </a>
+            </div>
+        </div>
+
         <div class="dropdown-container" data-dropdown-id="news-blogs" x-data="{ open: false }">
             <button @click="open = !open; toggleDropdown('news-blogs-menu')"
                 class="flex items-center justify-between w-full px-3 py-2 rounded-md hover:bg-[#3463c8] text-sm text-slate-200 group dropdown-btn">
@@ -141,7 +169,6 @@
         <a href="{{ route('users.list') }}"
             class="flex items-center px-3 py-2 rounded-md hover:bg-[#3463c8] text-sm text-slate-200 group">
             <span class="w-4 h-4 mr-2 flex-shrink-0 text-slate-400 group-hover:text-white">
-                {{-- Customers Group SVG Icon --}}
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -171,13 +198,6 @@
             <span class="sidebar-text">Policies</span>
         </a>
 
-        <!--<a href="{{ url('admin/investor-charter-policy') }}"-->
-        <!--    class="flex items-center px-3 py-2 rounded-md hover:bg-[#3463c8] text-sm text-slate-200 group">-->
-        <!--    <span class="w-4 h-4 mr-2 flex-shrink-0 text-slate-400 group-hover:text-white">-->
-        <!--        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>-->
-        <!--    </span>-->
-        <!--    <span class="sidebar-text">Investor Charter</span>-->
-        <!--</a>-->
         <div class="dropdown-container" data-dropdown-id="services" x-data="{ open: false }">
             <button @click="open = !open; toggleDropdown('services-menu')"
                 class="flex items-center justify-between w-full px-3 py-2 rounded-md hover:bg-[#3463c8] text-sm text-slate-200 group dropdown-btn">
@@ -289,7 +309,6 @@
 </aside>
 
 <style>
-    /* Sidebar styles */
     .sidebar-text {
         transition: opacity 0.3s ease;
         white-space: nowrap;
@@ -311,7 +330,6 @@
         font-size: 10px;
     }
 
-    /* When sidebar is collapsed */
     aside.w-16 nav a,
     aside.w-16 .dropdown-container button {
         justify-content: center;
@@ -324,14 +342,12 @@
         margin-right: 0;
     }
 
-    /* Smooth transitions */
     aside,
     .sidebar-text,
     .dropdown-content {
         transition: all 0.3s ease-in-out;
     }
 
-    /* Hover effects for dropdown buttons */
     .dropdown-btn:hover {
         background-color: #3463c8;
     }

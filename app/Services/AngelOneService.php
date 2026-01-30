@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Storage; // Add this at the top
 class AngelOneService
 {
     private Client $client;
@@ -24,7 +24,6 @@ class AngelOneService
         ]);
 
         $this->baseUrl = config('services.angel.base_url', env('ANGEL_BASE_URL', 'https://apiconnect.angelbroking.com'));
-        // Ensure marketBaseUrl points to the correct domain requested
         $this->marketBaseUrl = config('services.angel.market_base_url', env('ANGEL_MARKET_BASE_URL', 'https://apiconnect.angelone.in'));
         $this->cachePrefix = 'angel_';
         $this->jwtTtlSeconds = intval(config('services.angel.jwt_ttl_seconds', 3300));
@@ -361,7 +360,6 @@ class AngelOneService
 
     public function fetch52WeekHighLow(array $symbols, string $exchange = 'NSE'): array
     {
-        // The 'FULL' mode in quote API provides fundamental details including 52 week high/low
         return $this->quote($symbols, 'FULL', $exchange);
     }
 
@@ -390,5 +388,51 @@ class AngelOneService
                 'api_key' => config('services.angel.api_key', env('ANGEL_API_KEY')),
             ],
         ];
+    }
+
+ public function searchScrip(string $query, string $exchange = 'NSE'): array
+    {
+        $query = strtoupper(trim($query));
+        if (strlen($query) < 2) return [];
+
+        $client = new Client([
+            'timeout' => 20,
+            'verify'  => false
+        ]);
+
+        $response = $client->get(
+            'https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json'
+        );
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        if (empty($data)) return [];
+
+        $results = [];
+        $count = 0;
+
+        foreach ($data as $item) {
+
+            $exch = strtoupper($item['exch_seg'] ?? '');
+            if ($exchange !== 'ALL' && $exch !== $exchange) {
+                continue;
+            }
+
+            $rawSymbol = strtoupper($item['symbol'] ?? '');
+            $cleanSymbol = str_replace(['-EQ', '-BE'], '', $rawSymbol);
+            $name = strtoupper($item['name'] ?? '');
+
+            if (
+                str_contains($cleanSymbol, $query) ||
+                str_contains($rawSymbol, $query) ||
+                str_contains($name, $query)
+            ) {
+                $results[] = $item;
+                $count++;
+            }
+
+            if ($count >= 20) break;
+        }
+
+        return $results;
     }
 }

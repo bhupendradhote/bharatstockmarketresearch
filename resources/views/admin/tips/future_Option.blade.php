@@ -164,13 +164,19 @@
                                         x-text="errorMessage"></div>
                                 </div>
 
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black text-gray-400 uppercase mb-1">Exchange</label>
-                                    <select name="exchange" id="exchange_select"
-                                        class="w-full border-b-2 border-gray-100 focus:border-[#2a5298] py-2 text-base font-bold outline-none bg-transparent">
-                                        <option value="NSE">NSE (NFO)</option>
-                                        <option value="MCX">MCX</option>
+                               <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">
+                                        Exchange
+                                    </label>
+
+                                    <select
+                                        name="exchange"
+                                        id="exchange_select"
+                                        class="w-full border-b-2 border-gray-100 focus:border-[#2a5298] py-2 text-base font-bold outline-none bg-transparent"
+                                    >
+                                        <option value="NSE">NSE (NFO – NIFTY / BANKNIFTY)</option>
+                                        <option value="BSE">BSE (BFO – SENSEX)</option>
+                                        <option value="MCX">MCX (Commodities)</option>
                                     </select>
                                 </div>
 
@@ -451,7 +457,6 @@
         });
     });
 </script>
-
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('stockSearchDerivative', () => ({
@@ -463,6 +468,9 @@
             errorMessage: '',
             currentExchange: 'NSE',
             currentInstrument: 'future',
+
+            // index keywords we want to ensure are discoverable
+            indexKeywords: ['OPTIDX', 'SENSEX', 'NIFTY', 'BANKNIFTY', 'NIFTYBANK'],
 
             init() {
                 const exchangeSelect = document.getElementById('exchange_select');
@@ -504,6 +512,13 @@
                 }
             },
 
+            // helper: return true if symbol or name matches any index keyword
+            isIndexSymbol(s) {
+                if (!s) return false;
+                const hay = (s.symbol || s.name || '').toUpperCase();
+                return this.indexKeywords.some(k => hay.includes(k));
+            },
+
             filterStocks() {
                 if (!this.search || this.search.length < 2) {
                     this.filteredStocks = [];
@@ -511,22 +526,35 @@
                 }
                 const term = this.search.toUpperCase();
                 let out = [];
+                // map NSE -> NFO (derivatives), keep other exchanges as-is
                 const targetExch = (this.currentExchange === 'NSE') ? 'NFO' : this.currentExchange;
 
                 for (let s of this.allStocks) {
                     const sExch = (s.exch_seg || '').toUpperCase();
-                    if (sExch !== targetExch) continue;
-
                     const name = (s.name || '').toUpperCase();
                     const symbol = (s.symbol || '').toUpperCase();
 
+                    // If the user searches indices (OPTIDX, SENSEX...), allow them regardless of exch_seg
+                    const isIndex = this.isIndexSymbol(s);
+
+                    // skip if exchange doesn't match AND it's not an index we want to include for currentExchange
+                    if (!isIndex && sExch !== targetExch) continue;
+
                     if (name.includes(term) || symbol.includes(term)) {
+                        // If user selected instrument 'future' restrict to FUT suffix where appropriate
                         if (this.currentInstrument === 'future') {
-                            if (symbol.endsWith('FUT')) out.push(s);
+                            // many futures end with FUT; some index futures might have FUT or simply be indexFUT tokens
+                            if (symbol.endsWith('FUT') || /FUT$/.test(symbol) || isIndex) {
+                                out.push(s);
+                            }
                         } else {
-                            out.push(s);
+                            // options: include CE/PE or index option tokens
+                            if (/CE$|PE$/i.test(symbol) || /CE|PE/i.test(symbol) || isIndex) {
+                                out.push(s);
+                            }
                         }
                     }
+
                     if (out.length >= 50) break;
                 }
                 this.filteredStocks = out;
@@ -542,30 +570,58 @@
                 this.fetchCurrentPrice(stock);
             },
 
+            /**
+             * More forgiving symbol parser:
+             * - handles typical option formats with CE/PE at the end (or -CE/_CE),
+             * - extracts date tokens like 12JAN23, strike like 19000 or 19000.0,
+             * - still handles FUT suffixes.
+             */
             parseSymbolData(rawSymbol) {
-                const optionRegex = /^([A-Z0-9\W]+)(\d{2}[A-Z]{3}\d{2})([\d\.]+)(CE|PE)$/;
-                const futureRegex = /^([A-Z0-9\W]+)(\d{2}[A-Z]{3}\d{2})FUT$/;
-                let match = rawSymbol.match(optionRegex);
+                if (!rawSymbol) return;
+                const sym = rawSymbol.toUpperCase();
 
-                if (match) {
+                // quick detection for CE/PE
+                const hasCE = /\bCE\b|CE$/i.test(sym);
+                const hasPE = /\bPE\b|PE$/i.test(sym);
+                const hasFUT = /FUT$/i.test(sym);
+
+                // Generic date extractor: finds 2 digits + 3 letters + 2 digits e.g. 12JAN23
+                const dateMatch = sym.match(/(\d{2}[A-Z]{3}\d{2})/);
+                // Strike: sequence of digits possibly with dot, that appears before CE/PE or after date
+                const strikeMatch = sym.match(/(\d+(?:\.\d+)?)(?=(CE|PE)\b|CE$|PE$)/i) || sym.match(/(?:\d{2}[A-Z]{3}\d{2})(\d+(?:\.\d+)?)/);
+
+                if (hasCE || hasPE) {
                     this.switchInstrument('option');
-                    const dateStr = match[2];
-                    const strike = match[3];
-                    const type = match[4];
-                    this.setExpiryDate(dateStr);
-                    document.getElementById('strike_price').value = strike;
+
+                    const dateStr = dateMatch ? dateMatch[1] : null;
+                    const strike = strikeMatch ? strikeMatch[1] : '';
+                    const type = hasCE ? 'CE' : 'PE';
+
+                    if (dateStr) this.setExpiryDate(dateStr);
+                    const strikeEl = document.getElementById('strike_price');
+                    if (strikeEl) strikeEl.value = strike;
                     this.selectOptionType(type);
-                } else {
-                    match = rawSymbol.match(futureRegex);
-                    if (match) {
-                        this.switchInstrument('future');
-                        const dateStr = match[2];
-                        this.setExpiryDate(dateStr);
-                    }
+                    return;
+                }
+
+                if (hasFUT) {
+                    this.switchInstrument('future');
+
+                    const dateStr = dateMatch ? dateMatch[1] : null;
+                    if (dateStr) this.setExpiryDate(dateStr);
+                    return;
+                }
+
+                // Fallback: sometimes index symbols are labeled like "NIFTY" or "SENSEX" with no CE/PE/FUT.
+                // In that case, keep current instrument and try to set expiry if present.
+                if (dateMatch) {
+                    const dateStr = dateMatch[1];
+                    this.setExpiryDate(dateStr);
                 }
             },
 
             setExpiryDate(dateStr) {
+                if (!dateStr) return;
                 const monthMap = {
                     'JAN': '01',
                     'FEB': '02',
@@ -580,31 +636,37 @@
                     'NOV': '11',
                     'DEC': '12'
                 };
+                // dateStr expected like 12JAN23 or 05FEB26
                 const day = dateStr.substring(0, 2);
                 const mon = dateStr.substring(2, 5).toUpperCase();
                 const yr = dateStr.substring(5, 7);
-                const formattedDate = `20${yr}-${monthMap[mon]}-${day}`;
+                const mm = monthMap[mon] || '01';
+                const formattedDate = `20${yr}-${mm}-${day}`;
                 const expiryInput = document.getElementById('expiry_date');
                 if (expiryInput) expiryInput.value = formattedDate;
             },
 
             switchInstrument(type) {
-                document.getElementById('tip_type').value = type;
-                document.querySelectorAll(`[data-single="instrument"]`).forEach(b => b.classList
-                    .remove('active-box'));
-                const btn = document.querySelector(
-                    `[data-single="instrument"][data-type="${type}"]`);
+                const tipTypeEl = document.getElementById('tip_type');
+                if (tipTypeEl) tipTypeEl.value = type;
+
+                document.querySelectorAll(`[data-single="instrument"]`).forEach(b => b.classList.remove('active-box'));
+                const btn = document.querySelector(`[data-single="instrument"][data-type="${type}"]`);
                 if (btn) btn.classList.add('active-box');
+
                 const optionFields = document.getElementById('optionFields');
-                if (type === 'option') optionFields.classList.remove('hidden');
-                else optionFields.classList.add('hidden');
+                if (optionFields) {
+                    if (type === 'option') optionFields.classList.remove('hidden');
+                    else optionFields.classList.add('hidden');
+                }
+
                 this.currentInstrument = type;
             },
 
             selectOptionType(type) {
-                document.getElementById('selected_option_type').value = type;
-                document.querySelectorAll(`[data-single="cepe"]`).forEach(b => b.classList.remove(
-                    'active-box'));
+                const sel = document.getElementById('selected_option_type');
+                if (sel) sel.value = type;
+                document.querySelectorAll(`[data-single="cepe"]`).forEach(b => b.classList.remove('active-box'));
                 const btn = document.querySelector(`[data-single="cepe"][data-value="${type}"]`);
                 if (btn) btn.classList.add('active-box');
             },
@@ -615,11 +677,11 @@
                 const loader = document.getElementById('price_loader');
 
                 if (loader) loader.classList.remove('hidden');
-                cmpInput.value = '';
+                if (cmpInput) cmpInput.value = '';
 
                 try {
-                    const apiExchange = (this.currentExchange === 'NSE') ? 'NFO' : this
-                        .currentExchange;
+                    // For index derivatives like OPTIDX we still use the derivatives segment (NFO) when exchange= NSE
+                    const apiExchange = (this.currentExchange === 'NSE') ? 'NFO' : this.currentExchange;
                     const params = new URLSearchParams({
                         symbol: stock.token,
                         exchange: apiExchange
@@ -633,16 +695,14 @@
                     const result = await response.json();
                     let ltp = 0;
                     if (result.status && result.data) {
-                        const dataPoint = result.data.fetched ? result.data.fetched[0] : result
-                            .data;
+                        const dataPoint = result.data.fetched ? result.data.fetched[0] : result.data;
                         if (dataPoint) ltp = parseFloat(dataPoint.ltp);
                     }
                     if (ltp > 0) {
-                        cmpInput.value = ltp;
+                        if (cmpInput) cmpInput.value = ltp;
                         if (entryInput) {
                             entryInput.value = ltp;
-                            entryInput.dispatchEvent(new Event(
-                                'input'));
+                            entryInput.dispatchEvent(new Event('input'));
                         }
                     }
                 } catch (error) {
@@ -654,6 +714,7 @@
         }));
     });
 </script>
+
 
 <script>
     (function() {

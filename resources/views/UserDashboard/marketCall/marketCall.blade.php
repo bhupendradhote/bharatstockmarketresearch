@@ -268,7 +268,6 @@
 <script>
     document.addEventListener('alpine:init', () => {
         
-        // MAIN DASHBOARD COMPONENT
         Alpine.data('marketDashboard', (config) => ({
             callTab: config.firstCategory,
             highlights: config.highlights,
@@ -295,12 +294,11 @@
             }
         }));
     
-        // CARD COMPONENT WITH AJAX LIVE RELOAD
         Alpine.data('stockCard', (item) => ({
             item: item,
             cmp: null,
             timer: null,
-            flashColor: '', // Stores class for flash effect
+            flashColor: '',
     
             init() {
                 this.cmp = parseFloat(item.cmp_price) ? parseFloat(item.cmp_price) : parseFloat(item.entry_price);
@@ -312,7 +310,7 @@
                 if(this.timer) clearInterval(this.timer);
                 this.timer = setInterval(() => {
                     this.fetchLivePrice();
-                }, 5000); 
+                }, 3000); 
             },
     
             async fetchLivePrice() {
@@ -388,7 +386,6 @@
     [x-cloak] { display: none !important; }
     .scrollbar-none::-webkit-scrollbar { display: none; }
     .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-    /* MESH GRADIENT BACKGROUND */
     .dashboard-mesh {
     background-color: #f3f4f6;
     background-image: 
@@ -397,7 +394,6 @@
     radial-gradient(at 100% 0%, hsla(339,49%,90%,1) 0, transparent 50%),
     radial-gradient(at 0% 100%, hsla(225,39%,90%,1) 0, transparent 50%);
     }
-    /* LIGHT GLASS EFFECT */
     .glass-panel {
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(20px);
@@ -412,7 +408,6 @@
     border: 1px solid rgba(255, 255, 255, 0.9);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     }
-    /* Buttons & Interactive Elements */
 .glass-button {
     background: linear-gradient(90deg, #ffc1076e 0%, #0096889c 30%, #4CAF50 100%);
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -426,7 +421,6 @@
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
-    /* Gradients for Sliders */
     .range-gradient-buy {
     background: linear-gradient(
     90deg,

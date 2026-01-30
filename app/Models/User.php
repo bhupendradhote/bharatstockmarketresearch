@@ -135,4 +135,8 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->hasOne(\App\Models\KycVerification::class);
     }
+public function watchlists()
+{
+    return $this->hasMany(Watchlist::class);
+}
 }
