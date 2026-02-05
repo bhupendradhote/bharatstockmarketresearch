@@ -23,19 +23,23 @@ class Tip extends Model
         'strike_price',    
         'option_type',
         'status',
-        'trade_status', // <--- Added this
+        'trade_status', 
         'version',
         'admin_note',
-        'created_by'
+        'created_by',
+        'followups'
     ];
 
     protected $attributes = [
         'status' => 'active',
-        'trade_status' => 'Open', // Default attribute
+        'trade_status' => 'Open',
         'version' => 1,
     ];
 
-    // Scopes
+    protected $casts = [
+        'followups' => 'array'
+    ];
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -46,7 +50,6 @@ class Tip extends Model
         return $query->where('status', 'archived');
     }
 
-    // Relationships
     public function category()
     {
         return $this->belongsTo(TipCategory::class, 'category_id');

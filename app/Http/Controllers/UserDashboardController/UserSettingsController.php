@@ -28,14 +28,34 @@ public function profile()
     ));
 }
 
+
 public function dashboard()
 {
     $user = auth()->user();
 
-    $data = $this->getProfileData($user); // same method you created
+    $data = $this->getProfileData($user);
+
+    $activeSubscription = \App\Models\UserSubscription::where('user_id', $user->id ?? null)
+        ->where('status', 'active')
+        ->where('end_date', '>', now())
+        ->first();
+
+    // ✅ Only Intraday tips
+    $highlights = \App\Models\Tip::with(['category', 'planAccess'])
+        ->whereIn('status', ['active', 'Active'])
+        ->whereHas('category', function ($q) {
+            $q->where('name', 'Intraday');
+        })
+        ->latest()
+        ->take(8)
+        ->get();
 
     return view('UserDashboard.userdashboard', array_merge(
-        ['user' => $user],
+        [
+            'user' => $user,
+            'highlights' => $highlights,
+            'activeSubscription' => $activeSubscription
+        ],
         $data
     ));
 }

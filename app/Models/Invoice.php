@@ -35,4 +35,21 @@ class Invoice extends Model
     {
         return $this->belongsTo(UserSubscription::class, 'user_subscription_id');
     }
+      public function couponUsage()
+    {
+        return $this->hasOne(CouponUsage::class);
+    }
+
+    // (optional quick access)
+    public function coupon()
+    {
+        return $this->hasOneThrough(
+            Coupon::class,
+            CouponUsage::class,
+            'invoice_id',
+            'id',
+            'id',
+            'coupon_id'
+        );
+    }
 }

@@ -5,6 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
+use App\Events\AnnouncementPublished;
+use App\Models\Notification;
+use App\Models\NotificationUser;
+use App\Models\AnnouncementNotification;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use App\Models\MasterNotification;
+use App\Events\MasterNotificationBroadcast;
 
 class AnnouncementController extends Controller
 {
@@ -29,26 +37,61 @@ class AnnouncementController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'type'    => 'required|string|in:Features,Service Update,Others',
-            'content' => 'required|string|max:255',
-            'detail'  => 'required|string',
-            'published_at' => 'nullable|date',
-        ]);
+  
+    
 
-        if (empty($validated['published_at'])) {
-            $validated['published_at'] = now();
+
+    
+
+        public function store(Request $request)
+        {
+            $validated = $request->validate([
+                'title'   => 'required|string|max:255',
+                'type'    => 'required|string|in:Features,Service Update,Others',
+                'content' => 'required|string|max:255',
+                'detail'  => 'required|string',
+                'published_at' => 'nullable|date',
+            ]);
+
+            $publishedAt = $validated['published_at'] ?? now();
+
+            // 📢 1️⃣ OLD SYSTEM (keep working)
+            $announcement = Announcement::create([
+                'title'        => $validated['title'],
+                'type'         => $validated['type'],
+                'content'      => $validated['content'],
+                'detail'       => $validated['detail'],
+                'published_at' => $publishedAt,
+            ]);
+
+            // 🌍 2️⃣ MASTER NOTIFICATION SYSTEM
+            $notification = MasterNotification::create([
+                'type'     => 'announcement',
+                'severity' => null,
+
+                'title'   => $validated['title'],
+                'message' => $validated['content'],
+
+                'data' => [
+                    'category'     => $validated['type'],
+                    'detail'       => $validated['detail'],
+                    'published_at'=> $publishedAt,
+                    'announcement_id' => $announcement->id, // link both systems
+                    'created_by'  => auth()->id(),
+                ],
+
+                'user_id'   => null,
+                'is_global' => true,
+                'channel'   => 'both',
+            ]);
+
+            // 🚀 Realtime broadcast
+            broadcast(new MasterNotificationBroadcast($notification));
+
+            return redirect()
+                ->route('admin.announcements.index')
+                ->with('success', 'Announcement published successfully!');
         }
-
-        Announcement::create($validated);
-
-        return redirect()->route('admin.announcements.index')
-            ->with('success', 'Announcement published successfully!');
-    }
-
     /**
      * Show the form for editing the specified resource.
      */

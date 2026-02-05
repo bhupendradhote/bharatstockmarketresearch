@@ -14,7 +14,6 @@ use Spatie\Permission\Models\Role;
 
 class UserApiController extends Controller
 {
-    // Get current user
     public function user(Request $request)
     {
         $user = Auth::user();
@@ -44,10 +43,27 @@ class UserApiController extends Controller
         ]);
     }
 
-    // Update user - works exactly like web version
+    public function usersCountToken()
+    {
+        $users = User::with(['roles', 'media'])->get();
+
+    return response()->json([
+        'success' => true,
+        'count' => $users->count(),
+        'users' => $users->map(function ($user) {
+            return [
+                ...$user->toArray(),
+
+                'profile_image_url' => $user->getFirstMediaUrl('profile_images') ?: null,
+                'roles' => $user->roles->pluck('name')->toArray(),
+            ];
+        }),
+    ]);
+    }
+
+
     public function update(Request $request, $id = null)
     {   
-        // If no ID provided, update current user
         if ($id === null) {
             $user = Auth::user();
             if (!$user) {
@@ -57,7 +73,6 @@ class UserApiController extends Controller
                 ], 401);
             }
         } else {
-            // Check if user is admin to update other users
             $authUser = Auth::user();
             if (!$authUser->hasRole('super-admin')) {
                 return response()->json([
@@ -75,7 +90,6 @@ class UserApiController extends Controller
             }
         }
 
-        // Validate the request - same as web version
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -96,7 +110,6 @@ class UserApiController extends Controller
             ], 422);
         }
 
-        // Update basic user info - same as web version
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
@@ -106,7 +119,6 @@ class UserApiController extends Controller
             'notes' => $request->notes,
         ]);
 
-        // Handle role update - same as web version
         if ($request->has('role') && $request->role) {
             $user->roles()->detach();
             $role = Role::where('name', $request->role)->first();
@@ -115,44 +127,34 @@ class UserApiController extends Controller
             }
         }
 
-        // Handle profile image with Media Library - same as web version
         if ($request->hasFile('profile_image')) {
-            // IMPORTANT: Clear existing images first
             $user->clearMediaCollection('profile_images');
             
-            // Add the new media
             $media = $user->addMediaFromRequest('profile_image')
                 ->usingName('profile_image_' . $user->id)
                 ->usingFileName($request->file('profile_image')->getClientOriginalName())
                 ->toMediaCollection('profile_images', 'public');
             
-            // Log for debugging
             Log::info('New profile image uploaded via API for user ' . $user->id, [
                 'media_id' => $media->id,
                 'file_name' => $media->file_name,
                 'url' => $media->getUrl()
             ]);
         }
-        // Handle remove profile image checkbox - same as web version
         elseif ($request->has('remove_profile_image') && $request->remove_profile_image == '1') {
-            // Delete all profile images
             $user->clearMediaCollection('profile_images');
             Log::info('Profile image removed via API for user ' . $user->id);
         }
 
-        // IMPORTANT: Refresh the user model to get updated media - same as web version
         $user->refresh();
         
-        // Get the latest profile image URL for response - same as web version
         $profileImageUrl = $user->getFirstMediaUrl('profile_images');
         
-        // Debug: Check what's being returned
         Log::info('Update response via API for user ' . $user->id, [
             'profile_image_url' => $profileImageUrl,
             'media_count' => $user->getMedia('profile_images')->count()
         ]);
 
-        // Return response - same as web version
         return response()->json([
             'success' => true,
             'message' => 'User updated successfully',

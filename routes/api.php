@@ -58,18 +58,11 @@ Route::post('verify-otp', [AuthApiController::class, 'verifyOtp']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthApiController::class, 'logout']);
     Route::get('user', [UserApiController::class, 'user']);
-     Route::put('user/update', [UserApiController::class, 'update']); // Update current user
+     Route::put('user/update', [UserApiController::class, 'update']); 
     Route::put('user/{id}', [UserApiController::class, 'update']);
-
-    // ⭐ TEST API
-    Route::get('test-api', function () {
-        return response()->json([
-            'success' => true,
-            'message' => 'Sanctum token verified successfully!',
-            'user' => Auth::user(),
-        ]);
-    });
 });
+
+Route::get('users-token', [UserApiController::class, 'usersCountToken']);
 
 
 // blogs api
@@ -94,7 +87,6 @@ Route::middleware('auth:sanctum')->prefix('packages')->group(function () {
 
 // service plans api
 Route::middleware('auth:sanctum')->prefix('service-plans')->group(function () {
-
     Route::get('/', [ServicePlanApiController::class, 'index']);
     Route::get('/{id}', [ServicePlanApiController::class, 'show']);
     Route::post('/', [ServicePlanApiController::class, 'store']);

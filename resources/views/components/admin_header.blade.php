@@ -6,21 +6,21 @@
     </div>
 
     <div class="flex items-center space-x-4">
-<a href="/admin/tips"
-   class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-slate-600
-          border border-slate-300 rounded-lg
-          hover:bg-slate-100 hover:text-slate-900
-          transition duration-200">
-   Tips
-</a>
+        <a href="/admin/tips"
+            class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-slate-600
+                border border-slate-300 rounded-lg
+                hover:bg-slate-100 hover:text-slate-900
+                transition duration-200">
+            Tips
+        </a>
 
-<a href="/listUser"
-   class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-slate-600
-          border border-slate-300 rounded-lg
-          hover:bg-slate-100 hover:text-slate-900
-          transition duration-200">
-   Customers
-</a>
+        <a href="/listUser"
+            class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-slate-600
+                border border-slate-300 rounded-lg
+                hover:bg-slate-100 hover:text-slate-900
+                transition duration-200">
+            Customers
+        </a>
 
 
         <div class="relative w-64" id="global-search-wrapper">
@@ -44,7 +44,7 @@
                     class="hidden absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-[10px] text-white rounded-full flex items-center justify-center">
                 </span>
             </button>
-            
+
             <!-- DROPDOWN -->
             <div id="notificationDropdown"
                 class="hidden absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-lg shadow-lg z-50">
@@ -125,7 +125,7 @@
 
 
 
-<script>
+{{-- <script>
     let notificationCount =
         {{ \App\Models\NotificationUser::where('user_id', auth()->id())->whereNull('read_at')->count() }};
 </script>
@@ -162,9 +162,84 @@
 
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
+
 <script>
-    // Pusher configuration
-    Pusher.logToConsole = true; // Debug के लिए true रखें
+    const adminId = {{ auth()->id() }};
+    const badge = document.getElementById('notificationCount');
+    const list = document.getElementById('notificationList');
+
+    let unreadCount = 0;
+
+    /* ===============================
+       🔔 BADGE UPDATE
+    =============================== */
+    function updateBadge() {
+        if (unreadCount > 0) {
+            badge.innerText = unreadCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    /* ===============================
+       📥 RENDER NOTIFICATION
+    =============================== */
+    function addNotification(n) {
+
+        const chatUser = n.data?.from_user_name || 'User';
+
+        const html = `
+        <div class="px-4 py-3 border-b hover:bg-slate-50 cursor-pointer"
+             onclick="handleAdminNotification('${n.type}', ${n.data?.chat_id || 0}, ${n.data?.from_user_id || 0})">
+
+            <p class="text-sm font-semibold">
+                ${n.title}
+            </p>
+
+            <p class="text-xs text-slate-500 truncate">
+                ${n.message}
+            </p>
+        </div>
+    `;
+
+        list.insertAdjacentHTML('afterbegin', html);
+
+        unreadCount++;
+        updateBadge();
+    }
+
+    /* ===============================
+       🎯 CLICK ACTION
+    =============================== */
+    function handleAdminNotification(type, chatId, userId) {
+
+        if (type === 'chat') {
+            window.location.href = '/admin/chat?user=' + userId;
+        }
+
+        unreadCount = 0;
+        updateBadge();
+    }
+
+    /* ===============================
+       📡 LOAD OLD NOTIFICATIONS
+    =============================== */
+    fetch('/admin/notifications/latest')
+        .then(r => r.json())
+        .then(res => {
+
+            list.innerHTML = '';
+            unreadCount = 0;
+
+            res.notifications.forEach(n => {
+                addNotification(n);
+            });
+        });
+
+    /* ===============================
+       ⚡ REALTIME PUSHER
+    =============================== */
 
     const pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
         cluster: "{{ env('PUSHER_APP_CLUSTER') }}",
@@ -177,79 +252,193 @@
         }
     });
 
-    // Admin ID
+    /* 🎯 ADMIN PRIVATE CHANNEL */
+    const adminChannel = pusher.subscribe('user.' + adminId);
+
+    adminChannel.bind('master.notification', function(data) {
+
+        console.log('🔥 Realtime admin:', data);
+
+        if (!['chat', 'ticket', 'login', 'warning', 'subscription', 'disaster'].includes(data.type)) {
+            return;
+        }
+
+        addNotification(data);
+    });
+
+    /* 🌍 GLOBAL CHANNEL (optional) */
+    const globalChannel = pusher.subscribe('public-notifications');
+
+    globalChannel.bind('master.notification', function(data) {
+
+        if (data.is_global) {
+            addNotification(data);
+        }
+    });
+</script> --}}
+
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
+<script>
     const adminId = {{ auth()->id() }};
+    const badge = document.getElementById('notificationCount');
+    const list = document.getElementById('notificationList');
+    const dropdown = document.getElementById('notificationDropdown');
 
-    // Subscribe to admin's private channel
-    const channel = pusher.subscribe('private-user.' + adminId);
+    let unreadCount = 0;
 
-    console.log('Subscribed to channel: private-user.' + adminId);
-
-    // Listen for NOTIFICATION event
-    channel.bind('user-chat-notification', function(data) {
-        console.log('Notification received:', data);
-
-        // Update notification count
-        let badge = document.getElementById('notificationCount');
-        let currentCount = parseInt(badge.innerText) || 0;
-        currentCount++;
-
-        badge.innerText = currentCount;
-        badge.classList.remove('hidden');
-
-        // Add animation
-        badge.classList.add('animate-bounce');
-        setTimeout(() => badge.classList.remove('animate-bounce'), 600);
-
-        // Add notification to dropdown
-        addNotificationToDropdown(data);
-    });
-
-    // Listen for MESSAGE event (if needed)
-    channel.bind('user-chat-message', function(data) {
-        console.log('Chat message received:', data);
-        // This is for real-time chat messages
-    });
-
-    // Function to add notification to dropdown
-    function addNotificationToDropdown(data) {
-        const list = document.getElementById('notificationList');
-
-        if (list) {
-            const notificationHTML = `
-                <div class="px-4 py-3 border-b hover:bg-slate-50 cursor-pointer"
-                     onclick="openChatFromNotification(${data.fromUserId})">
-                    <p class="text-sm font-medium">
-                        New message from ${data.fromUserName}
-                    </p>
-                    <p class="text-xs text-slate-500 truncate">
-                        ${data.message}
-                    </p>
-                </div>
-            `;
-
-            list.insertAdjacentHTML('afterbegin', notificationHTML);
+    /* ===============================
+       🔔 BADGE HANDLER
+    =============================== */
+    function updateBadge() {
+        if (unreadCount > 0) {
+            badge.innerText = unreadCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
         }
     }
 
-    // Function to open chat from notification
-    function openChatFromNotification(userId) {
-        // Mark notifications as read
-        fetch('/admin/notifications/mark-read', {
-            method: 'POST',
+    /* ===============================
+       📥 RENDER ONE NOTIFICATION
+    =============================== */
+    function renderNotification(n) {
+
+        const html = `
+        <div class="px-4 py-3 border-b hover:bg-slate-50 cursor-pointer"
+             onclick="openAdminNotification('${n.type}', ${n.data?.chat_id || 0}, ${n.data?.from_user_id || 0})">
+
+            <p class="text-sm font-semibold">
+                ${n.title}
+            </p>
+
+            <p class="text-xs text-slate-500 truncate">
+                ${n.message}
+            </p>
+        </div>
+    `;
+
+        list.insertAdjacentHTML('afterbegin', html);
+
+        unreadCount++;
+        updateBadge();
+    }
+
+    /* ===============================
+       🎯 CLICK ACTION
+    =============================== */
+
+    function openAdminNotification(type, chatId, userId) {
+
+        // 💬 CHAT
+        if (type === 'chat') {
+            window.location.href = '/admin/chat?user=' + userId;
+            return;
+        }
+
+        // 🎫 TICKET
+        if (type === 'ticket') {
+            window.location.href = '/admin/tickets';
+            return;
+        }
+
+        // 📦 Future types ready
+        if (type === 'subscription') {
+            window.location.href = '/admin/subscriptions';
+            return;
+        }
+
+        if (type === 'warning') {
+            window.location.href = '/admin/warnings';
+            return;
+        }
+
+        if (type === 'login') {
+            window.location.href = '/admin/logs';
+            return;
+        }
+    }
+
+    /* ===============================
+       📡 LOAD ALL NOTIFICATIONS
+    =============================== */
+    function loadAdminNotifications() {
+
+        fetch('/admin/notifications/latest')
+            .then(r => r.json())
+            .then(res => {
+
+                console.log('Loaded notifications:', res);
+
+                list.innerHTML = '';
+                unreadCount = 0;
+
+                res.notifications.forEach(n => {
+                    renderNotification(n);
+                });
+            })
+            .catch(err => console.error('Load error:', err));
+    }
+
+    /* ===============================
+       🔔 BELL TOGGLE + REFRESH
+    =============================== */
+    document.getElementById('notificationBell').addEventListener('click', function(e) {
+        e.stopPropagation();
+
+        dropdown.classList.toggle('hidden');
+        loadAdminNotifications(); // refresh every open
+    });
+
+    document.addEventListener('click', function() {
+        dropdown.classList.add('hidden');
+    });
+
+    /* ===============================
+       ⚡ PUSHER REALTIME
+    =============================== */
+    const pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
+        cluster: "{{ env('PUSHER_APP_CLUSTER') }}",
+        forceTLS: true,
+        authEndpoint: '/broadcasting/auth',
+        auth: {
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
-        }).then(() => {
-            // Update badge count
-            document.getElementById('notificationCount').classList.add('hidden');
-            document.getElementById('notificationCount').innerText = '0';
+        }
+    });
 
-            // Redirect to chat
-            window.location.href = '/admin/chat?user=' + userId;
-        });
-    }
+    /* 🎯 ADMIN PRIVATE CHANNEL */
+    const adminChannel = pusher.subscribe('user.' + adminId);
+
+    adminChannel.bind('master.notification', function(data) {
+
+        console.log('🔥 Realtime:', data);
+
+        if (!['chat', 'ticket', 'login', 'warning', 'subscription', 'disaster'].includes(data.type)) {
+            return;
+        }
+
+        renderNotification(data);
+    });
+
+    /* 🌍 GLOBAL CHANNEL (optional) */
+    const globalChannel = pusher.subscribe('public-notifications');
+
+    globalChannel.bind('master.notification', function(data) {
+        if (data.is_global) {
+            renderNotification(data);
+        }
+    });
+
+    /* ===============================
+       🚀 INITIAL LOAD
+    =============================== */
+    loadAdminNotifications();
 </script>
+
+
+
 <script>
     function openChatFromNotification(userId) {
 

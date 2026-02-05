@@ -6,35 +6,134 @@ use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+    use App\Models\AnnouncementNotification;
+use App\Models\AnnouncementNotificationUser;
+use App\Models\MasterNotification;
+use App\Models\MasterNotificationRead;
+
 
 class UserAnnouncementController extends Controller
 {
+
+   
+
+
     public function index()
     {
-        // 1. Fetch active announcements, sorted by newest first
-        $announcements = Announcement::where('is_active', true)
-            ->orderBy('published_at', 'desc')
+        $userId = auth()->id();
+
+        /* ======================================
+        ✅ Mark all announcements as read
+        ====================================== */
+
+        $announcementIds = MasterNotification::where('type', 'announcement')
+            ->pluck('id');
+
+        foreach ($announcementIds as $id) {
+            MasterNotificationRead::updateOrCreate(
+                [
+                    'master_notification_id' => $id,
+                    'user_id' => $userId,
+                ],
+                [
+                    'read_at' => now(),
+                ]
+            );
+        }
+
+        /* ======================================
+        📢 Fetch announcements
+        ====================================== */
+
+        $announcements = MasterNotification::where('type', 'announcement')
+            ->orderByDesc('created_at')
             ->get()
             ->map(function ($item) {
-                // 2. Transform data for the frontend
+
                 return [
                     'id' => $item->id,
                     'title' => $item->title,
-                    'type' => $item->type, // 'Features', 'Service Update', 'Others'
-                    'content' => $item->content,
-                    'detail' => $item->detail,
-                    // Format for list: "Today", "2 days ago"
-                    'date_human' => $item->published_at ? Carbon::parse($item->published_at)->diffForHumans() : 'Just now',
-                    // Format for details: "30 Nov 2025"
-                    'date_formatted' => $item->published_at ? Carbon::parse($item->published_at)->format('d M Y') : date('d M Y'),
-                    // Flag for "New" badge (e.g., posted within last 3 days)
+                    'type' => $item->data['type'] ?? 'General',
+                    'content' => $item->message,
+                    'detail' => $item->data['detail'] ?? '',
+
+                    'date_human' => $item->created_at->diffForHumans(),
+                    'date_formatted' => $item->created_at->format('d M Y'),
+
                     'is_new' => $item->created_at > now()->subDays(3),
                 ];
             });
 
-        // 3. Return the view with data
-        return view('UserDashboard.announcement.announcement', [
-            'announcements' => $announcements
+        return view('UserDashboard.announcement.announcement', compact('announcements'));
+    }
+
+
+
+    public function fetchUnseen()
+    {
+        $userId = auth()->id();
+
+        // 🔍 Get unseen notifications (global + user specific)
+        $notifications = MasterNotification::where(function ($q) use ($userId) {
+
+                // global notifications
+                $q->where('is_global', true)
+
+                // OR personal notifications
+                ->orWhere('user_id', $userId);
+
+            })
+
+            // remove already seen by this user
+            ->whereDoesntHave('reads', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+
+            ->latest()
+            ->take(15)
+            ->get();
+
+
+        return response()->json([
+            'count' => $notifications->count(),
+
+            'notifications' => $notifications->map(function ($n) {
+
+                return [
+                    'tracking_id' => $n->id,
+                    'type'        => $n->type,
+                    'title'       => $n->title,
+                    'message'     => $n->message,
+
+                    // optional routing per type
+                    'url' => match ($n->type) {
+                        'announcement' => route('user.announcement.index'),
+                        'chat'         => route('user.chat.index'),
+                        'tip'          => route('user.tips.index'),
+                        default        => '/notifications',
+                    },
+
+                    'created_at' => $n->created_at,
+                    'read_at'    => null,
+                ];
+            })
         ]);
+    }
+
+
+    public function markSeen($id)
+    {
+        AnnouncementNotificationUser::updateOrCreate(
+            [
+                'announcement_notification_id' => $id,
+                'user_id' => auth()->id(),
+            ],
+            [
+                'is_seen' => true,
+                'read_at' => now(),
+            ]
+        );
+
+        return response()->json(['status' => true]);
     }
 }

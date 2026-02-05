@@ -28,7 +28,7 @@ class PaymentInvoiceController extends Controller
             ->orderByDesc('start_date')
             ->get();
 
-        return view('userdashboard.settings.payments_invoicesList', compact('subscriptions'));
+        return view('UserDashboard.settings.payments_invoicesList', compact('subscriptions'));
     }
 
       public function show()

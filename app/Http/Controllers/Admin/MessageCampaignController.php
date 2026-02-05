@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
  use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use App\Models\MasterNotification;
+use App\Events\MasterNotificationBroadcast;
+use Illuminate\Support\Str;
 class MessageCampaignController extends Controller
 {
     /**
@@ -33,50 +36,62 @@ class MessageCampaignController extends Controller
      */
 
 
-public function store(Request $request)
-{
-    $request->validate([
-        'title'   => 'required|string|max:255',
-        'content' => 'required|string',
-        'type'    => 'required|in:info,success,warning,danger,offer',
-        'image'   => 'nullable|image|max:2048', // 🔑 image validation
-    ]);
 
-    try {
-        $imageUrl = null;
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('campaigns', 'public');
-            $imageUrl = asset('/storage/' . $path);
-        }
-
-        $campaign = MessageCampaign::create([
-            'title'       => $request->title,
-            'description' => $request->description,
-            'message'     => $request->message,
-            'content'     => $request->content,
-            'type'        => $request->type,
-            'image'       => $imageUrl, // 🔑 SAVE URL
-            'is_active'   => true,
-            'starts_at'   => $request->starts_at,
-            'ends_at'     => $request->ends_at,
-            'created_by'  => auth()->id(),
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title'   => 'required|string|max:255',
+            'content' => 'required|string',
+            'type'    => 'required|in:info,success,warning,danger,offer',
+            'image'   => 'nullable|image|max:2048',
         ]);
 
-        event(new MessageCampaignBroadcasted($campaign));
+        try {
 
-        return redirect()
-            ->route('admin.message-campaigns.index')
-            ->with('success', 'Message campaign sent successfully');
+            $imageUrl = null;
 
-    } catch (\Throwable $e) {
-        Log::error('Campaign send failed', ['error' => $e->getMessage()]);
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('campaigns', 'public');
+                $imageUrl = asset('/storage/' . $path);
+            }
 
-        return back()
-            ->withInput()
-            ->with('error', 'Message campaign could not be sent');
+            // 🎯 MASTER CAMPAIGN NOTIFICATION
+            $notification = MasterNotification::create([
+                'type'     => 'campaign',
+                'severity' => $request->type, // map info/success/warning/danger/offer
+
+                'title'   => $request->title,
+                'message' => Str::limit($request->content, 120),
+
+                'data' => [
+                    'detail' => $request->content,
+                    'image'  => $imageUrl,
+                    'created_by' => auth()->id(),
+                ],
+
+                'is_global' => true,
+                'user_id'   => null,
+                'channel'   => 'both',
+            ]);
+
+            // ⚡ realtime broadcast
+            broadcast(new MasterNotificationBroadcast($notification));
+
+            return redirect()
+                ->route('admin.message-campaigns.index')
+                ->with('success', 'Campaign sent successfully!');
+
+        } catch (\Throwable $e) {
+
+            Log::error('Campaign failed', [
+                'error' => $e->getMessage()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Campaign could not be sent');
+        }
     }
-}
 
 
     /**

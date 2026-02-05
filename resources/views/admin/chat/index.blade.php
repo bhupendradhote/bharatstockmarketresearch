@@ -37,10 +37,14 @@
 
         let inboxUsers = {};
 
-        function loadInbox() {
+
+
+        function loadInbox(autoUser = null) {
+
             $.get('/admin/chat/inbox-unread', function(res) {
+
                 $('#userList').html('');
-                inboxUsers = {}; // reset
+                inboxUsers = {};
 
                 res.users.forEach(item => {
 
@@ -67,23 +71,33 @@
                 </li>
             `);
                 });
+
+                /* ✅ AUTO OPEN AFTER DATA IS READY */
+                if (autoUser && inboxUsers[autoUser]) {
+                    openChat(autoUser);
+                }
+
             });
         }
-
 
 
         loadInbox();
     </script>
 
     <script>
+        const authUsersMap = @json(\App\Models\User::pluck('name', 'id'));
+    </script>
+    <script>
         function openChat(userId) {
             selectedUserId = userId;
 
-            // 👇 NAME / PHONE / FALLBACK
             let user = inboxUsers[userId] || {};
-            let headerText = user.name ?
-                user.name :
-                (user.phone ? user.phone : 'User #' + userId);
+
+            let headerText =
+                user.name ||
+                user.phone ||
+                authUsersMap[userId] || // ✅ DB fallback
+                'User #' + userId;
 
             $('#chatHeader').text('Chat with ' + headerText);
             $('#chatBox').html('');
@@ -207,6 +221,29 @@
             pusher.connection.bind('error', function(error) {
                 console.error('Pusher connection error:', error);
             });
+        });
+    </script>
+
+    <script>
+        function getQueryUser() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('user');
+        }
+
+        $(document).ready(function() {
+
+            loadInbox();
+
+            const autoUser = getQueryUser();
+
+            if (autoUser) {
+
+                // Wait a little so inbox loads first
+                setTimeout(() => {
+                    openChat(autoUser);
+                }, 500);
+
+            }
         });
     </script>
 @endsection

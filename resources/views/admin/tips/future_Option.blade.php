@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('content') <div class="bg-[#f0f2f5] font-sans min-h-screen" x-data="{ showCategoryModal: false }"> <div class="max-w-[1400px] mx-auto ">
+@section('content')
+<div class="bg-[#f0f2f5] font-sans min-h-screen" x-data="{ showCategoryModal: false }">
+    <div class="max-w-[1400px] mx-auto ">
 
         <form action="{{ route('tips.derivative.store') }}" method="POST" id="mainTipForm">
             @csrf
@@ -91,7 +93,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-4" x-data="stockSearchDerivative()" x-init="init()">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-visible relative z-10">
 
                         <div
@@ -116,7 +118,25 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
-                                <div x-data="stockSearchDerivative()" x-init="init()" class="relative">
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">
+                                        Exchange
+                                    </label>
+                                    <select name="exchange" id="exchange_select" x-model="currentExchange" @change="filterStocks"
+                                        class="w-full border-b-2 border-gray-100 focus:border-[#2a5298] py-2 text-base font-bold outline-none bg-transparent">
+                                        <option value="NSE">NSE (NFO – NIFTY / BANKNIFTY)</option>
+                                        <option value="BSE">BSE (BFO – SENSEX)</option>
+                                        <option value="MCX">MCX (Commodities)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Expiry Date</label>
+                                    <input type="date" name="expiry_date" id="expiry_date" x-model="selectedExpiry" @change="filterStocks"
+                                        class="w-full border-b-2 border-gray-100 focus:border-[#2a5298] py-2 text-base font-bold outline-none">
+                                </div>
+
+                                <div class="relative">
                                     <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">
                                         Contract / Script
                                     </label>
@@ -124,7 +144,7 @@
                                     <div class="relative">
                                         <input type="text" name="stock_name" x-model="search" @focus="loadStocks"
                                             @input="filterStocks" @click.outside="isOpen = false" autocomplete="off"
-                                            required placeholder="e.g. TATASTEEL24FEB"
+                                            required placeholder="Search (e.g. NIFTY)"
                                             class="w-full border-b-2 border-gray-100 focus:border-[#2a5298] py-2 text-base font-bold uppercase outline-none transition-all">
 
                                         <div x-show="isLoading" class="absolute right-0 top-3">
@@ -158,33 +178,10 @@
 
                                     <div x-show="isOpen && !isLoading && filteredStocks.length === 0 && search.length > 1"
                                         class="absolute z-50 w-full bg-white p-3 text-xs text-gray-500 mt-1 rounded-lg shadow">
-                                        No contracts found. Try searching another symbols.
+                                        No contracts found. <span x-show="selectedExpiry">Try clearing the date.</span>
                                     </div>
                                     <div x-show="errorMessage" class="text-xs text-red-500 mt-1"
                                         x-text="errorMessage"></div>
-                                </div>
-
-                               <div>
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">
-                                        Exchange
-                                    </label>
-
-                                    <select
-                                        name="exchange"
-                                        id="exchange_select"
-                                        class="w-full border-b-2 border-gray-100 focus:border-[#2a5298] py-2 text-base font-bold outline-none bg-transparent"
-                                    >
-                                        <option value="NSE">NSE (NFO – NIFTY / BANKNIFTY)</option>
-                                        <option value="BSE">BSE (BFO – SENSEX)</option>
-                                        <option value="MCX">MCX (Commodities)</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Expiry
-                                        Date</label>
-                                    <input type="date" name="expiry_date" id="expiry_date"
-                                        class="w-full border-b-2 border-gray-100 focus:border-[#2a5298] py-2 text-base font-bold outline-none">
                                 </div>
                             </div>
 
@@ -329,7 +326,7 @@
     </div>
 </div>
 
-<script defer src="[https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js](https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js)"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
     window.RISK_MASTER = @json($riskMaster ?? null);
     console.log('Active Risk Master (FNO):', window.RISK_MASTER);
@@ -468,19 +465,16 @@
             errorMessage: '',
             currentExchange: 'NSE',
             currentInstrument: 'future',
+            selectedExpiry: '', 
 
-            // index keywords we want to ensure are discoverable
             indexKeywords: ['OPTIDX', 'SENSEX', 'NIFTY', 'BANKNIFTY', 'NIFTYBANK'],
 
             init() {
                 const exchangeSelect = document.getElementById('exchange_select');
-                if (exchangeSelect) {
-                    this.currentExchange = exchangeSelect.value;
-                    exchangeSelect.addEventListener('change', e => {
-                        this.currentExchange = e.target.value;
-                        this.filterStocks();
-                    });
+                if(exchangeSelect) {
+                   this.currentExchange = exchangeSelect.value;
                 }
+
                 window.addEventListener('instrument-changed', (e) => {
                     this.currentInstrument = e.detail.type;
                     this.filterStocks();
@@ -512,11 +506,34 @@
                 }
             },
 
-            // helper: return true if symbol or name matches any index keyword
             isIndexSymbol(s) {
                 if (!s) return false;
                 const hay = (s.symbol || s.name || '').toUpperCase();
                 return this.indexKeywords.some(k => hay.includes(k));
+            },
+
+            formatDateToSymbol(isoDate) {
+                if(!isoDate) return null;
+                const d = new Date(isoDate);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = d.toLocaleString('default', { month: 'short' }).toUpperCase();
+                const year = d.getFullYear(); 
+                return `${day}${month}${year}`;
+            },
+
+            formatSymbolDateToInput(str) {
+                 if(!str) return '';
+                 const cleanStr = str.replace(/-/g, '');
+                 const match = cleanStr.match(/^(\d{2})([A-Z]{3})(\d{2,4})$/);
+                 if(match) {
+                     const monthMap = {'JAN':'01','FEB':'02','MAR':'03','APR':'04','MAY':'05','JUN':'06','JUL':'07','AUG':'08','SEP':'09','OCT':'10','NOV':'11','DEC':'12'};
+                     let yr = match[3];
+                     if(yr.length === 2) yr = '20' + yr;
+                     const mm = monthMap[match[2]];
+                     const dd = match[1];
+                     return `${yr}-${mm}-${dd}`;
+                 }
+                 return '';
             },
 
             filterStocks() {
@@ -526,30 +543,30 @@
                 }
                 const term = this.search.toUpperCase();
                 let out = [];
-                // map NSE -> NFO (derivatives), keep other exchanges as-is
                 const targetExch = (this.currentExchange === 'NSE') ? 'NFO' : this.currentExchange;
+                
+                const filterDateStr = this.selectedExpiry ? this.formatDateToSymbol(this.selectedExpiry) : null;
 
                 for (let s of this.allStocks) {
                     const sExch = (s.exch_seg || '').toUpperCase();
                     const name = (s.name || '').toUpperCase();
                     const symbol = (s.symbol || '').toUpperCase();
+                    const expiry = (s.expiry || '').toUpperCase().replace(/-/g, ''); 
 
-                    // If the user searches indices (OPTIDX, SENSEX...), allow them regardless of exch_seg
                     const isIndex = this.isIndexSymbol(s);
-
-                    // skip if exchange doesn't match AND it's not an index we want to include for currentExchange
                     if (!isIndex && sExch !== targetExch) continue;
 
+                    if (filterDateStr && expiry !== filterDateStr) {
+                         continue;
+                    }
+
                     if (name.includes(term) || symbol.includes(term)) {
-                        // If user selected instrument 'future' restrict to FUT suffix where appropriate
                         if (this.currentInstrument === 'future') {
-                            // many futures end with FUT; some index futures might have FUT or simply be indexFUT tokens
-                            if (symbol.endsWith('FUT') || /FUT$/.test(symbol) || isIndex) {
+                            if (symbol.endsWith('FUT') || /FUT$/.test(symbol) || (isIndex && !/CE$|PE$/.test(symbol))) {
                                 out.push(s);
                             }
                         } else {
-                            // options: include CE/PE or index option tokens
-                            if (/CE$|PE$/i.test(symbol) || /CE|PE/i.test(symbol) || isIndex) {
+                            if (/CE$|PE$/i.test(symbol) || /CE|PE/i.test(symbol)) {
                                 out.push(s);
                             }
                         }
@@ -566,84 +583,53 @@
                 this.isOpen = false;
                 const tokenInput = document.getElementById('symbol_token');
                 if (tokenInput) tokenInput.value = stock.token;
+                
+                if(!this.selectedExpiry && stock.expiry) {
+                    this.selectedExpiry = this.formatSymbolDateToInput(stock.expiry);
+                }
+
                 this.parseSymbolData(stock.symbol);
                 this.fetchCurrentPrice(stock);
             },
 
-            /**
-             * More forgiving symbol parser:
-             * - handles typical option formats with CE/PE at the end (or -CE/_CE),
-             * - extracts date tokens like 12JAN23, strike like 19000 or 19000.0,
-             * - still handles FUT suffixes.
-             */
             parseSymbolData(rawSymbol) {
                 if (!rawSymbol) return;
                 const sym = rawSymbol.toUpperCase();
 
-                // quick detection for CE/PE
                 const hasCE = /\bCE\b|CE$/i.test(sym);
                 const hasPE = /\bPE\b|PE$/i.test(sym);
                 const hasFUT = /FUT$/i.test(sym);
 
-                // Generic date extractor: finds 2 digits + 3 letters + 2 digits e.g. 12JAN23
-                const dateMatch = sym.match(/(\d{2}[A-Z]{3}\d{2})/);
-                // Strike: sequence of digits possibly with dot, that appears before CE/PE or after date
-                const strikeMatch = sym.match(/(\d+(?:\.\d+)?)(?=(CE|PE)\b|CE$|PE$)/i) || sym.match(/(?:\d{2}[A-Z]{3}\d{2})(\d+(?:\.\d+)?)/);
-
                 if (hasCE || hasPE) {
                     this.switchInstrument('option');
-
-                    const dateStr = dateMatch ? dateMatch[1] : null;
-                    const strike = strikeMatch ? strikeMatch[1] : '';
                     const type = hasCE ? 'CE' : 'PE';
 
-                    if (dateStr) this.setExpiryDate(dateStr);
-                    const strikeEl = document.getElementById('strike_price');
-                    if (strikeEl) strikeEl.value = strike;
+                    // Strict Regex:
+                    // 1. Matches Month (e.g. FEB)
+                    // 2. Matches exactly 2 digits for Year (e.g. 26) - we SKIP this in capture
+                    // 3. Captures the remaining digits as Strike
+                    const match = sym.match(/[A-Z]{3}\d{2}(\d+(?:\.\d+)?)(?=CE$|PE$)/i);
+                    
+                    if (match) {
+                        const strike = match[1];
+                        const strikeEl = document.getElementById('strike_price');
+                        if (strikeEl) strikeEl.value = strike;
+                    } else {
+                        // Fallback for non-standard symbols (e.g. just strike+CE)
+                        const simpleMatch = sym.match(/(\d+(?:\.\d+)?)(?=CE$|PE$)/i);
+                        if (simpleMatch) {
+                            const strike = simpleMatch[1];
+                            const strikeEl = document.getElementById('strike_price');
+                            if (strikeEl) strikeEl.value = strike;
+                        }
+                    }
+                    
                     this.selectOptionType(type);
-                    return;
-                }
-
-                if (hasFUT) {
+                } else {
                     this.switchInstrument('future');
-
-                    const dateStr = dateMatch ? dateMatch[1] : null;
-                    if (dateStr) this.setExpiryDate(dateStr);
-                    return;
+                    const strikeEl = document.getElementById('strike_price');
+                    if (strikeEl) strikeEl.value = '';
                 }
-
-                // Fallback: sometimes index symbols are labeled like "NIFTY" or "SENSEX" with no CE/PE/FUT.
-                // In that case, keep current instrument and try to set expiry if present.
-                if (dateMatch) {
-                    const dateStr = dateMatch[1];
-                    this.setExpiryDate(dateStr);
-                }
-            },
-
-            setExpiryDate(dateStr) {
-                if (!dateStr) return;
-                const monthMap = {
-                    'JAN': '01',
-                    'FEB': '02',
-                    'MAR': '03',
-                    'APR': '04',
-                    'MAY': '05',
-                    'JUN': '06',
-                    'JUL': '07',
-                    'AUG': '08',
-                    'SEP': '09',
-                    'OCT': '10',
-                    'NOV': '11',
-                    'DEC': '12'
-                };
-                // dateStr expected like 12JAN23 or 05FEB26
-                const day = dateStr.substring(0, 2);
-                const mon = dateStr.substring(2, 5).toUpperCase();
-                const yr = dateStr.substring(5, 7);
-                const mm = monthMap[mon] || '01';
-                const formattedDate = `20${yr}-${mm}-${day}`;
-                const expiryInput = document.getElementById('expiry_date');
-                if (expiryInput) expiryInput.value = formattedDate;
             },
 
             switchInstrument(type) {
@@ -680,7 +666,6 @@
                 if (cmpInput) cmpInput.value = '';
 
                 try {
-                    // For index derivatives like OPTIDX we still use the derivatives segment (NFO) when exchange= NSE
                     const apiExchange = (this.currentExchange === 'NSE') ? 'NFO' : this.currentExchange;
                     const params = new URLSearchParams({
                         symbol: stock.token,

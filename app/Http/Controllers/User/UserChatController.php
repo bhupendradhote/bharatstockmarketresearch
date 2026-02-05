@@ -10,14 +10,48 @@ use App\Models\NotificationUser;
 use App\Events\UserChatMessageSent;
 use App\Events\NewChatNotification;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\MasterNotification;
+use App\Models\MasterNotificationRead;
+use App\Events\MasterNotificationBroadcast;
 
 class UserChatController extends Controller
 {
     /**
      * User → Admin message send
      */
-    public function sendMessage(Request $request)
+    
+    public function index()
+    {
+        $userId = auth()->id();
+
+        /* ======================================
+           ✅ Mark all CHAT notifications as read
+        ====================================== */
+
+        $chatNotificationIds = MasterNotification::where('type', 'chat')
+            ->where('user_id', $userId)   // only for this user
+            ->pluck('id');
+
+        foreach ($chatNotificationIds as $id) {
+            MasterNotificationRead::updateOrCreate(
+                [
+                    'master_notification_id' => $id,
+                    'user_id' => $userId,
+                ],
+                [
+                    'read_at' => now(),
+                ]
+            );
+        }
+
+        /* ======================================
+           📩 Open chat UI
+        ====================================== */
+
+        return view('user.chat');
+    }
+
+        public function sendMessage(Request $request)
     {
         try {
 
@@ -28,13 +62,13 @@ class UserChatController extends Controller
             $user = auth()->user();
 
             if (!$user) {
-                throw new \Exception('User not authenticated');
+                return response()->json(['error' => 'Unauthenticated'], 401);
             }
 
             $adminId = 1;
 
             /* =========================
-               1️⃣ SAVE CHAT MESSAGE
+            1️⃣ SAVE CHAT MESSAGE
             ========================= */
             $chat = ChatMessage::create([
                 'from_user_id' => $user->id,
@@ -45,59 +79,45 @@ class UserChatController extends Controller
             ]);
 
             /* =========================
-               2️⃣ CREATE NOTIFICATION (MASTER)
-               SINGLE NOTIFICATION ONLY
+            2️⃣ MASTER NOTIFICATION (CHAT)
             ========================= */
-            $notification = Notification::create([
-                'type'      => 'chat',
-                'title'     => 'New Support Message',
-                'message'   => $request->message,
-                'url'       => '/admin/chat?user=' . $user->id,
-                'sender_id' => $user->id,
-                'data'      => [
+            $notification = \App\Models\MasterNotification::create([
+                'type'     => 'chat',
+                'severity' => 'info',
+
+                'title'   => 'New Support Message',
+                'message' => $request->message,
+
+                'data' => [
                     'from_user_id'   => $user->id,
-                    'from_user_name' => $user->name  ?? 'User #' . $user->id,
+                    'from_user_name' => $user->name ?? 'User #' . $user->id,
                     'chat_id'        => $chat->id,
+                    'url'            => '/admin/chat?user=' . $user->id,
                 ],
+
+                'is_global' => false,
+                'user_id'   => $adminId,
+                'channel'   => 'both',
             ]);
 
             /* =========================
-               3️⃣ ATTACH ADMIN (DELIVERY) - UNCOMMENT THIS
-               THIS LINKS NOTIFICATION TO ADMIN
+            3️⃣ REALTIME CHAT MESSAGE
             ========================= */
-            NotificationUser::create([
-                'notification_id' => $notification->id,
-                'user_id'         => $adminId,
-            ]);
-
-            /* =========================
-               4️⃣ PUSHER BROADCAST - MESSAGES
-               FOR REAL-TIME CHAT
-            ========================= */
-            broadcast(new UserChatMessageSent(
+            broadcast(new \App\Events\UserChatMessageSent(
                 $user->id,
                 $adminId,
                 $request->message
             ));
 
             /* =========================
-               5️⃣ PUSHER BROADCAST - NOTIFICATION
-               FOR REAL-TIME NOTIFICATION IN HEADER
+            4️⃣ REALTIME MASTER NOTIFICATION
             ========================= */
-            $userName = $user->name ?? $user->phone ?? 'User #' . $user->id;
-            
-            broadcast(new NewChatNotification(
-                $user->id,
-                $userName,
-                $request->message,
-                $adminId,
-                'chat'
-            ));
+            broadcast(new \App\Events\MasterNotificationBroadcast($notification));
 
-            Log::info('📨 Single notification created and sent', [
-                'user_id' => $user->id,
+            \Log::info('💬 Chat + MasterNotification sent', [
+                'chat_id' => $chat->id,
                 'notification_id' => $notification->id,
-                'message' => $request->message,
+                'user_id' => $user->id,
                 'admin_id' => $adminId
             ]);
 
@@ -105,7 +125,7 @@ class UserChatController extends Controller
 
         } catch (\Throwable $e) {
 
-            Log::error('❌ Chat Send Error', [
+            \Log::error('❌ Chat Send Failed', [
                 'msg' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -142,4 +162,54 @@ class UserChatController extends Controller
             'messages' => $messages
         ]);
     }
+
+
+    /**
+     * Chat delete behaviour 
+     **/
+        public function markNotificationRead($id)
+    {
+        $userId = auth()->id();
+
+        MasterNotificationRead::updateOrCreate(
+            [
+                'master_notification_id' => $id,
+                'user_id' => $userId,
+            ],
+            [
+                'read_at' => now(),
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification marked as read'
+        ]);
+    }
+    
+    /**
+     * Mark All Notifications behaviour 
+     **/
+
+    public function markAllNotificationsRead()
+{
+    $userId = auth()->id();
+
+    // 🔥 get ALL notifications (all types)
+    $notificationIds = \App\Models\MasterNotification::pluck('id');
+
+    foreach ($notificationIds as $id) {
+        \App\Models\MasterNotificationRead::updateOrCreate(
+            [
+                'master_notification_id' => $id,
+                'user_id' => $userId,
+            ],
+            [
+                'read_at' => now(),
+            ]
+        );
+    }
+
+    return response()->json(['success' => true]);
+}
 }

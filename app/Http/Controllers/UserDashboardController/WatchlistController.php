@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\UserDashboardController;
 
-// Necessary imports for a sub-folder controller
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
 use App\Models\Watchlist;
 use App\Models\WatchlistScript;
 use Illuminate\Http\Request;
@@ -29,11 +28,31 @@ class WatchlistController extends Controller
         return response()->json($watchlist->load('scripts'));
     }
 
+    // NEW: Update method for renaming
+    public function update(Request $request, Watchlist $watchlist)
+    {
+        if ($watchlist->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate(['name' => 'required|string|max:50']);
+        
+        $watchlist->update([
+            'name' => $request->name
+        ]);
+
+        return response()->json($watchlist);
+    }
+
     public function destroy(Watchlist $watchlist)
     {
         if ($watchlist->user_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+        
+        // Optional: Detach scripts first if foreign keys don't cascade automatically
+        // $watchlist->scripts()->delete(); 
+        
         $watchlist->delete();
         return response()->json(['success' => true]);
     }
@@ -57,7 +76,6 @@ class WatchlistController extends Controller
 
     public function removeScript(WatchlistScript $script)
     {
-        // Accessing the relationship to verify ownership
         if ($script->watchlist->user_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }

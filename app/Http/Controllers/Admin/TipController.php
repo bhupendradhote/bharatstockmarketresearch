@@ -296,11 +296,9 @@ public function index(Request $request)
         ]);
 
         DB::transaction(function () use ($oldTip, $request) {
-            // Archive old version
             $oldTip->update(['status' => 'archived']);
             $planIds = $request->plans;
 
-            // Create new version
             $newTip = $oldTip->replicate();
             $newTip->fill($request->except(['plans', '_token', '_method']));
             $newTip->parent_id = $oldTip->parent_id ?? $oldTip->id;
@@ -310,12 +308,60 @@ public function index(Request $request)
             $newTip->created_by = Auth::id();
             $newTip->save();
 
-            // Re-attach plans
             foreach ($planIds as $planId) {
                 TipPlanAccess::create(['tip_id' => $newTip->id, 'service_plan_id' => $planId]);
             }
         });
 
         return redirect()->route('admin.tips.index')->with('success', 'Tip updated successfully.');
+    }
+
+    public function storeFollowUp(Request $request, $id)
+    {
+        $request->validate([
+            'target_price' => 'required|numeric',
+            'target_price_2' => 'nullable|numeric',
+            'stop_loss' => 'required|numeric',
+            'message' => 'required|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            
+            $tip = Tip::findOrFail($id);
+
+            $newEntry = [
+                'date' => now()->toDateTimeString(),
+                'message' => $request->message,
+                'old_values' => [
+                    'target_price' => $tip->target_price,
+                    'target_price_2' => $tip->target_price_2,
+                    'stop_loss' => $tip->stop_loss,
+                ],
+                'new_values' => [
+                    'target_price' => $request->target_price,
+                    'target_price_2' => $request->target_price_2,
+                    'stop_loss' => $request->stop_loss,
+                ]
+            ];
+
+            $currentFollowups = $tip->followups ?? [];
+            array_unshift($currentFollowups, $newEntry); 
+
+            $tip->update([
+                'target_price' => $request->target_price,
+                'target_price_2' => $request->target_price_2,
+                'stop_loss' => $request->stop_loss,
+                'followups' => $currentFollowups
+            ]);
+
+            DB::commit();
+            
+            return redirect()->back()->with('success', 'Follow-up added and prices updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 }

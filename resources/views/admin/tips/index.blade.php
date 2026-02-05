@@ -1,15 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-    {{-- CSRF Token for AJAX --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    {{-- Include Alpine.js --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <div class="p-4 md:p-6 space-y-6 text-sm text-gray-700" x-data="{
         showModal: false,
         showCategoryModal: false,
+        showFollowUpModal: false,
         activeTip: null,
         filterType: 'all',
         allTips: {{ json_encode(collect($tips->items())->map(function ($tip) {
@@ -74,13 +72,21 @@
                 this.showModal = true;
             }
         },
+
+        openFollowUp(tip) {
+            // Guard clause: Check if trade is closed
+            if (tip.trade_status === 'Closed') {
+                return;
+            }
+            this.activeTip = JSON.parse(JSON.stringify(tip)); 
+            this.showFollowUpModal = true;
+        },
     
         init() {
             $store.liveMarket.start(this.allTips);
         }
     }" @ajax-updated.window="allTips = $event.detail.tips; $store.liveMarket.start(allTips)">
 
-        {{-- Header Section --}}
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h1 class="text-lg font-bold text-gray-800 tracking-tight">Market Analytics Dashboard</h1>
 
@@ -112,12 +118,10 @@
         </div>
 
         <div id="tips-table-container"> 
-            {{-- SEARCH & FILTER FORM --}}
             <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6">
                 <form id="filterForm" action="{{ route('admin.tips.index') }}" method="GET"
                     class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 items-end">
                     
-                    {{-- 1. Search Stock --}}
                     <div class="col-span-2">
                         <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest">Search Stock</label>
                         <div class="relative">
@@ -128,7 +132,6 @@
                         </div>
                     </div>
 
-                    {{-- 2. Trade Status (Open/Closed) --}}
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest">Trade Status</label>
                         <select name="trade_status"
@@ -139,7 +142,6 @@
                         </select>
                     </div>
 
-                    {{-- 3. Result Status --}}
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest">Result Status</label>
                         <select name="status"
@@ -153,14 +155,12 @@
                         </select>
                     </div>
 
-                    {{-- 4. Date --}}
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest">Date</label>
                         <input type="date" name="date" value="{{ request('date') }}"
                             class="filter-input w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all">
                     </div>
 
-                    {{-- 5. Month --}}
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest">Month</label>
                         <select name="month"
@@ -174,7 +174,6 @@
                         </select>
                     </div>
 
-                    {{-- 6. Year --}}
                     <div>
                         <label class="text-[10px] font-black text-gray-400 uppercase mb-2 block tracking-widest">Year</label>
                         <select name="year"
@@ -187,7 +186,6 @@
                         </select>
                     </div>
 
-                    {{-- 7. Reset Button --}}
                     <div class="flex">
                         <a href="{{ route('admin.tips.index') }}"
                             class="w-full bg-gray-100 text-gray-500 py-2.5 rounded-xl font-black text-[10px] uppercase flex items-center justify-center hover:bg-gray-200 transition-all gap-2">
@@ -197,7 +195,6 @@
                 </form>
             </div>
 
-            {{-- Filter Tabs --}}
            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
              <div class="mb-4 bg-gray-100 p-1 rounded-xl inline-flex gap-1 border border-gray-200 flex-wrap">
                 <button @click="filterType = 'all'"
@@ -219,14 +216,12 @@
                 </button>
            </div>
             
-            {{-- Data Table --}}
             <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs" id="tipsTable">
                         <thead class="bg-gray-50 text-gray-500 border-b border-gray-100">
                             <tr>
                                 <th class="p-4 text-left font-bold uppercase tracking-wider">Date</th>
-                                <!-- <th class="p-4 text-left font-bold uppercase tracking-wider">Time</th> -->
                                 <th class="p-4 text-left font-bold uppercase tracking-wider">Stock / Exc.</th>
                                 <th class="p-4 text-center font-bold uppercase tracking-wider">Call</th>
                                 <th class="p-4 text-center font-bold uppercase tracking-wider">Type</th>
@@ -292,7 +287,6 @@
                                         </span>
                                     </td>
                                     
-                                    {{-- UPDATED STATUS COLUMN --}}
                                     <td class="p-4 text-center">
                                         <span
                                             :class="{
@@ -311,6 +305,18 @@
                                     </td>
 
                                     <td class="p-4 text-right whitespace-nowrap">
+                                        {{-- Only show Follow Up if status is NOT Closed --}}
+                                        <template x-if="tip.trade_status !== 'Closed'">
+                                            <span class="inline-flex items-center">
+                                                <button @click="openFollowUp(tip)"
+                                                    class="text-orange-500 hover:text-orange-700 transition-colors text-xs font-black uppercase inline-flex items-center gap-1"
+                                                    title="Add Follow Up">
+                                                    <i class="fa-solid fa-bullhorn"></i>
+                                                </button>
+                                                <span class="text-gray-300 mx-1">|</span>
+                                            </span>
+                                        </template>
+
                                         <button @click="activeTip = tip; showModal = true;"
                                             class="text-blue-600 hover:text-blue-800 transition-colors text-xs font-black uppercase inline-flex items-center gap-1">
                                             <i class="fa-solid fa-eye"></i> 
@@ -340,7 +346,67 @@
             <div id="new-tips-data" style="display:none">{{ $tips->getCollection()->toJson() }}</div>
         </div>
 
-        {{-- TIP DETAILS MODAL (Pop-up) --}}
+        {{-- FOLLOW UP MODAL --}}
+        <div x-show="showFollowUpModal" x-cloak x-transition.opacity
+             class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+            
+            <div @click.away="showFollowUpModal = false"
+                 class="bg-white w-full max-w-lg rounded-[24px] shadow-2xl overflow-hidden border border-gray-100 animate-fade-in">
+                 
+                <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                    <h3 class="text-xs font-black text-gray-900 uppercase tracking-[0.2em]">Add Follow Up</h3>
+                    <button @click="showFollowUpModal = false" class="text-gray-400 hover:text-gray-900 transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <form :action="`{{ url('admin/tips') }}/${activeTip?.id}/follow-up`" method="POST" class="p-6 space-y-5">
+                    @csrf
+                    
+                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mb-4">
+                        <h4 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1" x-text="activeTip?.stock_name"></h4>
+                        <div class="text-xs text-blue-900 font-medium">Update targets and SL for this active trade.</div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Target 1</label>
+                            <input type="number" step="0.01" name="target_price" x-model="activeTip.target_price" required
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-green-700">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Target 2</label>
+                            <input type="number" step="0.01" name="target_price_2" x-model="activeTip.target_price_2"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-emerald-700">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Stop Loss</label>
+                            <input type="number" step="0.01" name="stop_loss" x-model="activeTip.stop_loss" required
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-red-600">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Follow Up Message</label>
+                        <textarea name="message" rows="3" required placeholder="e.g. Trailing SL modified due to market movement..."
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"></textarea>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" @click="showFollowUpModal = false"
+                            class="flex-1 py-3.5 bg-gray-100 text-gray-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="flex-1 py-3.5 bg-orange-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-600 shadow-lg shadow-orange-100 transition-all">
+                            Update & Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- TIP DETAILS MODAL --}}
         <div x-show="showModal" x-cloak x-transition.opacity
             class="fixed inset-0 bg-gray-900/80 backdrop-blur-md flex items-center justify-center z-[100] p-4">
 
@@ -421,22 +487,28 @@
                         </div>
                     </div>
 
-                    <template x-if="activeTip?.tip_type && activeTip?.tip_type !== 'equity'">
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 border-t pt-6">
-                            <div x-show="activeTip?.strike_price">
-                                <p class="text-[9px] font-black text-gray-400 uppercase mb-1">Strike Price</p>
-                                <p class="text-sm font-black text-gray-900" x-text="activeTip?.strike_price"></p>
-                            </div>
-                            <div x-show="activeTip?.option_type">
-                                <p class="text-[9px] font-black text-gray-400 uppercase mb-1">Option Type</p>
-                                <p class="text-sm font-black text-gray-900" x-text="activeTip?.option_type"></p>
-                            </div>
-                            <div x-show="activeTip?.expiry_date">
-                                <p class="text-[9px] font-black text-gray-400 uppercase mb-1">Expiry Date</p>
-                                <p class="text-sm font-black text-gray-900" x-text="activeTip?.expiry_date"></p>
-                            </div>
+                    {{-- FOLLOW UP HISTORY SECTION --}}
+                    <div x-show="activeTip?.followups && activeTip.followups.length > 0" class="mb-8">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-clock-rotate-left text-orange-500 text-xs"></i>
+                            <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest">Follow Up History</p>
                         </div>
-                    </template>
+                        <div class="space-y-3">
+                            <template x-for="followup in activeTip?.followups">
+                                <div class="bg-orange-50/50 border border-orange-100 p-3 rounded-xl">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <span class="text-[10px] font-bold text-gray-400" x-text="followup.date"></span>
+                                    </div>
+                                    <p class="text-xs font-bold text-gray-800 mb-2" x-text="followup.message"></p>
+                                    <div class="grid grid-cols-3 gap-2 text-[9px] text-gray-500 border-t border-orange-100 pt-2">
+                                        <div>T1: <span class="font-bold text-gray-700" x-text="followup.old_values.target_price"></span> ➝ <span class="font-bold text-green-700" x-text="followup.new_values.target_price"></span></div>
+                                        <div>T2: <span class="font-bold text-gray-700" x-text="followup.old_values.target_price_2"></span> ➝ <span class="font-bold text-green-700" x-text="followup.new_values.target_price_2"></span></div>
+                                        <div>SL: <span class="font-bold text-gray-700" x-text="followup.old_values.stop_loss"></span> ➝ <span class="font-bold text-red-700" x-text="followup.new_values.stop_loss"></span></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
 
                     <div class="bg-amber-50 p-5 rounded-2xl border border-amber-100 mb-8">
                         <div class="flex items-center gap-2 mb-2">
@@ -455,7 +527,7 @@
             </div>
         </div>
 
-        {{-- NEW: CREATE CATEGORY MODAL --}}
+        {{-- CREATE CATEGORY MODAL --}}
         <div x-show="showCategoryModal" x-cloak x-transition.opacity
             class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
 
@@ -496,86 +568,59 @@
         </div>
     </div>
 
-    {{-- 🔴🔴🔴 LIVE PRICE & STATUS ENGINE 🔴🔴🔴 --}}
+    {{-- SCRIPTS --}}
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('liveMarket', {
                 previousPrices: {},
-
                 start(tipsList) {
                     console.log('🚀 Live Market Store Started', tipsList.length);
-
                     setInterval(async () => {
-                        // console.log('⏱ Fetching Angel live prices...');
-
-                        // Filter only Active trades to check
                         const activeTips = tipsList.filter(t => !['SL-Hit', 'T2-Achieved', 'Closed', 'archived', 'cancel'].includes(t.status));
-
                         for (const tip of activeTips) {
-                            
                             if (!tip.symbol_token) continue;
-                            if (tip.is_updating) continue; // Skip if currently updating via AJAX
-
+                            if (tip.is_updating) continue; 
                             try {
                                 const params = new URLSearchParams({
                                     symbol: tip.symbol_token, 
                                     exchange: tip.exchange
                                 });
-
                                 const res = await fetch(`/api/angel/quote?${params.toString()}`);
                                 const json = await res.json();
-
                                 if (json?.data?.fetched?.length) {
                                     const newPrice = parseFloat(json.data.fetched[0].ltp);
-                                    const oldPrice = parseFloat(tip.cmp_price);
-
-                                    // 1. Update Direction
                                     if (!this.previousPrices[tip.id]) {
-                                        this.previousPrices[tip.id] = oldPrice;
+                                        this.previousPrices[tip.id] = parseFloat(tip.cmp_price);
                                     }
-
                                     if (newPrice > this.previousPrices[tip.id]) {
                                         tip.priceDirection = 'up';
                                     } else if (newPrice < this.previousPrices[tip.id]) {
                                         tip.priceDirection = 'down';
                                     }
-
                                     tip.cmp_price = newPrice;
                                     this.previousPrices[tip.id] = newPrice;
-                                    
-                                    // 2. CHECK STATUS (T1, T2, SL) AND SAVE TO DB
                                     this.checkStatus(tip);
-
                                 } 
                             } catch (e) {
                                 console.error('❌ Angel API error:', e);
                             }
                         }
-
-                    }, 3000); // 3 seconds interval
+                    }, 3000); 
                 },
-
-                // Helper to calculate status based on Tip Type
                 checkStatus(tip) {
-                    // 🛑 CRITICAL CHECK: IF TRADE IS CLOSED, DO NOT UPDATE STATUS
                     if (tip.trade_status === 'Closed' || tip.status === 'Closed') {
                         return;
                     }
-
                     const cmp = parseFloat(tip.cmp_price);
                     const t1 = parseFloat(tip.target_price);
                     const t2 = tip.target_price_2 ? parseFloat(tip.target_price_2) : null;
                     const sl = parseFloat(tip.stop_loss);
-                    const callType = tip.call_type.toLowerCase(); // 'buy' or 'sell'
-
+                    const callType = tip.call_type.toLowerCase(); 
                     let newStatus = tip.status;
-
                     if (callType === 'buy') {
-                        // BUY LOGIC
                         if (t2 && cmp >= t2) {
                             newStatus = 'T2-Achieved';
                         } else if (cmp >= t1) {
-                            // Only upgrade to T1 if we aren't already at T2
                             if (newStatus !== 'T2-Achieved') {
                                 newStatus = 'T1-Achieved';
                             }
@@ -583,7 +628,6 @@
                             newStatus = 'SL-Hit';
                         }
                     } else if (callType === 'sell') {
-                        // SELL LOGIC (Targets are lower, SL is higher)
                         if (t2 && cmp <= t2) {
                             newStatus = 'T2-Achieved';
                         } else if (cmp <= t1) {
@@ -594,19 +638,13 @@
                             newStatus = 'SL-Hit';
                         }
                     }
-
-                    // 3. IF STATUS CHANGED, SAVE TO DATABASE VIA AJAX
                     if (newStatus !== tip.status) {
-                        console.log(`⚡ Status Change Detected for #${tip.id}: ${tip.status} -> ${newStatus}`);
                         this.updateTipStatus(tip, newStatus);
                     }
                 },
-
-                // AJAX FUNCTION TO UPDATE DB
                 async updateTipStatus(tip, newStatus) {
                     tip.is_updating = true;
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
                     try {
                         const response = await fetch(`/admin/tips/${tip.id}/update-live-status`, {
                             method: 'POST',
@@ -620,18 +658,12 @@
                                 cmp_price: tip.cmp_price
                             })
                         });
-
                         const result = await response.json();
-
                         if (result.success) {
-                            // Update local model
                             tip.status = result.new_status;
-                            
                             if(result.trade_status) {
                                 tip.trade_status = result.trade_status;
                             }
-                        } else {
-                            console.error('Failed to update status', result);
                         }
                     } catch (error) {
                         console.error('AJAX Error:', error);
@@ -653,7 +685,6 @@
         }
     </style>
 
-    {{-- AJAX SCRIPT (Keeping existing jQuery for Filter) --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -662,7 +693,6 @@
                 let url = pageUrl || form.attr('action');
                 let formData = form.serialize();
                 $('#tips-table-container').css('opacity', '0.5');
-
                 $.ajax({
                     url: url,
                     type: "GET",
@@ -670,28 +700,23 @@
                     success: function(response) {
                         let newHtml = $(response).find('#tips-table-container').html();
                         $('#tips-table-container').html(newHtml);
-
                         let freshTips = JSON.parse($(response).find('#new-tips-data').text());
                         window.dispatchEvent(new CustomEvent('ajax-updated', {
                             detail: { tips: freshTips }
                         }));
-
                         $('#tips-table-container').css('opacity', '1');
                         window.history.pushState({}, '', url + '?' + formData);
                     }
                 });
             }
-
             $(document).on('change', '.filter-input', function() {
                 if (this.id !== 'searchInput') filterTips();
             });
-
             let typingTimer;
             $(document).on('keyup', '#searchInput', function() {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(filterTips, 700);
             });
-
             $(document).on('click', '#pagination-container a', function(e) {
                 e.preventDefault();
                 filterTips($(this).attr('href'));

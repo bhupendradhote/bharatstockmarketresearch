@@ -52,6 +52,61 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserDashboardController\WatchlistController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\UserDashboardController\UserAnnouncementController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\Admin\Tickets\AllTicketsController;
+use App\Http\Controllers\Admin\AdminDemoSubscriptionController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\UserDashboardController\NewsAndBlogsController;
+
+
+
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function () {
+    
+    Route::resource('tips', TipController::class);
+
+    Route::post('tips/{id}/follow-up', [TipController::class, 'storeFollowUp'])->name('admin.tips.followup');
+
+});
+
+Route::get('/latestNews', [NewsAndBlogsController::class, 'index'])->name('latest.news');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/help-center', [TicketController::class, 'index'])
+        ->name('tickets.index');
+
+
+    Route::post('/help-center', [TicketController::class, 'store'])
+        ->name('tickets.store');
+
+});
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+
+    Route::get('/demo-subscriptions', 
+        [AdminDemoSubscriptionController::class, 'index']
+    )->name('admin.demo.index');
+
+    Route::post('/demo-subscriptions/grant', 
+        [AdminDemoSubscriptionController::class, 'grantDemo']
+    )->name('admin.demo.grant');
+
+});
+
+Route::middleware(['auth'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get('/tickets', [AllTicketsController::class, 'index'])
+            ->name('tickets.all');
+
+        Route::post('/tickets/{id}/open', [AllTicketsController::class, 'open'])
+            ->name('tickets.open');
+
+        Route::post('/tickets/{id}/resolve', [AllTicketsController::class, 'resolve'])
+            ->name('tickets.resolve');
+
+});
 
 Route::get('/announcement', [UserAnnouncementController::class, 'index'])->name('user.announcement.index');
 
@@ -59,12 +114,19 @@ Route::get('/announcement', [UserAnnouncementController::class, 'index'])->name(
                 Route::resource('announcements', AnnouncementController::class);
             });
 
+            Route::get('/announcements/fetch', [UserAnnouncementController::class, 'fetchUnseen'])
+    ->middleware('auth');
+    
+Route::post('/announcements/read/{id}', [UserAnnouncementController::class, 'markSeen'])
+    ->middleware('auth');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/watchlists', [WatchlistController::class, 'index']);
     Route::post('/watchlists', [WatchlistController::class, 'store']);
     Route::delete('/watchlists/{watchlist}', [WatchlistController::class, 'destroy']);
     Route::post('/watchlists/{watchlist}/scripts', [WatchlistController::class, 'addScript']);
     Route::delete('/watchlist-scripts/{script}', [WatchlistController::class, 'removeScript']);
+    Route::put('/watchlists/{watchlist}', [WatchlistController::class, 'update'])->name('watchlists.update');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -78,9 +140,10 @@ Route::post('/admin/tips/{id}/update-live-status', [App\Http\Controllers\Admin\T
 Route::get('/api/proxy/scrips', [ProxyController::class, 'scripMaster'])->name('proxy.scrips');
 
 
-Route::get('/admin/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified','admin'])->name('dashboard');
+Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'admin']) 
+    ->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -88,10 +151,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-
 require __DIR__.'/auth.php';
-
 
 
     Route::post('/blogs/category', [BlogController::class, 'storeCategory'])->name('blogs.category.store');
@@ -357,10 +417,6 @@ require __DIR__.'/auth.php';
                 Route::post('popups/{popup}/deactivate', [PopupController::class, 'deactivate'])->name('popups.deactivate');
                 
             });
-
-
-
-    
   
 
         // Chat Routes
@@ -370,9 +426,6 @@ require __DIR__.'/auth.php';
 
                 // send message (save in session + broadcast)
                 Route::post('/send-message', [ChatController::class, 'sendMessage']);
-
-
-
 
                 Route::middleware(['auth', 'admin'])->group(function () {    
                     Route::post('/admin/chat/send', [AdminChatController::class, 'sendMessage'])->name('admin.chat.send');
@@ -384,13 +437,9 @@ require __DIR__.'/auth.php';
                 });
 
 
-
-
-
                 Route::middleware(['auth'])->group(function () {
                     Route::post('/user/chat/send', [UserChatController::class, 'sendMessage'])->name('user.chat.send');
                 });
-
 
 
             // User chat page
@@ -427,9 +476,11 @@ require __DIR__.'/auth.php';
                     return view('UserDashboard.userdashboard');
                 })->name('user.dashboard')->middleware('auth');
 
-Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
-    ->name('user.dashboard')
-    ->middleware('auth');
+                Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
+                    ->name('user.dashboard')
+                    ->middleware('auth');
+
+
                 Route::middleware(['auth'])->group(function () {
                     Route::get('/market-calls', [MarketCallController::class, 'index'])->name('marketCall.index');
                 });
@@ -438,13 +489,7 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
                     return view('UserDashboard.marketCall.marketCall_detail');
                 });
 
-                // Latest News
-                Route::get('/latestNews',function(){
-                    return view('UserDashboard.latestNews.latest_news');
-                });
-
-
-         
+               
 
 
                 //UserDashboard  Settings Route
@@ -457,19 +502,11 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
                     });
 
 
-
                     Route::prefix('settings')->group(function () {
                         Route::post('/profile/update', [UserSettingsController::class, 'updateGeneralProfile'])->name('settings.profile.update');
                         Route::post('/send-otp', [UserSettingsController::class, 'sendOtp'])->name('profile.sendOtp');
                         Route::post('/verify-otp', [UserSettingsController::class, 'verifyAndUpdate'])->name('profile.verifyOtp');
                     });
-
-
-
-                    
-
-
-                
 
 
                     Route::get('/settings/kyc', [DigioKycController::class, 'index'])->name('kyc.index');
@@ -526,8 +563,6 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
 
                     });
 
-
-
                     // Separate Routes for each policy
                     Route::get('/privacy-policy', [PolicyDisplayController::class, 'privacy'])->name('policy.privacy');
                     Route::get('/terms-and-conditions', [PolicyDisplayController::class, 'terms'])->name('policy.terms');
@@ -536,9 +571,6 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
 
                     Route::get('/investor-charter', [InvestorCharterController::class, 'show'])
                         ->name('investor.charter');
-
-
-
 
                         Route::get('/banner-test', function () {
                             $banner = App\Models\HeroBanner::first();
@@ -549,8 +581,6 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
                             ];
                         });
 
-
-
                         // Legal Pages
 
                         Route::get('/legal',function(){
@@ -558,14 +588,10 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
                         });
 
 
-
-
                         Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
                                 Route::resource('marquees', \App\Http\Controllers\Admin\MarqueeController::class);
                                 Route::post('marquees/{marquee}/toggle',[\App\Http\Controllers\Admin\MarqueeController::class, 'toggle'])->name('marquees.toggle');
                         });
-
-
 
                         Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
                             Route::resource('offer-banners', OfferBannerController::class);
@@ -591,16 +617,12 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
                             Route::delete('news-categories/{id}', [NewsController::class, 'categoryDestroy'])->name('news.categories.destroy');
                         });
 
-
-
                         // Frontend News Routes
                         Route::prefix('news')->name('news.')->group(function () {
                             Route::get('/', [FrontendNewsController::class, 'index'])->name('index');           // News Hub
                             Route::get('/all', [FrontendNewsController::class, 'archive'])->name('archive');    // Archive (Latest/Oldest)
                             Route::get('/{slug}', [FrontendNewsController::class, 'show'])->name('show');       // Single News Page
                         });
-
-
 
                     Route::post('/subscription/razorpay/initiate',[SubscriptionController::class, 'initiateRazorpay'])->name('subscription.razorpay.initiate');
                     Route::post('/subscription/razorpay/verify',[SubscriptionController::class, 'verifyRazorpay'])->name('subscription.razorpay.verify');                             // 4️⃣ Success page
@@ -610,22 +632,20 @@ Route::get('/dashboard', [UserSettingsController::class, 'dashboard'])
                         Route::patch('/reviews/{review}/status', [ReviewAdminController::class, 'updateStatus'])->name('reviews.status');
                         Route::post('/reviews/{review}/featured', [ReviewAdminController::class, 'toggleFeatured'])->name('reviews.featured');
                     });
-
-
             
 
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+            Route::middleware(['auth'])->prefix('admin')->group(function () {
 
-    Route::get('/risk-reward-master', [RiskRewardMasterController::class, 'index'])
-        ->name('admin.risk-reward.index');
+                Route::get('/risk-reward-master', [RiskRewardMasterController::class, 'index'])
+                    ->name('admin.risk-reward.index');
 
-    Route::post('/risk-reward-master', [RiskRewardMasterController::class, 'store'])
-        ->name('admin.risk-reward.store');
+                Route::post('/risk-reward-master', [RiskRewardMasterController::class, 'store'])
+                    ->name('admin.risk-reward.store');
 
-    Route::post('/risk-reward-master/{riskRewardMaster}/activate', [RiskRewardMasterController::class, 'activate'])
-        ->name('admin.risk-reward.activate');
+                Route::post('/risk-reward-master/{riskRewardMaster}/activate', [RiskRewardMasterController::class, 'activate'])
+                    ->name('admin.risk-reward.activate');
 
-});
+            });
 
 
 
@@ -640,10 +660,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::resource('certificates', CertificateController::class);
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/my-certificates', [UserCertificateShowController::class, 'index'])->name('user.certificates.index');
-    Route::get('/certificates/download/{certificate}', [UserCertificateShowController::class, 'download'])->name('user.certificates.download');
-});	
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/my-certificates', [UserCertificateShowController::class, 'index'])->name('user.certificates.index');
+        Route::get('/certificates/download/{certificate}', [UserCertificateShowController::class, 'download'])->name('user.certificates.download');
+    });	
 
 
 

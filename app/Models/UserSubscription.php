@@ -88,12 +88,24 @@ class UserSubscription extends Model
     /**
      * Is subscription active?
      */
+    // public function isActive(): bool
+    // {
+    //     return $this->status === 'active'
+    //         && $this->payment_status === 'paid'
+    //         && now()->lte($this->end_date);
+    // }
     public function isActive(): bool
-    {
-        return $this->status === 'active'
-            && $this->payment_status === 'paid'
-            && now()->lte($this->end_date);
-    }
+{
+    return $this->status === 'active'
+        && in_array($this->payment_status, ['paid', 'demo'])
+        && now()->lte($this->end_date);
+}
+
+    public function isDemo(): bool
+{
+    return $this->status === 'active' &&
+    $this->payment_status === 'demo';
+}
 
     /**
      * Is subscription expired?

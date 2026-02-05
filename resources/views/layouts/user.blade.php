@@ -35,7 +35,8 @@
         [x-cloak] {
             display: none !important;
         }
-        .offer-pop-cont h3{
+
+        .offer-pop-cont h3 {
             text-align: justify !important;
         }
     </style>
@@ -342,7 +343,7 @@
 
             {{-- Message Campaigns show here  --}}
 
-            @php
+            {{-- @php
                 use Carbon\Carbon;
 
                 $today = Carbon::today();
@@ -364,260 +365,323 @@
                 window.AUTH_USER_ID = {{ auth()->check() ? auth()->id() : 'null' }};
                 window.ALL_CAMPAIGNS = @json($activeCampaigns);
                 window.SEEN_CAMPAIGNS = @json($seenCampaignIds);
-            </script>
+            </script> --}}
+
+            @auth
+
+                @php
+
+                    $userId = auth()->id();
+
+                    $activeCampaigns = \App\Models\MasterNotification::where('type', 'campaign')
+
+                        // 🌍 global OR personal
+                        ->where(function ($q) use ($userId) {
+                            $q->where('is_global', true)->orWhere('user_id', $userId);
+                        })
+
+                        // 👁️ hide already read for this user
+                        ->whereDoesntHave('reads', function ($q) use ($userId) {
+                            $q->where('user_id', $userId);
+                        })
+
+                        ->orderByDesc('id')
+                        ->limit(10)
+                        ->get()
+                        ->map(function ($c) {
+                            return [
+                                'id' => $c->id,
+                                'title' => $c->title,
+                                'message' => $c->message,
+                                'description' => $c->data['detail'] ?? '',
+                                'image' => $c->data['image'] ?? null,
+                            ];
+                        })
+                        ->toArray();
+
+                @endphp
+
+                <script>
+                    window.ALL_CAMPAIGNS = @json($activeCampaigns);
+                </script>
 
 
-            <div id="campaign-bell-container" class="fixed top-5 right-5 z-[60] hidden">
-                <button onclick="openCampaignDetails()"
-                    class="relative flex items-center justify-center w-12 h-12 bg-yellow-400 rounded-full shadow-lg hover:bg-yellow-500 transition-all animate-vibrate">
-                    <i class="fa-solid fa-bell text-white text-xl"></i>
-                    <span class="absolute top-0 right-0 flex h-3 w-3">
-                        <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                    </span>
-                </button>
-            </div>
+                <div id="campaign-bell-container" class="fixed top-5 right-5 z-[60] hidden">
+                    <button onclick="openCampaignDetails()"
+                        class="relative flex items-center justify-center w-12 h-12 bg-yellow-400 rounded-full shadow-lg hover:bg-yellow-500 transition-all animate-vibrate">
+                        <i class="fa-solid fa-bell text-white text-xl"></i>
+                        <span class="absolute top-0 right-0 flex h-3 w-3">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                    </button>
+                </div>
 
 
 
-            <div id="campaign-toast"
-                class="fixed z-50 hidden
+                <div id="campaign-toast"
+                    class="fixed z-50 hidden
                     w-[92%] max-w-[340px]
                     left-[97%] -translate-x-1/2 top-3
                     sm:left-auto sm:translate-x-0 sm:top-5 sm:right-5
                     overflow-hidden rounded-[1.75rem] bg-white shadow-2xl
                     transition-all duration-500 transform scale-95 border border-white/20">
 
-                <!-- IMAGE WRAPPER -->
-                <div id="campaign-image-wrapper"
-                    class="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-900 hidden">
+                    <!-- IMAGE WRAPPER -->
+                    <div id="campaign-image-wrapper"
+                        class="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-900 hidden">
 
-                    <img id="campaign-image" class="h-full w-full object-cover opacity-90" src=""
-                        alt="">
+                        <img id="campaign-image" class="h-full w-full object-cover opacity-90" src=""
+                            alt="">
 
-                    <div class="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent"></div>
 
-                    <button onclick="closeCampaignToast()"
-                        class="absolute top-3 right-3 z-20
+                        <button onclick="closeCampaignToast()"
+                            class="absolute top-3 right-3 z-20
                    flex h-9 w-9 items-center justify-center
                    rounded-full bg-black/30 text-white backdrop-blur
                    transition hover:bg-red-500">
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                </div>
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    </div>
 
-                <!-- CONTENT -->
-                <div id="campaign-content-wrapper" class="relative bg-white px-5 sm:px-7 pb-6 pt-6 sm:pt-10">
+                    <!-- CONTENT -->
+                    <div id="campaign-content-wrapper" class="relative bg-white px-5 sm:px-7 pb-6 pt-6 sm:pt-10">
 
-                    <!-- ICON -->
-                    <div id="campaign-icon"
-                        class="relative mx-auto sm:mx-0
+                        <!-- ICON -->
+                        <div id="campaign-icon"
+                            class="relative mx-auto sm:mx-0
                     flex h-11 w-11 items-center justify-center
                     rounded-xl bg-yellow-400 shadow-md ring-4 ring-white">
-                        <i class="fa-solid fa-bolt-lightning text-white text-lg"></i>
-                    </div>
+                            <i class="fa-solid fa-bolt-lightning text-white text-lg"></i>
+                        </div>
 
-                    <div class="mt-4 space-y-2 text-center sm:text-left">
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-blue-600">
-                            New Announcement
-                        </span>
+                        <div class="mt-4 space-y-2 text-center sm:text-left">
+                            <span class="text-[9px] font-black uppercase tracking-[0.2em] text-blue-600">
+                                New Announcement
+                            </span>
 
-                        <h4 id="campaign-title" class="text-lg sm:text-xl font-black leading-snug text-slate-900">
-                        </h4>
+                            <h4 id="campaign-title" class="text-lg sm:text-xl font-black leading-snug text-slate-900">
+                            </h4>
 
-                        <div class="h-1 w-10 bg-slate-100 rounded-full mx-auto sm:mx-0"></div>
+                            <div class="h-1 w-10 bg-slate-100 rounded-full mx-auto sm:mx-0"></div>
 
-                        <p id="campaign-message"
-                            class="text-[13px] sm:text-sm font-medium leading-relaxed text-slate-500 italic">
-                        </p>
-                    </div>
+                            <p id="campaign-message"
+                                class="text-[13px] sm:text-sm font-medium leading-relaxed text-slate-500 italic">
+                            </p>
+                        </div>
 
-                    <button onclick="closeCampaignToast()"
-                        class="group mt-6 flex w-full items-center justify-center gap-2
+                        <button onclick="closeCampaignToast()"
+                            class="group mt-6 flex w-full items-center justify-center gap-2
                    rounded-xl bg-slate-900 py-3.5
                    text-[10px] font-bold uppercase tracking-[0.18em]
                    text-white shadow-lg transition-all
                    active:scale-95 hover:bg-blue-600">
-                        <span>Got it, Thanks!</span>
-                        <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
-                    </button>
-                    <button onclick="closeAllCampaigns()"
-                        class="mt-3 text-[10px] font-bold uppercase text-slate-400 hover:text-red-500">
-                        Close all notifications
-                    </button>
+                            <span>Got it, Thanks!</span>
+                            <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+                        </button>
+                        <button onclick="closeAllCampaigns()"
+                            class="mt-3 text-[10px] font-bold uppercase text-slate-400 hover:text-red-500">
+                            Close all notifications
+                        </button>
 
+                    </div>
                 </div>
-            </div>
 
-            <style>
-                @keyframes vibrate {
+                <style>
+                    @keyframes vibrate {
 
-                    0%,
-                    100% {
-                        transform: rotate(0deg);
+                        0%,
+                        100% {
+                            transform: rotate(0deg);
+                        }
+
+                        20% {
+                            transform: rotate(15deg);
+                        }
+
+                        40% {
+                            transform: rotate(-15deg);
+                        }
+
+                        60% {
+                            transform: rotate(10deg);
+                        }
+
+                        80% {
+                            transform: rotate(-10deg);
+                        }
                     }
 
-                    20% {
-                        transform: rotate(15deg);
+                    .animate-vibrate {
+                        animation: vibrate 0.6s cubic-bezier(.36, .07, .19, .97) both infinite;
+                        animation-delay: 1.5s;
                     }
 
-                    40% {
-                        transform: rotate(-15deg);
+                    #campaign-toast {
+                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
                     }
+                </style>
 
-                    60% {
-                        transform: rotate(10deg);
-                    }
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
 
-                    80% {
-                        transform: rotate(-10deg);
-                    }
-                }
+                        const bell = document.getElementById('campaign-bell-container');
+                        const toast = document.getElementById('campaign-toast');
 
-                .animate-vibrate {
-                    animation: vibrate 0.6s cubic-bezier(.36, .07, .19, .97) both infinite;
-                    animation-delay: 1.5s;
-                }
+                        const title = document.getElementById('campaign-title');
+                        const message = document.getElementById('campaign-message');
+                        const image = document.getElementById('campaign-image');
+                        const imageWrap = document.getElementById('campaign-image-wrapper');
+                        const icon = document.getElementById('campaign-icon');
 
-                #campaign-toast {
-                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                }
-            </style>
+                        let pendingCampaigns = [];
+                        let activeCampaign = null;
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
+                        /* ===============================
+                            🧠 BUILD PENDING QUEUE
+                        ================================*/
+                        // if (window.AUTH_USER_ID && Array.isArray(window.ALL_CAMPAIGNS)) {
 
-                    const bell = document.getElementById('campaign-bell-container');
-                    const toast = document.getElementById('campaign-toast');
+                        //     pendingCampaigns = window.ALL_CAMPAIGNS.filter(c => {
+                        //         return !window.SEEN_CAMPAIGNS.includes(c.id);
+                        //     });
 
-                    const title = document.getElementById('campaign-title');
-                    const message = document.getElementById('campaign-message');
-                    const image = document.getElementById('campaign-image');
-                    const imageWrap = document.getElementById('campaign-image-wrapper');
-                    const icon = document.getElementById('campaign-icon');
-
-                    let pendingCampaigns = [];
-                    let activeCampaign = null;
-
-                    /* ===============================
-                        🧠 BUILD PENDING QUEUE
-                    ================================*/
-                    if (window.AUTH_USER_ID && Array.isArray(window.ALL_CAMPAIGNS)) {
-
-                        pendingCampaigns = window.ALL_CAMPAIGNS.filter(c => {
-                            return !window.SEEN_CAMPAIGNS.includes(c.id);
-                        });
-
-                        if (pendingCampaigns.length) {
+                        //     if (pendingCampaigns.length) {
+                        //         showNextCampaign();
+                        //     }
+                        // }
+                        if (Array.isArray(window.ALL_CAMPAIGNS) && window.ALL_CAMPAIGNS.length) {
+                            pendingCampaigns = [...window.ALL_CAMPAIGNS];
                             showNextCampaign();
                         }
-                    }
 
-                    /* ===============================
-                        🔴 PUSHER REALTIME
-                    ================================*/
-                    const pusher = new Pusher("{{ config('broadcasting.connections.pusher.key') }}", {
-                        cluster: "{{ config('broadcasting.connections.pusher.options.cluster') }}",
-                        forceTLS: true
-                    });
+                        /* ===============================
+                            🔴 PUSHER REALTIME
+                        ================================*/
+                        // const pusher = new Pusher("{{ config('broadcasting.connections.pusher.key') }}", {
+                        //     cluster: "{{ config('broadcasting.connections.pusher.options.cluster') }}",
+                        //     forceTLS: true
+                        // });
 
-                    pusher.subscribe('all-users')
-                        .bind('message.campaign.sent', function(data) {
+                        // pusher.subscribe('all-users')
+                        //     .bind('message.campaign.sent', function(data) {
 
-                            if (!data || window.SEEN_CAMPAIGNS.includes(data.id)) return;
+                        //         if (!data || window.SEEN_CAMPAIGNS.includes(data.id)) return;
 
-                            pendingCampaigns.push(data);
+                        //         pendingCampaigns.push(data);
 
-                            if (!activeCampaign) {
-                                showNextCampaign();
+                        //         if (!activeCampaign) {
+                        //             showNextCampaign();
+                        //         }
+                        // });
+
+                        Echo.channel('public-notifications')
+                            .listen('.master.notification', (data) => {
+
+                                if (data.type !== 'campaign') return;
+
+                                const campaign = {
+                                    id: data.id,
+                                    title: data.title,
+                                    message: data.message,
+                                    description: data.data?.detail || '',
+                                    image: data.data?.image || null
+                                };
+
+                                pendingCampaigns.push(campaign);
+
+                                if (!activeCampaign) {
+                                    showNextCampaign();
+                                }
+                            });
+
+                        /* ===============================
+                            🔔 SHOW NEXT CAMPAIGN
+                        ================================*/
+                        function showNextCampaign() {
+
+                            if (!pendingCampaigns.length) return;
+
+                            activeCampaign = pendingCampaigns[0];
+
+                            title.innerText = activeCampaign.title || 'Announcement';
+                            message.innerText = activeCampaign.message || activeCampaign.description || '';
+
+                            if (activeCampaign.image) {
+                                image.src = activeCampaign.image;
+                                imageWrap.classList.remove('hidden');
+                                icon.classList.add('absolute', '-top-6', 'left-6');
+                            } else {
+                                imageWrap.classList.add('hidden');
+                                icon.classList.remove('absolute', '-top-6', 'left-6');
                             }
-                        });
 
-                    /* ===============================
-                        🔔 SHOW NEXT CAMPAIGN
-                    ================================*/
-                    function showNextCampaign() {
-
-                        if (!pendingCampaigns.length) return;
-
-                        activeCampaign = pendingCampaigns[0];
-
-                        title.innerText = activeCampaign.title || 'Announcement';
-                        message.innerText = activeCampaign.message || activeCampaign.description || '';
-
-                        if (activeCampaign.image) {
-                            image.src = activeCampaign.image;
-                            imageWrap.classList.remove('hidden');
-                            icon.classList.add('absolute', '-top-6', 'left-6');
-                        } else {
-                            imageWrap.classList.add('hidden');
-                            icon.classList.remove('absolute', '-top-6', 'left-6');
+                            bell.classList.remove('hidden');
                         }
 
-                        bell.classList.remove('hidden');
-                    }
+                        /* ===============================
+                            🔔 OPEN MODAL
+                        ================================*/
+                        window.openCampaignDetails = function() {
+                            bell.classList.add('hidden');
+                            toast.classList.remove('hidden');
+                            toast.classList.add('scale-100');
+                        };
 
-                    /* ===============================
-                        🔔 OPEN MODAL
-                    ================================*/
-                    window.openCampaignDetails = function() {
-                        bell.classList.add('hidden');
-                        toast.classList.remove('hidden');
-                        toast.classList.add('scale-100');
-                    };
+                        /* ===============================
+                            ❌ CLOSE ONE (NEXT AUTO)
+                        ================================*/
+                        window.closeCampaignToast = function() {
 
-                    /* ===============================
-                        ❌ CLOSE ONE (NEXT AUTO)
-                    ================================*/
-                    window.closeCampaignToast = function() {
+                            if (!activeCampaign) return;
 
-                        if (!activeCampaign) return;
+                            logCampaign(activeCampaign.id);
 
-                        logCampaign(activeCampaign.id);
+                            pendingCampaigns.shift();
+                            activeCampaign = null;
 
-                        pendingCampaigns.shift();
-                        activeCampaign = null;
+                            toast.classList.add('hidden');
 
-                        toast.classList.add('hidden');
+                            if (pendingCampaigns.length) {
+                                setTimeout(showNextCampaign, 400);
+                            }
+                        };
 
-                        if (pendingCampaigns.length) {
-                            setTimeout(showNextCampaign, 400);
+                        /* ===============================
+                            ❌ CLOSE ALL (ONE CLICK)
+                        ================================*/
+                        window.closeAllCampaigns = function() {
+
+                            pendingCampaigns.forEach(c => logCampaign(c.id));
+
+                            pendingCampaigns = [];
+                            activeCampaign = null;
+
+                            toast.classList.add('hidden');
+                            bell.classList.add('hidden');
+                        };
+
+                        /* ===============================
+                            🧾 LOG SEEN
+                        ================================*/
+                        function logCampaign(id) {
+                            fetch('/campaign/mark-as-seen', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    campaign_id: id
+                                })
+                            }).catch(() => {});
                         }
-                    };
 
-                    /* ===============================
-                        ❌ CLOSE ALL (ONE CLICK)
-                    ================================*/
-                    window.closeAllCampaigns = function() {
-
-                        pendingCampaigns.forEach(c => logCampaign(c.id));
-
-                        pendingCampaigns = [];
-                        activeCampaign = null;
-
-                        toast.classList.add('hidden');
-                        bell.classList.add('hidden');
-                    };
-
-                    /* ===============================
-                        🧾 LOG SEEN
-                    ================================*/
-                    function logCampaign(id) {
-                        fetch('/campaign/mark-as-seen', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                campaign_id: id
-                            })
-                        }).catch(() => {});
-                    }
-
-                });
-            </script>
+                    });
+                </script>
+            @endauth
 
             {{-- END message campaign --}}
 

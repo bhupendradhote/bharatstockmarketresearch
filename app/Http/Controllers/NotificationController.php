@@ -8,22 +8,30 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function fetchNotifications()
+     public function fetchNotifications()
     {
         $userId = Auth::id();
 
-        // 1. Get the count of unread notifications
-        $unreadCount = DB::table('notification_users')
-            ->where('user_id', $userId)
-            ->whereNull('read_at') // If read_at is NULL, it's unread
-            ->where('is_active', 1)
-            ->count();
+        /* ======================================
+           ✅ 1. Mark ALL as read when fetched
+        ====================================== */
 
-        // 2. Fetch the actual notifications with details
+        DB::table('notification_users')
+            ->where('user_id', $userId)
+            ->whereNull('read_at')
+            ->where('is_active', 1)
+            ->update([
+                'read_at' => now()
+            ]);
+
+        /* ======================================
+           📩 2. Fetch notifications (now read)
+        ====================================== */
+
         $notifications = DB::table('notification_users as nu')
             ->join('notifications as n', 'nu.notification_id', '=', 'n.id')
             ->select(
-                'nu.id as tracking_id', // The unique ID for this user's specific notification
+                'nu.id as tracking_id',
                 'nu.read_at',
                 'nu.created_at',
                 'n.title',
@@ -34,8 +42,14 @@ class NotificationController extends Controller
             ->where('nu.user_id', $userId)
             ->where('nu.is_active', 1)
             ->orderBy('nu.created_at', 'desc')
-            ->limit(20) // Limit to latest 20
+            ->limit(20)
             ->get();
+
+        /* ======================================
+           🔔 3. Count AFTER marking read (will be 0)
+        ====================================== */
+
+        $unreadCount = 0;
 
         return response()->json([
             'count' => $unreadCount,

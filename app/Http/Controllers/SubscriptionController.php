@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Razorpay\Api\Errors\SignatureVerificationError;
 
+       use App\Models\Coupon;
+
 class SubscriptionController extends Controller{
 
 
@@ -69,76 +71,225 @@ class SubscriptionController extends Controller{
             ]);
         }
 
+        // Apply coupon code on selected plan...
 
-        public function initiateRazorpay(Request $request)
+
+        public function applyCoupon(Request $request)
         {
-            $request->validate([
-                'plan_id' => 'required|exists:service_plans,id',
-                'duration_id' => 'required|exists:service_plan_durations,id',
+            $user = auth()->user();
+            
+            // 📝 LOG: Log the initial attempt
+            Log::info('Coupon Application Attempt', [
+                'user_id'     => $user->id ?? 'Guest',
+                'coupon_code' => $request->coupon_code,
+                'duration_id' => $request->duration_id
             ]);
 
-            // ✅ Authenticated user
-            $user = Auth::user();
+            $request->validate([
+                'coupon_code' => 'required|string',
+                'duration_id' => 'required|exists:service_plan_durations,id'
+            ]);
 
-            // ✅ Selected plan
-            $plan = DB::table('service_plans')
-                ->where('id', $request->plan_id)
+            // Fetch the plan duration details
+            $duration = DB::table('service_plan_durations')->where('id', $request->duration_id)->first();
+            
+            // Find the coupon in the database using your Model Scopes
+            $coupon = Coupon::where('code', strtoupper($request->coupon_code))
+                ->active()      // Scope from your Model
+                ->notExpired()  // Scope from your Model
                 ->first();
 
-            // ✅ Selected duration (belongs to plan)
-            $duration = DB::table('service_plan_durations')
-                ->where('id', $request->duration_id)
-                ->where('service_plan_id', $plan->id)
-                ->first();
-
-            if (!$plan || !$duration) {
+            // ❌ REJECTION: Coupon doesn't exist, is inactive, or expired
+            if (!$coupon) {
+                Log::notice('Coupon Rejected: Invalid or Expired', [
+                    'user_id' => $user->id,
+                    'code_entered' => $request->coupon_code
+                ]);
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid plan or duration'
+                    'success' => false, 
+                    'message' => 'Invalid or expired coupon code.'
                 ]);
             }
 
-            // ✅ Amount from DB (₹ → paise)
-            $amount = (int) ($duration->price * 100);
+            // ❌ REJECTION: Global usage limit reached
+            if ($coupon->isGlobalLimitReached()) {
+                Log::notice('Coupon Rejected: Limit Reached', ['coupon_id' => $coupon->id]);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'This coupon code has reached its maximum usage limit.'
+                ]);
+            }
 
-            // ✅ BACKEND LOG (for debug)
-            Log::info('Razorpay Initiate', [
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'user_email' => $user->email,
-                'plan_id' => $plan->id,
-                'plan_name' => $plan->name,
-                'duration_id' => $duration->id,
-                'duration' => $duration->duration,
-                'amount_rupees' => $duration->price
+            // ❌ REJECTION: Minimum amount requirement not met
+            if (!$coupon->isApplicableOn($duration->price)) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'This coupon is only applicable for orders above ₹' . $coupon->min_amount
+                ]);
+            }
+
+            // ✅ SUCCESS: Calculate discount using Model Helper
+            $discount = $coupon->calculateDiscount($duration->price);
+            $newTotal = max(0, $duration->price - $discount);
+
+            Log::info('Coupon Applied Successfully', [
+                'user_id'        => $user->id,
+                'coupon_code'    => $coupon->code,
+                'original_price' => $duration->price,
+                'discount'       => $discount,
+                'new_total'      => $newTotal
             ]);
 
-            // ✅ Razorpay
-            $api = new Api(
-                config('services.razorpay.key'),
-                config('services.razorpay.secret')
-            );
+            return response()->json([
+                'success'   => true,
+                'discount'  => $discount,
+                'new_total' => number_format($newTotal, 2),
+                'message'   => 'Coupon "' . $coupon->code . '" applied successfully!'
+            ]);
+        }
 
+
+            private function validateCouponUsage($coupon, $userId)
+    {
+        $alreadyUsed = \App\Models\CouponUsage::where('coupon_id', $coupon->id)
+            ->where('user_id', $userId)
+            ->sum('times_used');
+
+        if ($alreadyUsed >= $coupon->per_user_limit) {
+            return 'You already used this coupon maximum times';
+        }
+
+        if ($coupon->used_global >= $coupon->global_limit) {
+            return 'Coupon usage limit reached';
+        }
+
+        return null; // ✅ OK
+    }
+        
+            public function initiateRazorpay(Request $request)
+    {
+        $request->validate([
+            'plan_id' => 'required|exists:service_plans,id',
+            'duration_id' => 'required|exists:service_plan_durations,id',
+            'coupon_code' => 'nullable|string' // Added validation for coupon
+        ]);
+
+        // ✅ Authenticated user
+        $user = Auth::user();
+
+        // ✅ Selected plan
+        $plan = DB::table('service_plans')
+            ->where('id', $request->plan_id)
+            ->first();
+
+        // ✅ Selected duration (belongs to plan)
+        $duration = DB::table('service_plan_durations')
+            ->where('id', $request->duration_id)
+            ->where('service_plan_id', $plan->id)
+            ->first();
+
+        if (!$plan || !$duration) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid plan or duration'
+            ]);
+        }
+
+        // ✅ Default Amount (Original Price)
+        $finalPrice = $duration->price;
+        if ($request->filled('coupon_code')) {
+
+        $coupon = Coupon::where('code', strtoupper($request->coupon_code))
+            ->active()
+            ->notExpired()
+            ->first();
+
+        if (!$coupon) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired coupon'
+            ], 422);
+        }
+
+        $error = $this->validateCouponUsage($coupon, auth()->id());
+
+        if ($error) {
+            return response()->json([
+                'success' => false,
+                'message' => $error
+            ], 422);
+        }
+
+     }
+
+
+        // ✅ Apply Coupon Logic (if provided)
+        if ($request->filled('coupon_code')) {
+            $coupon = \App\Models\Coupon::where('code', strtoupper($request->coupon_code))
+                ->active()
+                ->notExpired()
+                ->first();
+
+            if ($coupon && !$coupon->isGlobalLimitReached() && $coupon->isApplicableOn($duration->price)) {
+                $discount = $coupon->calculateDiscount($duration->price);
+                $finalPrice = max(0, $duration->price - $discount);
+                
+                Log::info('Razorpay Coupon Applied', [
+                    'user_id' => $user->id,
+                    'coupon' => $coupon->code,
+                    'discount' => $discount,
+                    'final_price' => $finalPrice
+                ]);
+            } else {
+                // Optional: You can return an error here if you want to force valid coupons
+                // But usually, it's safer to proceed with original price if verification fails at this stage
+                Log::warning('Razorpay Coupon Invalid at Initiation', ['code' => $request->coupon_code]);
+            }
+        }
+
+        // ✅ Amount from DB (₹ → paise)
+        $amountInPaise = (int) (round($finalPrice, 2) * 100);
+
+        // ✅ BACKEND LOG
+        Log::info('Razorpay Initiate', [
+            'user_id' => $user->id,
+            'plan_name' => $plan->name,
+            'amount_rupees' => $finalPrice,
+            'coupon_used' => $request->coupon_code ?? 'None'
+        ]);
+
+        // ✅ Razorpay
+        $api = new Api(
+            config('services.razorpay.key'),
+            config('services.razorpay.secret')
+        );
+
+        try {
             $order = $api->order->create([
-                'receipt' => 'test_' . uniqid(),
-                'amount' => $amount,
+                'receipt' => 'rcpt_' . uniqid(),
+                'amount' => $amountInPaise,
                 'currency' => 'INR'
             ]);
 
             return response()->json([
                 'success' => true,
                 'key' => config('services.razorpay.key'),
-                'amount' => $amount,
+                'amount' => $amountInPaise,
                 'order_id' => $order['id'],
-                'description' => $plan->name . ' - ' . $duration->duration,
+                'description' => $plan->name . ' - ' . $duration->duration . ($request->coupon_code ? ' (Coupon Applied)' : ''),
                 'user' => [
                     'name' => $user->name,
                     'email' => $user->email,
                     'contact' => $user->phone ?? '9999999999'
                 ]
             ]);
+        } catch (\Exception $e) {
+            Log::error('Razorpay Order Creation Failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Payment initiation failed.']);
         }
+    }
 
+      
 
         public function verifyRazorpay(Request $request)
         {
@@ -148,24 +299,19 @@ class SubscriptionController extends Controller{
                 'razorpay_signature'  => 'required',
                 'plan_id'              => 'required|exists:service_plans,id',
                 'duration_id'          => 'required|exists:service_plan_durations,id',
+                'coupon_code'          => 'nullable|string',
             ]);
 
             $user = Auth::user();
-
-            // 🧾 LOG: Verify started
-            Log::info('Razorpay Verify Started', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'plan_id' => $request->plan_id,
-                'duration_id' => $request->duration_id,
-                'razorpay_order_id' => $request->razorpay_order_id,
-                'razorpay_payment_id' => $request->razorpay_payment_id,
-            ]);
 
             $api = new Api(
                 config('services.razorpay.key'),
                 config('services.razorpay.secret')
             );
+
+
+
+            
 
             // 🔐 Verify Razorpay signature
             try {
@@ -175,73 +321,74 @@ class SubscriptionController extends Controller{
                     'razorpay_signature'  => $request->razorpay_signature,
                 ]);
             } catch (SignatureVerificationError $e) {
-
-                Log::warning('Razorpay Signature Verification Failed', [
-                    'user_id' => $user->id,
-                    'order_id' => $request->razorpay_order_id,
-                    'error' => $e->getMessage(),
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Payment verification failed'
-                ], 422);
+                return response()->json(['success' => false, 'message' => 'Payment verification failed'], 422);
             }
 
-            // 📦 Fetch duration
-            $duration = DB::table('service_plan_durations')
-                ->where('id', $request->duration_id)
-                ->first();
+            // 📦 Fetch duration row
+            $durationRow = DB::table('service_plan_durations')->where('id', $request->duration_id)->first();
 
-            if (!$duration) {
-
-                Log::warning('Invalid Duration in Razorpay Verify', [
-                    'user_id' => $user->id,
-                    'duration_id' => $request->duration_id,
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid duration'
-                ], 422);
+            if (!$durationRow) {
+                return response()->json(['success' => false, 'message' => 'Invalid duration'], 422);
             }
 
+            // ✅ STEP 1: CALCULATE END DATE DYNAMICALLY
             $startDate = now();
-            // $endDate   = now()->addMonths((int) $duration->duration_months);
-            $endDate = now()->addDays((int) $duration->duration_days);
+            $endDate = now();
 
+            // extract number from string like "1 Month" or "3 Months"
+            $durationValue = (int) filter_var($durationRow->duration, FILTER_SANITIZE_NUMBER_INT);
+            
+            if (str_contains(strtolower($durationRow->duration), 'month')) {
+                $endDate = $startDate->copy()->addMonths($durationValue);
+            } elseif (str_contains(strtolower($durationRow->duration), 'day')) {
+                $endDate = $startDate->copy()->addDays($durationValue);
+            } else {
+                // Fallback to duration_days column if string parsing fails
+                $days = $durationRow->duration_days ?? 30; 
+                $endDate = $startDate->copy()->addDays((int)$days);
+            }
+
+            // ✅ STEP 2: CALCULATE FINAL PRICE (HANDLING COUPON)
+            $finalAmount = $durationRow->price;
+            $appliedCoupon = null;
+
+            if ($request->filled('coupon_code')) {
+                $appliedCoupon = Coupon::where('code', strtoupper($request->coupon_code))
+                    ->active()
+                    ->notExpired()
+                    ->first();
+
+                if ($appliedCoupon && $appliedCoupon->isApplicableOn($durationRow->price)) {
+                    $discount = $appliedCoupon->calculateDiscount($durationRow->price);
+                    $finalAmount = max(0, $durationRow->price - $discount);
+                }
+            }
 
             DB::beginTransaction();
 
             try {
-
                 /**
-                 * ✅ STEP 1: EXPIRE OLD ACTIVE SUBSCRIPTIONS
+                 * ✅ STEP 3: EXPIRE OLD ACTIVE SUBSCRIPTIONS
                  */
-                $expiredCount = UserSubscription::where('user_id', $user->id)
+                UserSubscription::where('user_id', $user->id)
                     ->where('status', 'active')
                     ->update([
                         'status'   => 'expired',
                         'end_date' => now(),
                     ]);
 
-                Log::info('Old Subscriptions Expired', [
-                    'user_id' => $user->id,
-                    'expired_count' => $expiredCount,
-                ]);
-
                 /**
-                 * ✅ STEP 2: CREATE NEW ACTIVE SUBSCRIPTION
+                 * ✅ STEP 4: CREATE NEW ACTIVE SUBSCRIPTION
                  */
                 $subscription = UserSubscription::create([
                     'user_id' => $user->id,
                     'service_plan_id' => $request->plan_id,
                     'service_plan_duration_id' => $request->duration_id,
                     'start_date' => $startDate,
-                    'end_date'   => $endDate,
+                    'end_date'   => $endDate, // Corrected date
                     'status' => 'active',
                     'payment_status' => 'paid',
-                    'amount' => $duration->price,
+                    'amount' => $finalAmount,
                     'currency' => 'INR',
                     'payment_gateway' => 'razorpay',
                     'payment_reference' => $request->razorpay_payment_id,
@@ -250,90 +397,70 @@ class SubscriptionController extends Controller{
                     'razorpay_signature' => $request->razorpay_signature,
                 ]);
 
-                Log::info('New Subscription Created', [
+                /**
+                 * ✅ STEP 5: GENERATE INVOICE
+                 */
+                $lastInvoice = Invoice::lockForUpdate()->orderByDesc('id')->first();
+                $lastNumber = ($lastInvoice && $lastInvoice->invoice_number) ? (int) substr($lastInvoice->invoice_number, 3) : 0;
+                $invoiceNumber = 'INV' . str_pad($lastNumber + 1, 6, '0', STR_PAD_LEFT);
+
+                    $invoice = Invoice::create([
                     'user_id' => $user->id,
-                    'subscription_id' => $subscription->id,
-                    'plan_id' => $request->plan_id,
-                    'duration_id' => $request->duration_id,
-                    'amount' => $duration->price,
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
+                    'user_subscription_id' => $subscription->id,
+                    'invoice_number' => $invoiceNumber,
+                    'amount' => $finalAmount,
+                    'currency' => 'INR',
+                    'payment_gateway' => 'razorpay',
+                    'payment_reference' => $request->razorpay_payment_id,
+                    'invoice_date' => now(),
+                    'service_start_date' => $startDate,
+                    'service_end_date' => $endDate,
                 ]);
 
-            
-          /**
-             * ✅ STEP 3: GENERATE INVOICE
-             */
+                /**
+                 * ✅ STEP 6: RECORD COUPON USAGE
+                 */
 
-            // 🔹 Get last invoice number (FOR UPDATE = race condition safe)
-            $lastInvoice = Invoice::lockForUpdate()
-                ->orderByDesc('id')
-                ->first();
 
-            $lastNumber = 0;
+                if ($appliedCoupon) {
 
-            if ($lastInvoice && $lastInvoice->invoice_number) {
-                // INV000123 → 123
-                $lastNumber = (int) substr($lastInvoice->invoice_number, 3);
-            }
+                    $appliedCoupon->increment('used_global');
 
-            // 🔹 Next invoice number
-            $nextNumber = $lastNumber + 1;
-            $invoiceNumber = 'INV' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                    $usage = \App\Models\CouponUsage::where('coupon_id', $appliedCoupon->id)
+                        ->where('user_id', $user->id)
+                        ->first();   // 👈 important (not get)
 
-            // 🔹 Create invoice WITH invoice_number
-            $invoice = Invoice::create([
-                'user_id' => $user->id,
-                'user_subscription_id' => $subscription->id,
-                'invoice_number' => $invoiceNumber,
-                'amount' => $duration->price,
-                'currency' => 'INR',
-                'payment_gateway' => 'razorpay',
-                'payment_reference' => $request->razorpay_payment_id,
-                'invoice_date' => now(),
-                'service_start_date' => $startDate,
-                'service_end_date' => $endDate,
-            ]);
+                    if ($usage) {
 
-            Log::info('Invoice Generated', [
-                'user_id' => $user->id,
-                'invoice_id' => $invoice->id,
-                'invoice_number' => $invoiceNumber,
-                'subscription_id' => $subscription->id,
-                'amount' => $invoice->amount,
-            ]);
+                        $usage->increment('times_used');
+                        $usage->update([
+                            'invoice_id' => $invoice->id
+                        ]);
 
+                    } else {
+
+                        \App\Models\CouponUsage::create([
+                            'coupon_id'  => $appliedCoupon->id,
+                            'user_id'    => $user->id,
+                            'invoice_id' => $invoice->id,
+                            'times_used' => 1
+                        ]);
+                    }
+                }
 
                 DB::commit();
 
             } catch (\Exception $e) {
-
                 DB::rollBack();
-
-                Log::error('Razorpay Verify Failed (Exception)', [
-                    'user_id' => $user->id,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Something went wrong'
-                ], 500);
+                Log::error('Razorpay Verify Failed', ['error' => $e->getMessage()]);
+                return response()->json(['success' => false, 'message' => 'Something went wrong'], 500);
             }
-
-            Log::info('Razorpay Verify Completed Successfully', [
-                'user_id' => $user->id,
-                'subscription_id' => $subscription->id,
-                'invoice_id' => $invoice->id ?? null,
-            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Payment verified, old plan expired & new subscription activated'
+                'message' => 'Payment verified & subscription activated'
             ]);
         }
-
 
         public function pay(Request $request)
         {

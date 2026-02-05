@@ -32,8 +32,9 @@
                 <div class="flex items-center">
                     <span class="w-4 h-4 mr-2 flex-shrink-0 text-slate-400 group-hover:text-white">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                            </path>
                         </svg>
                     </span>
                     <span class="sidebar-text">Announcements</span>
@@ -41,7 +42,8 @@
                 <span class="arrow-icon transition-transform duration-300" :class="{ 'rotate-180': open }">▼</span>
             </button>
 
-            <div id="announcements-menu" class="dropdown-content {{ request()->routeIs('admin.announcements.*') ? '' : 'hidden' }} pl-8 mt-1 space-y-1">
+            <div id="announcements-menu"
+                class="dropdown-content {{ request()->routeIs('admin.announcements.*') ? '' : 'hidden' }} pl-8 mt-1 space-y-1">
                 <a href="{{ route('admin.announcements.index') }}"
                     class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text {{ request()->routeIs('admin.announcements.index') ? 'bg-[#3463c8] text-white' : '' }}">
                     All Announcements
@@ -218,6 +220,10 @@
                     class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text">
                     Service Plans
                 </a>
+                <a href="{{ url('admin/demo-subscriptions') }}"
+                    class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text">
+                    Demo Subcription
+                </a>
             </div>
         </div>
 
@@ -303,6 +309,8 @@
                     class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text">Permissions</a>
                 <a href="{{ route('admin.reviews.index') }}"
                     class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text">Reviews</a>
+                <a href="{{ url('admin/tickets') }}"
+                    class="block px-3 py-2 text-sm text-slate-300 rounded-md hover:bg-[#3463c8] sidebar-text">Tickets</a>
             </div>
         </div>
     </nav>
